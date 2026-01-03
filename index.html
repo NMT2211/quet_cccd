@@ -1,0 +1,518 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Quét QR CCCD + Chuyển đổi địa chỉ mới</title>
+
+  <!-- ✅ Load local lib từ node_modules (không CDN) -->
+  <!-- Nếu bạn deploy lên hosting không có node_modules, hãy copy file này ra thư mục public (vd: /assets/html5-qrcode.min.js) -->
+  <script src="./node_modules/html5-qrcode/html5-qrcode.min.js"></script>
+
+  <style>
+    :root{
+      --bg:#0b1220; --card:#111a2e; --muted:#9fb0d0; --text:#e7efff;
+      --line: rgba(255,255,255,.10);
+      --btn:#2b6cff; --btn2:#16a34a; --danger:#ef4444; --warn:#f59e0b;
+      --radius:16px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      background:
+        radial-gradient(1200px 600px at 20% 10%, rgba(43,108,255,.25), transparent 60%),
+        radial-gradient(900px 500px at 90% 20%, rgba(22,163,74,.18), transparent 55%),
+        var(--bg);
+      color:var(--text);
+      padding:24px;
+    }
+    .wrap{max-width:1100px;margin:0 auto;display:grid;gap:16px}
+    .top{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end;justify-content:space-between}
+    h1{margin:0;font-size:20px;font-weight:700;letter-spacing:.2px}
+    .sub{color:var(--muted);font-size:13px;margin-top:6px;line-height:1.4}
+    .grid{display:grid;grid-template-columns: 380px 1fr;gap:16px}
+    @media (max-width: 980px){ .grid{grid-template-columns:1fr} }
+
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: 0 10px 30px rgba(0,0,0,.25);
+      padding:16px;
+    }
+    .row{display:flex;gap:10px;flex-wrap:wrap}
+    label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
+    input, textarea, select{
+      width:100%;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background: rgba(0,0,0,.25);
+      color:var(--text);
+      padding:10px 12px;
+      outline:none;
+    }
+    textarea{min-height:90px;resize:vertical}
+    .btn{
+      cursor:pointer;
+      border:0;
+      padding:10px 12px;
+      border-radius:12px;
+      color:white;
+      font-weight:650;
+      background: var(--btn);
+      transition:.15s transform, .15s opacity;
+    }
+    .btn:hover{opacity:.92}
+    .btn:active{transform: translateY(1px)}
+    .btn.secondary{background: rgba(255,255,255,.10); color: var(--text); border:1px solid var(--line)}
+    .btn.ok{background: var(--btn2)}
+    .btn.danger{background: var(--danger)}
+    .btn:disabled{opacity:.55; cursor:not-allowed}
+    .pill{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:6px 10px;border-radius:999px;
+      border:1px solid var(--line);
+      background: rgba(0,0,0,.18);
+      color: var(--muted);
+      font-size:12px;
+    }
+    .kv{display:grid;grid-template-columns: 160px 1fr; gap:10px; padding:10px 0; border-top:1px dashed var(--line)}
+    .kv:first-child{border-top:0}
+    .k{color:var(--muted);font-size:12px}
+    .v{font-weight:650}
+    .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}
+    .status{margin-top:10px;color:var(--muted);font-size:12px;line-height:1.5}
+    .warn{color: var(--warn)}
+    .error{color: var(--danger)}
+    .oktxt{color: #86efac}
+    .small{font-size:12px;color:var(--muted)}
+    .two{display:grid;grid-template-columns: 1fr 1fr; gap:12px}
+    @media (max-width: 640px){ .two{grid-template-columns:1fr} }
+    #reader{border-radius:14px;overflow:hidden;border:1px solid var(--line);background: rgba(0,0,0,.2)}
+    code.inline{background: rgba(255,255,255,.08);padding:2px 6px;border-radius:8px;border:1px solid var(--line)}
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="top">
+      <div>
+        <h1>Quét QR CCCD → Lấy thông tin + Chuyển đổi địa chỉ mới</h1>
+        <div class="sub">
+          Trang tĩnh chạy trên trình duyệt. API chuyển đổi dùng <code class="inline">tinhthanhpho.com</code>.
+        </div>
+      </div>
+      <div class="pill" id="libStatus">📦 Đang kiểm tra thư viện quét QR...</div>
+    </div>
+
+    <div class="grid">
+      <!-- LEFT -->
+      <div class="card">
+        <div class="row" style="justify-content:space-between; align-items:center">
+          <div style="font-weight:700">📷 Camera QR Scanner</div>
+          <div class="row">
+            <button class="btn" id="btnStart">Bắt đầu quét</button>
+            <button class="btn secondary" id="btnStop" disabled>Dừng</button>
+          </div>
+        </div>
+
+        <div style="height:12px"></div>
+        <div id="reader"></div>
+
+        <div class="status" id="scanStatus">Trạng thái: <b>Chưa quét</b></div>
+
+        <div style="height:12px"></div>
+        <label>Hoặc dán chuỗi QR thủ công</label>
+        <textarea id="rawInput" placeholder='VD: 034205011440|---|Nguyễn Minh Tuấn|22082005|Nam|Tổ 4B, Kp 1, Hội Nghĩa, Thị xã Tân Uyên, Bình Dương|19042021'></textarea>
+        <div class="row" style="margin-top:10px">
+          <button class="btn secondary" id="btnParse">Parse dữ liệu</button>
+          <button class="btn danger" id="btnClear">Xóa</button>
+        </div>
+      </div>
+
+      <!-- RIGHT -->
+      <div class="card">
+        <div style="font-weight:700">🪪 Thông tin đọc từ QR</div>
+        <div class="small">Format: phân tách bằng dấu <span class="mono">|</span></div>
+
+        <div style="height:10px"></div>
+
+        <div id="infoBox">
+          <div class="kv"><div class="k">Số CCCD</div><div class="v mono" id="cccd">—</div></div>
+          <div class="kv"><div class="k">Họ tên</div><div class="v" id="name">—</div></div>
+          <div class="kv"><div class="k">Ngày sinh</div><div class="v" id="dob">—</div></div>
+          <div class="kv"><div class="k">Giới tính</div><div class="v" id="gender">—</div></div>
+          <div class="kv"><div class="k">Địa chỉ (cũ)</div><div class="v" id="oldAddr">—</div></div>
+          <div class="kv"><div class="k">Ngày cấp</div><div class="v" id="issue">—</div></div>
+        </div>
+
+        <div style="height:14px"></div>
+        <hr style="border:0;border-top:1px solid var(--line);margin:0 0 14px" />
+
+        <div style="font-weight:700">🔁 Chuyển đổi địa chỉ mới</div>
+        <div class="small">POST <code class="inline">/api/v1/convert/address</code> (Bearer API key)</div>
+
+        <div style="height:12px"></div>
+
+        <div class="two">
+          <div>
+            <label>API Key (Bearer)</label>
+            <input id="apiKey" placeholder="Nhập API key (Authorization: Bearer ...)" />
+          </div>
+          <div>
+            <label>Chế độ dò mã hành chính</label>
+            <select id="mode">
+              <option value="smart" selected>Tự tách & dò mã từ địa chỉ</option>
+              <option value="manual">Nhập tay province/district/ward + street</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="height:12px"></div>
+
+        <div class="two" id="manualCodes" style="display:none">
+          <div><label>provinceCode</label><input id="provinceCode" placeholder="VD: 74" /></div>
+          <div><label>districtCode</label><input id="districtCode" placeholder="VD: 723..." /></div>
+          <div><label>wardCode</label><input id="wardCode" placeholder="VD: 257..." /></div>
+          <div><label>streetAddress</label><input id="streetAddress" placeholder="VD: Tổ 4B, Kp 1" /></div>
+        </div>
+
+        <div class="row" style="margin-top:10px">
+          <button class="btn ok" id="btnConvert">Chuyển đổi địa chỉ</button>
+          <button class="btn secondary" id="btnGuess">Tự dò mã (xem log)</button>
+        </div>
+
+        <div class="status" id="convertStatus" style="margin-top:12px">—</div>
+
+        <div style="height:10px"></div>
+        <label>Kết quả (địa chỉ mới)</label>
+        <textarea id="newAddr" readonly placeholder="Địa chỉ mới sẽ hiện ở đây..."></textarea>
+
+        <div style="height:10px"></div>
+        <label>Log kỹ thuật</label>
+        <textarea id="log" readonly class="mono" placeholder="Log request/response sẽ hiện ở đây..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ====== Basic helpers ======
+    const $ = (id) => document.getElementById(id);
+
+    function setScanStatus(html) { $("scanStatus").innerHTML = `Trạng thái: ${html}`; }
+    function setConvertStatus(html) { $("convertStatus").innerHTML = html; }
+
+    function fmtDDMMYYYY(s) {
+      if (!s) return "—";
+      const t = ("" + s).trim();
+      if (/^\d{8}$/.test(t)) return `${t.slice(0,2)}/${t.slice(2,4)}/${t.slice(4,8)}`;
+      return t;
+    }
+
+    function logLine(line) {
+      const box = $("log");
+      box.value = (box.value ? box.value + "\n" : "") + line;
+      box.scrollTop = box.scrollHeight;
+    }
+
+    // ====== QR parse ======
+    function normalizeQR(raw) { return (raw || "").trim().replace(/\|\s*---\s*\|/g, "|"); }
+    function parseQR(raw) {
+      const s = normalizeQR(raw);
+      const parts = s.split("|").map(x => (x || "").trim()).filter(x => x.length > 0);
+      if (parts.length < 6) throw new Error("Chuỗi QR không đúng định dạng (cần tối thiểu 6 trường).");
+      return { cccd: parts[0], name: parts[1], dob: parts[2], gender: parts[3], address: parts[4], issue: parts[5] };
+    }
+
+    function fillInfo(data) {
+      $("cccd").textContent = data?.cccd || "—";
+      $("name").textContent = data?.name || "—";
+      $("dob").textContent = fmtDDMMYYYY(data?.dob);
+      $("gender").textContent = data?.gender || "—";
+      $("oldAddr").textContent = data?.address || "—";
+      $("issue").textContent = fmtDDMMYYYY(data?.issue);
+    }
+
+    // ====== Address helpers (match mềm, không phụ thuộc keyword API) ======
+    function splitAddress(addr) {
+      const chunks = (addr || "").trim().split(",").map(x => x.trim()).filter(Boolean);
+      if (chunks.length < 3) return { street: (addr || "").trim(), wardName:"", districtName:"", provinceName:"" };
+      return {
+        street: chunks.slice(0,-3).join(", ").trim(),
+        wardName: chunks[chunks.length-3],
+        districtName: chunks[chunks.length-2],
+        provinceName: chunks[chunks.length-1],
+      };
+    }
+
+    function stripDiacritics(s) {
+      return (s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g,"d").replace(/Đ/g,"D");
+    }
+    function normName(s) {
+      return stripDiacritics(s).toLowerCase()
+        .replace(/\b(thanh pho|thi xa|quan|huyen|thi tran|xa|phuong|tp)\b/g, "")
+        .replace(/[^\w\s]/g, " ")
+        .replace(/\s+/g, " ").trim();
+    }
+    function bestMatch(list, targetName) {
+      if (!list?.length) return null;
+      const target = normName(targetName);
+      let found = list.find(x => normName(x.name) === target);
+      if (found) return found;
+      found = list.find(x => normName(x.name).includes(target) || target.includes(normName(x.name)));
+      return found || null;
+    }
+
+    // ====== API tinhthanhpho ======
+    const BASE = "https://tinhthanhpho.com/api/v1";
+
+    async function apiGET(path, params) {
+      const url = new URL(BASE + path);
+      Object.entries(params || {}).forEach(([k,v]) => {
+        if (v !== undefined && v !== null && (""+v).length > 0) url.searchParams.set(k, v);
+      });
+
+      logLine("GET " + url.toString());
+      const res = await fetch(url.toString(), { headers: { "Accept": "application/json" }});
+      const data = await res.json().catch(() => ({}));
+      logLine("↳ " + res.status + " " + JSON.stringify(data).slice(0, 1200));
+
+      if (!res.ok) throw new Error(`GET ${path} lỗi HTTP ${res.status}`);
+      if (data && data.success === false) throw new Error(data.message || "API success=false");
+      return data;
+    }
+
+    async function apiPOST(path, body, apiKey) {
+      const url = BASE + path;
+      logLine("POST " + url);
+      logLine("Body: " + JSON.stringify(body));
+
+      const res = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+          "Authorization": "Bearer " + apiKey
+        },
+        body: JSON.stringify(body)
+      });
+      const data = await res.json().catch(() => ({}));
+      logLine("↳ " + res.status + " " + JSON.stringify(data).slice(0, 1600));
+
+      if (!res.ok) throw new Error(`POST ${path} lỗi HTTP ${res.status}` + (data?.message ? `: ${data.message}` : ""));
+      if (data && data.success === false) throw new Error(data.message || "API success=false");
+      return data;
+    }
+
+    async function findProvince(provinceName) {
+      // provinces có keyword OK
+      const res = await apiGET("/provinces", { keyword: provinceName, limit: 20, page: 1 });
+      const list = res.data || [];
+      if (!list.length) throw new Error("Không tìm thấy tỉnh: " + provinceName);
+      return bestMatch(list, provinceName) || list[0];
+    }
+
+    async function findDistrictInProvince(provinceCode, districtName) {
+      // ✅ FIX: KHÔNG dùng keyword ở endpoint này (bạn đã thấy trả [] rồi)
+      // Lấy full danh sách districts và tự match.
+      const res = await apiGET(`/provinces/${encodeURIComponent(provinceCode)}/districts`, { limit: 500, page: 1 });
+      const list = res.data || [];
+      if (!list.length) throw new Error("API trả 0 districts cho province=" + provinceCode);
+
+      let d = bestMatch(list, districtName);
+      if (!d) d = bestMatch(list, districtName.replace(/thị xã/ig, "thành phố"));
+      if (!d?.code) throw new Error("Không match được district: " + districtName);
+      return d;
+    }
+
+    async function findWardInDistrict(districtCode, wardName) {
+      // ✅ FIX: tương tự wards
+      const res = await apiGET(`/districts/${encodeURIComponent(districtCode)}/wards`, { limit: 1000, page: 1 });
+      const list = res.data || [];
+      if (!list.length) throw new Error("API trả 0 wards cho district=" + districtCode);
+
+      let w = bestMatch(list, wardName);
+      if (!w) w = bestMatch(list, wardName.replace(/\b(xã|phường|thị trấn)\b/ig, ""));
+      if (!w?.code) throw new Error("Không match được ward: " + wardName);
+      return w;
+    }
+
+    async function guessCodesFromAddress(addr) {
+      const { street, wardName, districtName, provinceName } = splitAddress(addr);
+      if (!provinceName || !districtName || !wardName) {
+        throw new Error("Không tách được tỉnh/huyện/xã (cần 3 cụm cuối cách nhau bởi dấu phẩy).");
+      }
+
+      setConvertStatus(`Đang dò mã: <b>${provinceName}</b> / <b>${districtName}</b> / <b>${wardName}</b> ...`);
+
+      const prov = await findProvince(provinceName);
+      const dist = await findDistrictInProvince(prov.code, districtName);
+      const ward = await findWardInDistrict(dist.code, wardName);
+
+      return { provinceCode: prov.code, districtCode: dist.code, wardCode: ward.code, streetAddress: street || "" };
+    }
+
+    // ====== QR scanner (html5-qrcode) ======
+    let qr = null;
+    let currentData = null;
+
+    async function onScanSuccess(decodedText) {
+      try {
+        setScanStatus(`<b class="oktxt">Đã quét</b> • <span class="mono">${decodedText}</span>`);
+        $("rawInput").value = decodedText;
+
+        const data = parseQR(decodedText);
+        currentData = data;
+        fillInfo(data);
+
+        setConvertStatus(`<span class="oktxt">Parse OK.</span> Bấm <b>Chuyển đổi địa chỉ</b> để lấy địa chỉ mới.`);
+      } catch (e) {
+        setScanStatus(`<b class="error">Lỗi parse</b> • ${e.message}`);
+      }
+    }
+
+    async function startScanner() {
+      if (typeof window.Html5Qrcode === "undefined") {
+        setScanStatus(`<b class="error">Không load được Html5Qrcode</b> • Kiểm tra đường dẫn script local.`);
+        return;
+      }
+
+      if (!qr) qr = new Html5Qrcode("reader");
+
+      $("btnStart").disabled = true;
+      $("btnStop").disabled = false;
+      setScanStatus("<b>Đang mở camera...</b>");
+
+      try {
+        await qr.start(
+          { facingMode: "environment" },
+          { fps: 12, qrbox: { width: 280, height: 280 } },
+          onScanSuccess
+        );
+        setScanStatus("<b class='oktxt'>Đang quét...</b> Đưa QR vào khung.");
+      } catch (e) {
+        $("btnStart").disabled = false;
+        $("btnStop").disabled = true;
+        setScanStatus(`<b class="error">Không mở được camera</b> • ${e.message}`);
+      }
+    }
+
+    async function stopScanner() {
+      if (!qr) return;
+      try { await qr.stop(); await qr.clear(); } catch {}
+      $("btnStart").disabled = false;
+      $("btnStop").disabled = true;
+      setScanStatus("<b>Đã dừng</b>");
+    }
+
+    // ====== UI events ======
+    $("btnStart").addEventListener("click", startScanner);
+    $("btnStop").addEventListener("click", stopScanner);
+
+    $("btnClear").addEventListener("click", () => {
+      $("rawInput").value = "";
+      $("newAddr").value = "";
+      $("log").value = "";
+      currentData = null;
+      fillInfo({});
+      setScanStatus("<b>Chưa quét</b>");
+      setConvertStatus("—");
+    });
+
+    $("btnParse").addEventListener("click", () => {
+      try {
+        const data = parseQR($("rawInput").value);
+        currentData = data;
+        fillInfo(data);
+        setConvertStatus(`<span class="oktxt">Parse OK.</span> Bấm <b>Chuyển đổi địa chỉ</b> để lấy địa chỉ mới.`);
+      } catch (e) {
+        setConvertStatus(`<span class="error">Lỗi:</span> ${e.message}`);
+      }
+    });
+
+    $("mode").addEventListener("change", (e) => {
+      $("manualCodes").style.display = (e.target.value === "manual") ? "grid" : "none";
+    });
+
+    $("btnGuess").addEventListener("click", async () => {
+      try {
+        $("log").value = "";
+        const addr = currentData?.address || $("oldAddr").textContent;
+        const codes = await guessCodesFromAddress(addr);
+        logLine("✅ Guessed codes: " + JSON.stringify(codes));
+        setConvertStatus(
+          `<span class="oktxt">Dò mã OK.</span> province=<b>${codes.provinceCode}</b>, district=<b>${codes.districtCode}</b>, ward=<b>${codes.wardCode}</b>`
+        );
+
+        // đổ sẵn vào ô manual để bạn kiểm tra
+        $("provinceCode").value = codes.provinceCode;
+        $("districtCode").value = codes.districtCode;
+        $("wardCode").value = codes.wardCode;
+        $("streetAddress").value = codes.streetAddress || "";
+      } catch (e) {
+        setConvertStatus(`<span class="error">Dò mã lỗi:</span> ${e.message}`);
+      }
+    });
+
+    $("btnConvert").addEventListener("click", async () => {
+      try {
+        $("newAddr").value = "";
+        $("log").value = "";
+
+        const apiKey = ($("apiKey").value || "").trim();
+        if (!apiKey) throw new Error("Bạn chưa nhập API key.");
+        if (!currentData?.address) throw new Error("Chưa có địa chỉ cũ. Hãy quét QR hoặc parse dữ liệu trước.");
+
+        let payload;
+
+        if ($("mode").value === "manual") {
+          const provinceCode = ($("provinceCode").value || "").trim();
+          const districtCode = ($("districtCode").value || "").trim();
+          const wardCode = ($("wardCode").value || "").trim();
+          const streetAddress = ($("streetAddress").value || "").trim();
+          if (!provinceCode || !districtCode || !wardCode) throw new Error("Thiếu mã province/district/ward.");
+          payload = { provinceCode, districtCode, wardCode, streetAddress };
+        } else {
+          payload = await guessCodesFromAddress(currentData.address);
+        }
+
+        setConvertStatus("<b>Đang gọi API chuyển đổi...</b>");
+        const res = await apiPOST("/convert/address", payload, apiKey);
+
+        const newFull = res?.data?.new?.fullAddress || "";
+        const notes = res?.data?.mergeInfo?.notes || "";
+
+        if (!newFull) {
+          $("newAddr").value = JSON.stringify(res, null, 2);
+          setConvertStatus(`<span class="warn">Có phản hồi nhưng không thấy new.fullAddress.</span> Đã đổ JSON vào ô kết quả.`);
+          return;
+        }
+
+        $("newAddr").value = notes ? `${newFull}\n\nGhi chú: ${notes}` : newFull;
+        setConvertStatus(`<span class="oktxt">Thành công!</span> Địa chỉ mới đã được cập nhật.`);
+      } catch (e) {
+        setConvertStatus(`<span class="error">Lỗi:</span> ${e.message}`);
+      }
+    });
+
+    // ===== Boot: check local lib + enable start =====
+    (function boot() {
+      const badge = $("libStatus");
+      if (typeof window.Html5Qrcode === "undefined") {
+        badge.textContent = "📦 Không load được Html5Qrcode (local). Kiểm tra đường dẫn ./node_modules/html5-qrcode/html5-qrcode.min.js";
+        badge.classList.add("error");
+        $("btnStart").disabled = true;
+        setScanStatus(`<b class="warn">Không thể quét camera</b> • Bạn vẫn có thể dán chuỗi QR thủ công.`);
+        return;
+      }
+
+      badge.textContent = "📦 Thư viện QR: OK (local node_modules)";
+      badge.classList.add("oktxt");
+      $("btnStart").disabled = false;
+      setScanStatus("<b class='oktxt'>Sẵn sàng</b> • Bấm “Bắt đầu quét”.");
+    })();
+  </script>
+</body>
+</html>
+
