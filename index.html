@@ -5,103 +5,484 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Quét QR CCCD + Chuyển đổi địa chỉ mới</title>
 
-  <!-- ✅ Load local lib từ node_modules (không CDN) -->
-  <!-- Nếu bạn deploy lên hosting không có node_modules, hãy copy file này ra thư mục public (vd: /assets/html5-qrcode.min.js) -->
+  <!-- Local lib -->
   <script src="./assets/html5-qrcode.min.js"></script>
 
+  <!-- ✅ Xuất Excel (XLSX) – nếu offline/CDN lỗi sẽ fallback CSV -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <!-- ✅ OCR (fallback) -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
+  <link rel="stylesheet" href="style.css">
 
   <style>
     :root{
-      --bg:#0b1220; --card:#111a2e; --muted:#9fb0d0; --text:#e7efff;
-      --line: rgba(255,255,255,.10);
-      --btn:#2b6cff; --btn2:#16a34a; --danger:#ef4444; --warn:#f59e0b;
-      --radius:16px;
+      /* Colors */
+      --bg:#ffffff;
+      --surface:#ffffff;
+      --surface2:#f7f8fb;
+      --text:#0f172a;
+      --muted:#475569;
+      --line:#e5e7eb;
+
+      --btn:#2563eb;
+      --btn2:#16a34a;
+      --danger:#dc2626;
+      --warn:#d97706;
+
+      /* UI tokens */
+      --radius:18px;
+      --radius2:14px;
+
+      /* Shadows */
+      --shadow: 0 10px 22px rgba(15,23,42,.08);
+      --shadow2: 0 16px 36px rgba(15,23,42,.10);
+
+      /* Typography (<=700) */
+      --base: clamp(15px, 1.6vw, 16px);
+      --h1: clamp(18px, 2.6vw, 22px);
+      --label: 13px;
+      --control: 16px;
+
+      /* Touch targets */
+      --tap: 46px;
     }
+
     *{box-sizing:border-box}
+    html,body{height:100%}
+
     body{
       margin:0;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-      background:
-        radial-gradient(1200px 600px at 20% 10%, rgba(43,108,255,.25), transparent 60%),
-        radial-gradient(900px 500px at 90% 20%, rgba(22,163,74,.18), transparent 55%),
-        var(--bg);
-      color:var(--text);
-      padding:24px;
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      font-size: var(--base);
+      background: var(--bg);
+      color: var(--text);
+      /* padding: 16px; */
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
     }
-    .wrap{max-width:1100px;margin:0 auto;display:grid;gap:16px}
-    .top{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end;justify-content:space-between}
-    h1{margin:0;font-size:20px;font-weight:700;letter-spacing:.2px}
-    .sub{color:var(--muted);font-size:13px;margin-top:6px;line-height:1.4}
-    .grid{display:grid;grid-template-columns: 380px 1fr;gap:16px}
-    @media (max-width: 980px){ .grid{grid-template-columns:1fr} }
 
-    .card{
-      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+    .wrap{max-width: 1700px;margin:24px auto;display:grid;gap:14px; padding: 15px;}
+
+    /* Header */
+    .top{
+      display:flex; gap:12px; flex-wrap:wrap;
+      align-items:center; justify-content:space-between;
+      padding: 14px 14px;
       border:1px solid var(--line);
       border-radius: var(--radius);
-      box-shadow: 0 10px 30px rgba(0,0,0,.25);
-      padding:16px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
     }
+
+    h1{
+      margin:0;
+      font-size:var(--h1);
+      font-weight:700;
+      letter-spacing:.1px;
+    }
+
+    .pill{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:10px 12px;border-radius:999px;
+      border:1px solid var(--line);
+      background: var(--surface2);
+      color: var(--muted);
+      font-size:13px;
+      font-weight:600;
+      white-space:nowrap;
+    }
+
+    /* Layout */
+    .grid{
+      display:grid;
+      grid-template-columns: minmax(320px, 420px) 1fr;
+      gap:14px;
+      align-items:start;
+    }
+
+    @media (max-width: 980px){
+      body{padding:12px}
+      .grid{grid-template-columns:1fr}
+      .top{align-items:flex-start}
+    }
+
+    .card{
+      background: var(--surface);
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 14px;
+
+    }
+
     .row{display:flex;gap:10px;flex-wrap:wrap}
-    label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
+    .row.between{justify-content:space-between; align-items:center}
+
+    label{
+      display:block;
+      font-size: var(--label);
+      color: var(--muted);
+      margin: 10px 0 6px;
+      font-weight:600;
+    }
+
     input, textarea, select{
       width:100%;
-      border-radius:12px;
+      border-radius: var(--radius2);
       border:1px solid var(--line);
-      background: rgba(0,0,0,.25);
-      color:var(--text);
-      padding:10px 12px;
+      background: #fff;
+      color: var(--text);
+      padding: 12px 12px;
       outline:none;
+      font-size: var(--control);
+      min-height: var(--tap);
     }
-    textarea{min-height:90px;resize:vertical}
+    textarea{min-height:110px;resize:vertical}
+
+    input:focus, textarea:focus, select:focus{
+      border-color: rgba(37,99,235,.55);
+      box-shadow: 0 0 0 4px rgba(37,99,235,.12);
+    }
+
+    /* Buttons */
     .btn{
       cursor:pointer;
-      border:0;
-      padding:10px 12px;
-      border-radius:12px;
+      border:1px solid transparent;
+      padding: 12px 14px;
+      border-radius: var(--radius2);
       color:white;
-      font-weight:650;
+      font-weight:600;
       background: var(--btn);
-      transition:.15s transform, .15s opacity;
+      font-size: 15px;
+      min-height: var(--tap);
+      min-width: 140px;
+      transition: .15s transform, .15s opacity, .15s box-shadow;
     }
-    .btn:hover{opacity:.92}
+    .btn:hover{opacity:.96}
     .btn:active{transform: translateY(1px)}
-    .btn.secondary{background: rgba(255,255,255,.10); color: var(--text); border:1px solid var(--line)}
+    .btn.secondary{
+      background: #fff;
+      color: var(--text);
+      border-color: var(--line);
+    }
     .btn.ok{background: var(--btn2)}
     .btn.danger{background: var(--danger)}
     .btn:disabled{opacity:.55; cursor:not-allowed}
-    .pill{
-      display:inline-flex;align-items:center;gap:8px;
-      padding:6px 10px;border-radius:999px;
-      border:1px solid var(--line);
-      background: rgba(0,0,0,.18);
-      color: var(--muted);
-      font-size:12px;
+
+    /* Reader */
+    #reader{
+      border-radius: 16px;
+      overflow:hidden;
+      border:2px solid rgba(37,99,235,.16);
+      background: var(--surface2);
+      min-height: 420px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
     }
-    .kv{display:grid;grid-template-columns: 160px 1fr; gap:10px; padding:10px 0; border-top:1px dashed var(--line)}
+    #reader video{
+      width:100% !important;
+      height:100% !important;
+      object-fit: cover !important;
+    }
+    #reader img{
+  width:100% !important;
+  height:100% !important;
+  object-fit: contain !important; /* muốn “giống camera” hơn thì đổi thành cover */
+  display:block;
+}
+
+
+    .status{
+      margin-top:10px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height:1.55;
+    }
+    .warn{color: var(--warn); font-weight:600}
+    .error{color: var(--danger); font-weight:600}
+    .oktxt{color: #16a34a; font-weight:600}
+
+    .small{font-size:13px;color:var(--muted)}
+    code.inline{
+      background: var(--surface2);
+      padding:2px 8px;
+      border-radius:10px;
+      border:1px solid var(--line);
+      font-size: 12.5px;
+    }
+
+    /* Info table */
+    .kv{
+      display:grid;
+      grid-template-columns: 160px 1fr auto;
+      gap:10px;
+      padding:12px 0;
+      border-top:1px solid var(--line);
+    }
     .kv:first-child{border-top:0}
-    .k{color:var(--muted);font-size:12px}
-    .v{font-weight:650}
+    .k{color:var(--muted);font-size:13px;align-self:center;font-weight:600}
+    .v{font-weight:600; align-self:center; word-break: break-word}
     .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}
-    .status{margin-top:10px;color:var(--muted);font-size:12px;line-height:1.5}
-    .warn{color: var(--warn)}
-    .error{color: var(--danger)}
-    .oktxt{color: #86efac}
-    .small{font-size:12px;color:var(--muted)}
-    .two{display:grid;grid-template-columns: 1fr 1fr; gap:12px}
-    @media (max-width: 640px){ .two{grid-template-columns:1fr} }
-    #reader{border-radius:14px;overflow:hidden;border:1px solid var(--line);background: rgba(0,0,0,.2)}
-    code.inline{background: rgba(255,255,255,.08);padding:2px 6px;border-radius:8px;border:1px solid var(--line)}
+
+    .copyBtn{
+      padding:10px 12px;
+      border-radius: 12px;
+      border:1px solid var(--line);
+      background: var(--surface2);
+      color: var(--text);
+      font-weight:600;
+      cursor:pointer;
+      min-height: var(--tap);
+      white-space:nowrap;
+    }
+    .copyBtn:hover{opacity:.96}
+
+    .two{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:12px;
+    }
+
+    @media (max-width: 640px){
+      .two{grid-template-columns:1fr}
+      .btn{min-width: 100%}
+      #reader{min-height: 520px;}
+      .kv{grid-template-columns: 1fr; gap:6px}
+      .copyBtn{width:100%}
+    }
+
+    /* Sticky actions mobile */
+    @media (max-width: 640px){
+      .stickyActions{
+        position: sticky;
+        top: 10px;
+        z-index: 5;
+        background: var(--surface);
+        padding-bottom: 10px;
+        border-radius: 16px;
+      }
+    }
+
+    hr{border:0;border-top:1px solid var(--line);margin: 12px 0}
+
+    .toast{
+      position: fixed;
+      right: 14px;
+      bottom: 14px;
+      background: rgba(15,23,42,.92);
+      border: 1px solid rgba(255,255,255,.18);
+      padding: 12px 14px;
+      border-radius: 14px;
+      font-size: 13px;
+      color: #fff;
+      display:none;
+      max-width: 420px;
+      box-shadow: 0 14px 30px rgba(0,0,0,.18);
+      z-index: 60;
+    }
+
+    #oldAddr, #addrFull { font-weight: 600; }
+
+    /* =======================
+       Modal nhập phòng
+       ======================= */
+    .modalOverlay{
+      position: fixed;
+      inset: 0;
+      background: rgba(15,23,42,.55);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding: 16px;
+      z-index: 50;
+    }
+    .modal{
+      width: min(520px, 100%);
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      box-shadow: var(--shadow2);
+      padding: 14px;
+      max-height: min(78vh, 720px);
+      overflow:auto;
+    }
+    .modalTitle{
+      font-size: 17px;
+      font-weight: 700;
+      margin: 0;
+    }
+    .modalSub{
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+    .modalActions{
+      margin-top: 12px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .modal .btn{min-width: 140px}
+    @media (max-width: 420px){
+      .modalActions .btn{min-width: 100%}
+    }
+
+    /* =======================
+       Bảng tạm (Excel-like)
+       ======================= */
+    .tmpWrap{
+      margin-top: 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: #fff;
+      box-shadow: var(--shadow);
+    }
+    .tmpToolbar{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:space-between;
+      padding: 10px 10px;
+      background: var(--surface2);
+      border-bottom: 1px solid var(--line);
+    }
+    .tmpToolbar .left{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+    .tmpToolbar .right{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+
+    .tmpTableScroll{
+      overflow:auto;
+      max-height: 320px;
+      -webkit-overflow-scrolling: touch;
+    }
+    table.tmpTable{
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 920px;
+    }
+    .tmpTable th, .tmpTable td{
+      border-bottom: 1px solid var(--line);
+      padding: 10px 10px;
+      font-size: 13px;
+      vertical-align: top;
+    }
+    .tmpTable th{
+      position: sticky;
+      top: 0;
+      background: #fff;
+      z-index: 2;
+      font-weight: 700;
+      text-align: left;
+      white-space: nowrap;
+    }
+    .tmpTable td{
+      word-break: break-word;
+      max-width: 360px;
+    }
+    .tmpEmpty{
+      padding: 14px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .miniBtn{
+      padding: 8px 10px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: #fff;
+      cursor: pointer;
+      font-weight: 700;
+      min-height: 40px;
+    }
+    .miniBtn:hover{opacity:.96}
+    .miniBtn.danger{border-color: rgba(220,38,38,.35); color: var(--danger)}
+
+    /* ✅ Mobile: bảng tạm hiển thị dạng card */
+    @media (max-width: 640px){
+      table.tmpTable{min-width: 0;}
+      .tmpTable thead{display:none;}
+      .tmpTable, .tmpTable tbody, .tmpTable tr, .tmpTable td{display:block; width:100%;}
+      .tmpTable tr{
+        border-bottom: 1px solid var(--line);
+        padding: 10px 10px;
+      }
+      .tmpTable td{
+        border:0;
+        padding: 8px 0;
+        max-width: none;
+        display:flex;
+        gap:10px;
+        align-items:flex-start;
+      }
+      .tmpTable td::before{
+        content: attr(data-label);
+        min-width: 140px;
+        color: var(--muted);
+        font-weight: 600;
+      }
+      .tmpToolbar .right{width:100%}
+      .tmpToolbar .right .miniBtn{flex:1}
+    }
+
+    /* =======================
+       Tabs: QR upload / OCR
+       ======================= */
+    .tabs{
+      display:flex;
+      gap:8px;
+      margin-top: 12px;
+      flex-wrap:wrap;
+    }
+    .tabBtn{
+      padding: 10px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: var(--surface2);
+      color: var(--text);
+      font-weight: 700;
+      cursor:pointer;
+      min-height: 42px;
+    }
+    .tabBtn.active{
+      background: var(--btn);
+      color:#fff;
+      border-color: rgba(37,99,235,.35);
+    }
+    .tabPane{
+      display:none;
+      margin-top: 10px;
+      padding-top: 8px;
+    }
+    .tabPane.active{display:block}
+
+    .noticeBox{
+      border: 1px solid rgba(217,119,6,.35);
+      background: rgba(217,119,6,.08);
+      color: #8a4b00;
+      padding: 10px 12px;
+      border-radius: 14px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .noticeBox b{color:#6b3b00}
   </style>
 </head>
 
 <body>
+  <div id="nav-host"></div>
+
   <div class="wrap">
     <div class="top">
       <div>
         <h1>Quét QR CCCD → Lấy thông tin + Chuyển đổi địa chỉ mới</h1>
-        <div class="sub">
-          Trang tĩnh chạy trên trình duyệt. API chuyển đổi dùng <code class="inline">tinhthanhpho.com</code>.
+        <div class="small" style="margin-top:6px">
+          Quét QR / OCR ảnh CCCD → tự gọi API chuyển đổi địa chỉ → lưu bảng tạm → xuất Excel
         </div>
       </div>
       <div class="pill" id="libStatus">📦 Đang kiểm tra thư viện quét QR...</div>
@@ -110,8 +491,8 @@
     <div class="grid">
       <!-- LEFT -->
       <div class="card">
-        <div class="row" style="justify-content:space-between; align-items:center">
-          <div style="font-weight:700">📷 Camera QR Scanner</div>
+        <div class="row between stickyActions">
+          <div style="font-weight:700;font-size:16px">📷 Quét QR bằng camera</div>
           <div class="row">
             <button class="btn" id="btnStart">Bắt đầu quét</button>
             <button class="btn secondary" id="btnStop" disabled>Dừng</button>
@@ -123,43 +504,116 @@
 
         <div class="status" id="scanStatus">Trạng thái: <b>Chưa quét</b></div>
 
-        <div style="height:12px"></div>
-        <label>Hoặc dán chuỗi QR thủ công</label>
-        <textarea id="rawInput" placeholder='VD: 034205011440|---|Nguyễn Minh Tuấn|22082005|Nam|Tổ 4B, Kp 1, Hội Nghĩa, Thị xã Tân Uyên, Bình Dương|19042021'></textarea>
+        <!-- ✅ Tabs: Upload QR / OCR CCCD -->
+        <div class="tabs" role="tablist" aria-label="Chọn chế độ ảnh">
+          <button class="tabBtn active" id="tabQrBtn" type="button" role="tab" aria-selected="true" aria-controls="tabQrPane">
+            🧾 Ảnh QR
+          </button>
+          <button class="tabBtn" id="tabOcrBtn" type="button" role="tab" aria-selected="false" aria-controls="tabOcrPane">
+            🧠 OCR CCCD
+          </button>
+        </div>
+
+        <!-- TAB 1: Upload QR -->
+        <div class="tabPane active" id="tabQrPane" role="tabpanel" aria-labelledby="tabQrBtn">
+          <label>Tải ảnh QR (ảnh có QR ở mặt sau CCCD)</label>
+          <input id="qrFile" type="file" accept="image/*" />
+          <div class="small">Mẹo: chụp gần, nét, không rung, tránh chói.</div>
+        </div>
+
+        <!-- TAB 2: OCR CCCD -->
+        <div class="tabPane" id="tabOcrPane" role="tabpanel" aria-labelledby="tabOcrBtn">
+          <div class="noticeBox">
+            <b>⚠️ Lưu ý:</b> OCR có thể sai (đặc biệt ảnh mờ/chói). Hãy <b>kiểm tra lại thông tin</b> sau khi OCR xong trước khi lưu/xuất.
+          </div>
+
+          <div style="height:10px"></div>
+
+          <label>Tải ảnh CCCD để OCR (mặt trước)</label>
+          <input id="idFile" type="file" accept="image/*" />
+
+          <label style="margin-top:10px">Groq API Key</label>
+          <input id="groqKey" type="password" placeholder="Bearer gsk_..." value="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"/>
+
+
+          <label style="margin-top:10px">Model Vision</label>
+          <select id="groqModel">
+            <option value="meta-llama/llama-4-scout-17b-16e-instruct" selected>Llama 4 Scout (Vision)</option>
+            <option value="meta-llama/llama-4-maverick-17b-128e-instruct">Llama 4 Maverick (Vision)</option>
+          </select>
+
+          <div class="row" style="margin-top:10px">
+            <button class="btn ok" id="btnOcrId" disabled>🧠 OCR CCCD</button>
+            <button class="btn secondary" id="btnOcrClear" disabled>Xóa ảnh</button>
+          </div>
+          <div class="status" id="ocrStatus">OCR: —</div>
+        </div>
+
+        <hr />
+
+        <label>Hoặc dán chuỗi QR thủ công (hỗ trợ 2 dạng)</label>
+        <textarea id="rawInput" placeholder='VD 1: 034205011440|Nguyễn Minh Tuấn|22082005|Nam|Tổ 4B, Kp 1, Hội Nghĩa, Thị xã Tân Uyên, Bình Dương|19042021
+
+VD 2 (dạng có nhãn):
+Số CCCD: 034205011440
+Họ và tên: Nguyễn Minh Tuấn
+Giới tính: Nam
+Ngày sinh: 22/08/2005
+Nơi thường trú: Tổ 4B, Kp 1, Hội Nghĩa, Tân Uyên, Bình Dương
+Ngày cấp CCCD: 19/04/2021'></textarea>
+
         <div class="row" style="margin-top:10px">
-          <button class="btn secondary" id="btnParse">Parse dữ liệu</button>
+          <button class="btn secondary" id="btnParse">Parse + tự chuyển đổi</button>
           <button class="btn danger" id="btnClear">Xóa</button>
+        </div>
+
+        <div class="status">
+          💡 Điện thoại: dùng camera sau + bật flash + zoom 2x–3x để bắt QR nhỏ.
         </div>
       </div>
 
       <!-- RIGHT -->
       <div class="card">
-        <div style="font-weight:700">🪪 Thông tin đọc từ QR</div>
-        <div class="small">Format: phân tách bằng dấu <span class="mono">|</span></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+          <div style="font-weight:700;font-size:16px">🪪 Thông tin đọc được</div>
+          <div class="row" style="gap:8px">
+            <button class="copyBtn" id="btnCopyAll">📋 Copy tất cả</button>
+            <button class="copyBtn" id="btnSaveTmp">🧠 Lưu tạm</button>
+            <button class="copyBtn" id="btnGoCT01">📝 Điền CT01</button>
+          </div>
+        </div>
+
+        <div class="small" style="margin-top:6px">
+          Đã lưu: <b id="savedCount">0</b> dòng (bảng tạm)
+        </div>
 
         <div style="height:10px"></div>
 
         <div id="infoBox">
-          <div class="kv"><div class="k">Số CCCD</div><div class="v mono" id="cccd">—</div></div>
-          <div class="kv"><div class="k">Họ tên</div><div class="v" id="name">—</div></div>
-          <div class="kv"><div class="k">Ngày sinh</div><div class="v" id="dob">—</div></div>
-          <div class="kv"><div class="k">Giới tính</div><div class="v" id="gender">—</div></div>
-          <div class="kv"><div class="k">Địa chỉ (cũ)</div><div class="v" id="oldAddr">—</div></div>
-          <div class="kv"><div class="k">Ngày cấp</div><div class="v" id="issue">—</div></div>
+          <div class="kv"><div class="k">Số CCCD</div><div class="v mono" id="cccd">—</div><button class="copyBtn" data-copy="#cccd">Copy</button></div>
+          <div class="kv"><div class="k">Họ tên</div><div class="v" id="name">—</div><button class="copyBtn" data-copy="#name">Copy</button></div>
+          <div class="kv"><div class="k">Ngày sinh</div><div class="v" id="dob">—</div><button class="copyBtn" data-copy="#dob">Copy</button></div>
+          <div class="kv"><div class="k">Giới tính</div><div class="v" id="gender">—</div><button class="copyBtn" data-copy="#gender">Copy</button></div>
+          <div class="kv"><div class="k">Địa chỉ (cũ)</div><div class="v" id="oldAddr">—</div><button class="copyBtn" data-copy="#oldAddr">Copy</button></div>
+          <div class="kv"><div class="k">Ngày cấp</div><div class="v" id="issue">—</div><button class="copyBtn" data-copy="#issue">Copy</button></div>
         </div>
 
-        <div style="height:14px"></div>
-        <hr style="border:0;border-top:1px solid var(--line);margin:0 0 14px" />
+        <hr />
 
-        <div style="font-weight:700">🔁 Chuyển đổi địa chỉ mới</div>
-        <div class="small">POST <code class="inline">/api/v1/convert/address</code> (Bearer API key)</div>
+        <div class="row between">
+          <div>
+            <div style="font-weight:700;font-size:16px">🔁 Địa chỉ mới (tự động)</div>
+            <div class="small">POST <code class="inline">/api/v1/convert/address</code> (Bearer API key)</div>
+          </div>
+        </div>
 
-        <div style="height:12px"></div>
+        <div style="height:10px"></div>
 
         <div class="two">
           <div>
             <label>API Key (Bearer)</label>
-            <input id="apiKey" placeholder="Nhập API key (Authorization: Bearer ...)" />
+            <!-- 🔒 Khuyến nghị: để trống, nhập khi chạy -->
+            <input id="apiKey" type="password" placeholder="Authorization: Bearer ..." value="hvn_76s2V2WDzr9au59x6SFfZDzL1VYhby8p"/>
           </div>
           <div>
             <label>Chế độ dò mã hành chính</label>
@@ -170,39 +624,121 @@
           </div>
         </div>
 
-        <div style="height:12px"></div>
-
-        <div class="two" id="manualCodes" style="display:none">
+        <div class="two" id="manualCodes" style="display:none; margin-top: 8px">
           <div><label>provinceCode</label><input id="provinceCode" placeholder="VD: 74" /></div>
           <div><label>districtCode</label><input id="districtCode" placeholder="VD: 723..." /></div>
           <div><label>wardCode</label><input id="wardCode" placeholder="VD: 257..." /></div>
           <div><label>streetAddress</label><input id="streetAddress" placeholder="VD: Tổ 4B, Kp 1" /></div>
         </div>
 
-        <div class="row" style="margin-top:10px">
-          <button class="btn ok" id="btnConvert">Chuyển đổi địa chỉ</button>
-          <button class="btn secondary" id="btnGuess">Tự dò mã (xem log)</button>
-        </div>
-
         <div class="status" id="convertStatus" style="margin-top:12px">—</div>
 
-        <div style="height:10px"></div>
-        <label>Kết quả (địa chỉ mới)</label>
-        <textarea id="newAddr" readonly placeholder="Địa chỉ mới sẽ hiện ở đây..."></textarea>
+        <div style="height:8px"></div>
 
-        <div style="height:10px"></div>
-        <label>Log kỹ thuật</label>
+        <div id="newBox">
+          <div class="kv"><div class="k">Địa chỉ tổng</div><div class="v" id="addrFull">—</div><button class="copyBtn" data-copy="#addrFull">Copy</button></div>
+          <div class="kv"><div class="k">Tỉnh/Thành phố *</div><div class="v" id="addrProvince">—</div><button class="copyBtn" data-copy="#addrProvince">Copy</button></div>
+          <div class="kv"><div class="k">Xã/Phường/Đặc khu *</div><div class="v" id="addrWard">—</div><button class="copyBtn" data-copy="#addrWard">Copy</button></div>
+          <div class="kv"><div class="k">Số nhà/Ấp/KP/Đường</div><div class="v" id="addrStreet">—</div><button class="copyBtn" data-copy="#addrStreet">Copy</button></div>
+        </div>
+
+        <label style="margin-top:12px">Log kỹ thuật</label>
         <textarea id="log" readonly class="mono" placeholder="Log request/response sẽ hiện ở đây..."></textarea>
+      </div>
+    </div>
+
+    <!-- ✅ BẢNG TẠM -->
+    <div class="tmpWrap">
+      <div class="tmpToolbar">
+        <div class="left">
+          <div style="font-weight:700">🧠 Bảng tạm</div>
+          <div class="small">Lưu nhiều người rồi mới xuất file</div>
+        </div>
+        <div class="right">
+          <button class="miniBtn" id="btnExportExcelInTable">📄 Xuất Excel</button>
+          <button class="miniBtn danger" id="btnClearTmpAll">🗑 Xóa hết</button>
+        </div>
+      </div>
+
+      <div class="tmpTableScroll" id="tmpTableScroll">
+        <div class="tmpEmpty" id="tmpEmpty">Chưa có dòng nào. Bấm “🧠 Lưu tạm” để thêm.</div>
+        <table class="tmpTable" id="tmpTable" style="display:none">
+          <thead>
+            <tr id="tmpHead"></tr>
+          </thead>
+          <tbody id="tmpBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <!-- ✅ MODAL NHẬP PHÒNG -->
+  <div class="modalOverlay" id="roomModal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="roomModalTitle">
+      <div class="row between" style="align-items:flex-start">
+        <div>
+          <p class="modalTitle" id="roomModalTitle">Nhập số phòng (tùy chọn)</p>
+          <div class="modalSub">
+            Bạn có thể nhập số phòng để lưu chung trong Excel, hoặc bấm “Bỏ qua” nếu không cần.
+          </div>
+        </div>
+        <button class="miniBtn" id="btnCloseRoomModal" aria-label="Đóng">✕</button>
+      </div>
+
+      <label>Số phòng</label>
+      <input id="roomModalInput" placeholder="VD: 101 / A12..." />
+
+      <div class="modalActions">
+        <button class="btn secondary" id="btnRoomCancel">Hủy</button>
+        <button class="btn secondary" id="btnRoomSkip">Bỏ qua</button>
+        <button class="btn ok" id="btnRoomSave">Lưu</button>
       </div>
     </div>
   </div>
 
   <script>
-    // ====== Basic helpers ======
     const $ = (id) => document.getElementById(id);
+
+    let __readerPreviewUrl = null;
+
+function showReaderImage(file){
+  const box = $("reader");
+  if (!box || !file) return;
+
+  // clear old preview url
+  if (__readerPreviewUrl) {
+    try { URL.revokeObjectURL(__readerPreviewUrl); } catch {}
+    __readerPreviewUrl = null;
+  }
+
+  __readerPreviewUrl = URL.createObjectURL(file);
+  box.innerHTML = `<img src="${__readerPreviewUrl}" alt="CCCD Preview" />`;
+}
+
+function clearReaderPreview(){
+  const box = $("reader");
+  if (!box) return;
+  if (__readerPreviewUrl) {
+    try { URL.revokeObjectURL(__readerPreviewUrl); } catch {}
+    __readerPreviewUrl = null;
+  }
+  box.innerHTML = ""; // để Html5Qrcode dùng lại khi bật camera
+}
+
 
     function setScanStatus(html) { $("scanStatus").innerHTML = `Trạng thái: ${html}`; }
     function setConvertStatus(html) { $("convertStatus").innerHTML = html; }
+    function setOcrStatus(html) { $("ocrStatus").innerHTML = `OCR: ${html}`; }
+
+    function toast(msg){
+      const t = $("toast");
+      t.textContent = msg;
+      t.style.display = "block";
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(()=>{ t.style.display="none"; }, 1600);
+    }
 
     function fmtDDMMYYYY(s) {
       if (!s) return "—";
@@ -213,17 +749,374 @@
 
     function logLine(line) {
       const box = $("log");
+      if (!box) return;
       box.value = (box.value ? box.value + "\n" : "") + line;
       box.scrollTop = box.scrollHeight;
     }
 
-    // ====== QR parse ======
-    function normalizeQR(raw) { return (raw || "").trim().replace(/\|\s*---\s*\|/g, "|"); }
-    function parseQR(raw) {
+    async function copyText(text){
+      const v = (text || "").toString().trim();
+      if (!v || v === "—") return toast("Không có dữ liệu để copy");
+      try{
+        await navigator.clipboard.writeText(v);
+        toast("✅ Đã copy");
+      }catch{
+        const ta = document.createElement("textarea");
+        ta.value = v;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+        toast("✅ Đã copy");
+      }
+    }
+
+    document.addEventListener("click", async (e) => {
+      const btn = e.target.closest("[data-copy]");
+      if (!btn) return;
+      const sel = btn.getAttribute("data-copy");
+      const el = document.querySelector(sel);
+      await copyText(el ? el.textContent : "");
+    });
+
+    // =======================
+    // ✅ Tabs: QR Upload / OCR
+    // =======================
+    function setTab(tab){
+      const isQr = tab === "qr";
+      $("tabQrBtn").classList.toggle("active", isQr);
+      $("tabOcrBtn").classList.toggle("active", !isQr);
+
+      $("tabQrBtn").setAttribute("aria-selected", isQr ? "true" : "false");
+      $("tabOcrBtn").setAttribute("aria-selected", !isQr ? "true" : "false");
+
+      $("tabQrPane").classList.toggle("active", isQr);
+      $("tabOcrPane").classList.toggle("active", !isQr);
+    }
+
+    $("tabQrBtn").addEventListener("click", () => setTab("qr"));
+    $("tabOcrBtn").addEventListener("click", () => setTab("ocr"));
+
+    // =======================
+    // ✅ Bộ nhớ tạm + Export Excel
+    // =======================
+    const TMP_KEY = "cccd_convert_tmp_rows_v3";
+    const COLS = [
+      "Họ tên",
+      "Số CCCD",
+      "Ngày sinh",
+      "Giới tính",
+      "Tỉnh/TP",
+      "Xã/Phường/Đặc khu",
+      "Số nhà/Ấp/KP/Đường",
+      "Phòng"
+    ];
+
+    function loadTmpRows(){
+      try{
+        const raw = sessionStorage.getItem(TMP_KEY);
+        const arr = raw ? JSON.parse(raw) : [];
+        return Array.isArray(arr) ? arr : [];
+      }catch{ return []; }
+    }
+
+    function saveTmpRows(rows){
+      try{ sessionStorage.setItem(TMP_KEY, JSON.stringify(rows || [])); }catch{}
+      renderSavedCount();
+      renderTmpTable();
+    }
+
+    function renderSavedCount(){
+      const rows = loadTmpRows();
+      $("savedCount").textContent = String(rows.length);
+    }
+
+    function normalizeCell(v){
+      const s = (v ?? "").toString().trim();
+      return (s === "—") ? "" : s;
+    }
+
+    function buildRowFromUI(roomValue){
+      const row = {
+        "Họ tên": normalizeCell($("name").textContent),
+        "Số CCCD": normalizeCell($("cccd").textContent),
+        "Ngày sinh": normalizeCell($("dob").textContent),
+        "Giới tính": normalizeCell($("gender").textContent),
+        "Tỉnh/TP": normalizeCell($("addrProvince").textContent),
+        "Xã/Phường/Đặc khu": normalizeCell($("addrWard").textContent),
+        "Số nhà/Ấp/KP/Đường": normalizeCell($("addrStreet").textContent),
+        "Phòng": normalizeCell(roomValue || "")
+      };
+
+      if (!row["Số CCCD"] || !row["Họ tên"]) {
+        throw new Error("Chưa có dữ liệu CCCD/Họ tên để lưu. Hãy quét/parse/OCR trước.");
+      }
+      if (!row["Tỉnh/TP"] || !row["Xã/Phường/Đặc khu"]) {
+        throw new Error("Chưa có địa chỉ mới. Hãy chuyển đổi địa chỉ trước rồi hãy lưu.");
+      }
+      return row;
+    }
+
+    function downloadBlob(filename, blob){
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        URL.revokeObjectURL(a.href);
+        document.body.removeChild(a);
+      }, 0);
+    }
+
+    function toCsv(rows){
+      const esc = (v) => {
+        const s = (v ?? "").toString();
+        const needs = /[",\n\r]/.test(s);
+        const out = s.replace(/"/g, '""');
+        return needs ? `"${out}"` : out;
+      };
+      const head = COLS.map(esc).join(",");
+      const body = rows.map(r => COLS.map(c => esc(r?.[c] ?? "")).join(",")).join("\n");
+      return "\ufeff" + head + "\n" + body;
+    }
+
+    function exportExcel(){
+      const rows = loadTmpRows();
+      if (!rows.length) return toast("Chưa có dòng nào trong bảng tạm để xuất.");
+
+      const today = new Date();
+      const yyyy = today.getFullYear();
+      const mm = String(today.getMonth() + 1).padStart(2, "0");
+      const dd = String(today.getDate()).padStart(2, "0");
+      const filenameXlsx = `CCCD_DiaChi_${yyyy}-${mm}-${dd}.xlsx`;
+      const filenameCsv  = `CCCD_DiaChi_${yyyy}-${mm}-${dd}.csv`;
+
+      if (window.XLSX && window.XLSX.utils) {
+        const ordered = rows.map(r => {
+          const o = {};
+          COLS.forEach(c => o[c] = r?.[c] ?? "");
+          return o;
+        });
+
+        const ws = XLSX.utils.json_to_sheet(ordered, { header: COLS });
+        ws["!cols"] = [
+          { wch: 24 },
+          { wch: 18 },
+          { wch: 14 },
+          { wch: 10 },
+          { wch: 18 },
+          { wch: 26 },
+          { wch: 42 },
+          { wch: 10 },
+        ];
+
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "DanhSach");
+        XLSX.writeFile(wb, filenameXlsx);
+        toast("✅ Đã xuất Excel");
+        return;
+      }
+
+      const csv = toCsv(rows);
+      downloadBlob(filenameCsv, new Blob([csv], { type: "text/csv;charset=utf-8" }));
+      toast("✅ Đã xuất CSV (mở bằng Excel)");
+    }
+
+    function renderTmpTable(){
+      const rows = loadTmpRows();
+      const empty = $("tmpEmpty");
+      const table = $("tmpTable");
+      const head = $("tmpHead");
+      const body = $("tmpBody");
+
+      if (!rows.length){
+        empty.style.display = "block";
+        table.style.display = "none";
+        body.innerHTML = "";
+        head.innerHTML = "";
+        return;
+      }
+
+      empty.style.display = "none";
+      table.style.display = "table";
+
+      head.innerHTML = "";
+      const th0 = document.createElement("th");
+      th0.textContent = "#";
+      head.appendChild(th0);
+
+      COLS.forEach(c => {
+        const th = document.createElement("th");
+        th.textContent = c;
+        head.appendChild(th);
+      });
+
+      const thAct = document.createElement("th");
+      thAct.textContent = "Hành động";
+      head.appendChild(thAct);
+
+      body.innerHTML = "";
+      rows.forEach((r, idx) => {
+        const tr = document.createElement("tr");
+
+        const tdIndex = document.createElement("td");
+        tdIndex.textContent = String(idx + 1);
+        tdIndex.setAttribute("data-label", "#");
+        tr.appendChild(tdIndex);
+
+        COLS.forEach(c => {
+          const td = document.createElement("td");
+          td.textContent = (r?.[c] ?? "");
+          td.setAttribute("data-label", c);
+          tr.appendChild(td);
+        });
+
+        const tdAct = document.createElement("td");
+        tdAct.style.whiteSpace = "nowrap";
+        tdAct.setAttribute("data-label", "Hành động");
+
+        const del = document.createElement("button");
+        del.className = "miniBtn danger";
+        del.textContent = "Xóa";
+        del.addEventListener("click", () => {
+          const cur = loadTmpRows();
+          cur.splice(idx, 1);
+          saveTmpRows(cur);
+          toast("✅ Đã xóa dòng");
+        });
+
+        tdAct.appendChild(del);
+        tr.appendChild(tdAct);
+
+        body.appendChild(tr);
+      });
+    }
+
+    // =======================
+    // ✅ Popup nhập phòng khi lưu tạm
+    // =======================
+    function openRoomModal(){
+      $("roomModalInput").value = "";
+      $("roomModal").style.display = "flex";
+      setTimeout(() => $("roomModalInput").focus(), 0);
+    }
+    function closeRoomModal(){
+      $("roomModal").style.display = "none";
+    }
+
+    $("roomModal").addEventListener("click", (e) => {
+      if (e.target === $("roomModal")) closeRoomModal();
+    });
+
+    $("btnCloseRoomModal").addEventListener("click", closeRoomModal);
+    $("btnRoomCancel").addEventListener("click", closeRoomModal);
+
+    function doSaveTmpWithRoom(roomVal){
+      const row = buildRowFromUI(roomVal);
+      const rows = loadTmpRows();
+      rows.push(row);
+      saveTmpRows(rows);
+    }
+
+    $("btnRoomSave").addEventListener("click", () => {
+      try{
+        doSaveTmpWithRoom($("roomModalInput").value);
+        closeRoomModal();
+        toast("✅ Đã lưu vào bảng tạm");
+      }catch(e){
+        toast("❌ " + e.message);
+      }
+    });
+
+    $("btnRoomSkip").addEventListener("click", () => {
+      try{
+        doSaveTmpWithRoom("");
+        closeRoomModal();
+        toast("✅ Đã lưu (không có phòng)");
+      }catch(e){
+        toast("❌ " + e.message);
+      }
+    });
+
+    // =======================
+    // ✅ QR parse (đa định dạng)
+    // =======================
+    function normalizeQR(raw) {
+      return (raw || "")
+        .toString()
+        .trim()
+        .replace(/\r\n/g, "\n")
+        .replace(/\|\s*---\s*\|/g, "|");
+    }
+
+    function parseQRFromPipes(raw) {
       const s = normalizeQR(raw);
       const parts = s.split("|").map(x => (x || "").trim()).filter(x => x.length > 0);
       if (parts.length < 6) throw new Error("Chuỗi QR không đúng định dạng (cần tối thiểu 6 trường).");
       return { cccd: parts[0], name: parts[1], dob: parts[2], gender: parts[3], address: parts[4], issue: parts[5] };
+    }
+
+    function parseQRFromLabeledText(raw) {
+      const s = normalizeQR(raw);
+
+      const pick = (patterns) => {
+        for (const re of patterns) {
+          const m = s.match(re);
+          if (m && m[1]) return (m[1] || "").trim();
+        }
+        return "";
+      };
+
+      const cccd = pick([
+        /Số\s*CCCD\s*:\s*([0-9]{9,20})/i,
+        /\bCCCD\s*:\s*([0-9]{9,20})/i,
+        /\bSố\s*:\s*([0-9]{9,20})/i,
+      ]);
+
+      const name = pick([
+        /Họ\s*(?:và\s*)?tên\s*:\s*([^\n\r]+)/i,
+        /Họ\s*tên\s*:\s*([^\n\r]+)/i,
+      ]);
+
+      const gender = pick([
+        /Giới\s*tính\s*:\s*([^\n\r]+)/i,
+        /Sex\s*:\s*([^\n\r]+)/i,
+      ]);
+
+      const dob = pick([
+        /Ngày\s*sinh\s*:\s*([0-9]{1,2}[\/\-.][0-9]{1,2}[\/\-.][0-9]{2,4}|\d{8})/i,
+        /Sinh\s*ngày\s*:\s*([0-9]{1,2}[\/\-.][0-9]{1,2}[\/\-.][0-9]{2,4}|\d{8})/i,
+      ]);
+
+      const address = pick([
+        /Nơi\s*thường\s*trú\s*:\s*([^\n\r]+)/i,
+        /Địa\s*chỉ\s*(?:thường\s*trú)?\s*:\s*([^\n\r]+)/i,
+        /Address\s*:\s*([^\n\r]+)/i,
+      ]);
+
+      const issue = pick([
+        /Ngày\s*cấp(?:\s*CCCD)?\s*:\s*([0-9]{1,2}[\/\-.][0-9]{1,2}[\/\-.][0-9]{2,4}|\d{8})/i,
+      ]);
+
+      const ok = (cccd && name && dob && gender && address && issue);
+      if (!ok) {
+        throw new Error("Không đọc đủ trường từ dạng 'có nhãn'. Cần: Số CCCD, Họ và tên, Giới tính, Ngày sinh, Nơi thường trú, Ngày cấp CCCD.");
+      }
+
+      return { cccd, name, dob, gender, address, issue };
+    }
+
+    function parseQRAny(raw) {
+      const s = normalizeQR(raw);
+
+      if (s.includes("|")) return parseQRFromPipes(s);
+
+      if (/Số\s*CCCD\s*:|Họ\s*(?:và\s*)?tên\s*:|Nơi\s*thường\s*trú\s*:/i.test(s)) {
+        return parseQRFromLabeledText(s);
+      }
+
+      throw new Error("Chuỗi không đúng định dạng. Dán dạng '|' hoặc dạng nhiều dòng có nhãn.");
     }
 
     function fillInfo(data) {
@@ -235,37 +1128,176 @@
       $("issue").textContent = fmtDDMMYYYY(data?.issue);
     }
 
-    // ====== Address helpers (match mềm, không phụ thuộc keyword API) ======
+    function setNewAddressFields({full, province, ward, street}){
+      $("addrFull").textContent = full || "—";
+      $("addrProvince").textContent = province || "—";
+      $("addrWard").textContent = ward || "—";
+      $("addrStreet").textContent = street || "—";
+    }
+
+    function splitFullAddress(full){
+      const chunks = (full || "").split(",").map(s => s.trim()).filter(Boolean);
+      if (chunks.length === 0) return { full:"", province:"", ward:"", street:"" };
+      if (chunks.length === 1) return { full, province:"", ward:"", street: chunks[0] };
+
+      const provinceRaw = chunks[chunks.length - 1] || "";
+      const wardRaw = chunks.length >= 2 ? chunks[chunks.length - 2] : "";
+      const street = chunks.slice(0, Math.max(0, chunks.length - 2)).join(", ").trim();
+
+      const province = stripAdminPrefix(provinceRaw, "province");
+      const ward = stripAdminPrefix(wardRaw, "ward");
+
+      return { full, province, ward, street };
+    }
+
+    // =======================
+    // ✅ Address helpers for code guessing
+    // =======================
+    function stripDiacritics(s) {
+      return (s || "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/đ/g, "d")
+        .replace(/Đ/g, "D");
+    }
+
+    function normalizeNumberName(s){
+      const t = (s || "").toString().trim();
+      if (/^\d+$/.test(t)) return String(parseInt(t, 10));
+      return t;
+    }
+
+    function stripAdminPrefix(text, type){
+  let s = (text || "").trim();
+  if (!s) return s;
+
+  // ✅ Fix lỗi "Phường" (Unicode tổ hợp) không match được "phường"
+  s = s.normalize("NFC");
+
+  if (type === "province") {
+    s = s.replace(/^(tỉnh|thành phố|tp\.?|t\.p\.?)\s+/i, "");
+    s = s.replace(/^(city|province)\s+/i, "");
+    return s.trim();
+  }
+
+  if (type === "district") {
+    // ✅ q chỉ được phép match khi sau q là "." hoặc space/digit (Q.1, Q 1, Q1)
+    s = s.replace(/^q\.?(?=\s|\d)/i, "");
+    s = s.replace(/^(quận|huyện|thành phố|tp\.?|t\.p\.?|thị xã|tx\.?|đặc khu)\s+/i, "");
+    s = s.replace(/^(district|city|town|township)\s+/i, "");
+    return s.trim();
+  }
+
+  if (type === "ward") {
+    // ✅ p chỉ match khi sau p là "." hoặc space/digit (P.02, P 02, P02) — không ăn "Phường"
+    s = s.replace(/^p\.?(?=\s|\d)/i, "");
+
+    s = s.replace(/^(xã|x\.?|phường|thị trấn|tt\.?|đặc khu)\s*/i, "");
+    s = s.replace(/^(commune|ward|townlet)\s+/i, "");
+    return s.trim();
+  }
+
+  return s.trim();
+}
+
+
+    function detectTypeHint(raw, kind){
+      const s = stripDiacritics((raw || "").toLowerCase());
+
+      if (kind === "district") {
+        if (/\b(quan|q\.)\b/.test(s) || s.includes(" quan ")) return "Quận";
+        if (/\b(huyen|h\.)\b/.test(s) || s.includes(" huyen ")) return "Huyện";
+        if (/\b(thi xa|tx\.)\b/.test(s) || s.includes(" thi xa ")) return "Thị xã";
+        if (/\b(tp|thanh pho|t\.p\.)\b/.test(s) || s.includes(" thanh pho ")) return "Thành phố";
+        if (s.includes(" dac khu ")) return "Đặc khu";
+        return "";
+      }
+
+      if (kind === "ward") {
+        if (/\b(phuong|p\.)\b/.test(s) || s.includes(" phuong ")) return "Phường";
+        if (/\b(xa|x\.)\b/.test(s) || s.includes(" xa ")) return "Xã";
+        if (s.includes(" thi tran ") || s.includes(" tt.")) return "Thị trấn";
+        if (s.includes(" dac khu ")) return "Đặc khu";
+        return "";
+      }
+
+      if (kind === "province") {
+        if (/\b(tp|thanh pho|t\.p\.)\b/.test(s) || s.includes(" thanh pho ")) return "Thành phố";
+        if (s.includes(" tinh ")) return "Tỉnh";
+        return "";
+      }
+
+      return "";
+    }
+
+function normName(s) {
+  return stripDiacritics((s || "").toString().normalize("NFC")).toLowerCase()
+    .replace(/\b(thanh pho|thi xa|quan|q\.|huyen|h\.|thi tran|xa|x\.|phuong|p\.|tp|t\.p\.|tx\.|dac khu)\b/g, " ")
+    .replace(/[^\w\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+
+    function bestMatch(list, rawName, typeHint){
+      if (!list?.length) return null;
+
+      const cleanedRaw = (rawName || "").toString().trim();
+      const cleaned = normName(cleanedRaw);
+
+      let candidates = list.filter(x => normName(x.name) === cleaned);
+      if (!candidates.length) {
+        candidates = list.filter(x => {
+          const n = normName(x.name);
+          return n.includes(cleaned) || cleaned.includes(n);
+        });
+      }
+
+      if (!candidates.length) return null;
+
+      if (typeHint) {
+        const typed = candidates.filter(x => (x.type || "").toLowerCase().includes(typeHint.toLowerCase()));
+        if (typed.length) return typed[0];
+      }
+
+      if (candidates.length > 1) {
+        logLine(`⚠️ Trùng tên "${cleanedRaw}". Candidates=` +
+          candidates.map(c => `${c.type} ${c.name}(${c.code})`).join(" | ")
+        );
+      }
+      return candidates[0];
+    }
+
+    function normalizeWardDisplayName(rawWard){
+      const s = stripAdminPrefix(rawWard, "ward");
+      return normalizeNumberName(s);
+    }
+
     function splitAddress(addr) {
       const chunks = (addr || "").trim().split(",").map(x => x.trim()).filter(Boolean);
-      if (chunks.length < 3) return { street: (addr || "").trim(), wardName:"", districtName:"", provinceName:"" };
-      return {
-        street: chunks.slice(0,-3).join(", ").trim(),
-        wardName: chunks[chunks.length-3],
-        districtName: chunks[chunks.length-2],
-        provinceName: chunks[chunks.length-1],
-      };
+      if (chunks.length < 3) {
+        return { street: (addr || "").trim(), wardName:"", districtName:"", provinceName:"", wardHint:"", districtHint:"", provinceHint:"" };
+      }
+
+      const provinceRaw = chunks[chunks.length - 1];
+      const districtRaw = chunks[chunks.length - 2];
+      const wardRaw = chunks[chunks.length - 3];
+      const street = chunks.slice(0, -3).join(", ").trim();
+
+      const provinceHint = detectTypeHint(provinceRaw, "province");
+      const districtHint = detectTypeHint(districtRaw, "district");
+      const wardHint = detectTypeHint(wardRaw, "ward");
+
+      const provinceName = stripAdminPrefix(provinceRaw, "province");
+      const districtName = stripAdminPrefix(districtRaw, "district");
+      const wardName = normalizeWardDisplayName(wardRaw);
+
+      return { street, wardName, districtName, provinceName, wardHint, districtHint, provinceHint };
     }
 
-    function stripDiacritics(s) {
-      return (s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g,"d").replace(/Đ/g,"D");
-    }
-    function normName(s) {
-      return stripDiacritics(s).toLowerCase()
-        .replace(/\b(thanh pho|thi xa|quan|huyen|thi tran|xa|phuong|tp)\b/g, "")
-        .replace(/[^\w\s]/g, " ")
-        .replace(/\s+/g, " ").trim();
-    }
-    function bestMatch(list, targetName) {
-      if (!list?.length) return null;
-      const target = normName(targetName);
-      let found = list.find(x => normName(x.name) === target);
-      if (found) return found;
-      found = list.find(x => normName(x.name).includes(target) || target.includes(normName(x.name)));
-      return found || null;
-    }
-
-    // ====== API tinhthanhpho ======
+    // =======================
+    // ✅ API tinhthanhpho
+    // =======================
     const BASE = "https://tinhthanhpho.com/api/v1";
 
     async function apiGET(path, params) {
@@ -307,40 +1339,54 @@
     }
 
     async function findProvince(provinceName) {
-      // provinces có keyword OK
       const res = await apiGET("/provinces", { keyword: provinceName, limit: 20, page: 1 });
       const list = res.data || [];
       if (!list.length) throw new Error("Không tìm thấy tỉnh: " + provinceName);
-      return bestMatch(list, provinceName) || list[0];
+      return bestMatch(list, provinceName, detectTypeHint(provinceName, "province")) || list[0];
     }
 
-    async function findDistrictInProvince(provinceCode, districtName) {
-      // ✅ FIX: KHÔNG dùng keyword ở endpoint này (bạn đã thấy trả [] rồi)
-      // Lấy full danh sách districts và tự match.
+    // ✅ FIX: TRÙNG TÊN district (VD Cao Lãnh có cả TP + Huyện)
+    async function findDistrictInProvince(provinceCode, districtRaw) {
       const res = await apiGET(`/provinces/${encodeURIComponent(provinceCode)}/districts`, { limit: 500, page: 1 });
       const list = res.data || [];
       if (!list.length) throw new Error("API trả 0 districts cho province=" + provinceCode);
 
-      let d = bestMatch(list, districtName);
-      if (!d) d = bestMatch(list, districtName.replace(/thị xã/ig, "thành phố"));
-      if (!d?.code) throw new Error("Không match được district: " + districtName);
+      const hint = detectTypeHint(districtRaw, "district");
+      const cleanName = stripAdminPrefix(districtRaw, "district");
+
+      let d = bestMatch(list, cleanName, hint);
+
+      if (!d && /thi xa/i.test(stripDiacritics(districtRaw))) {
+        d = bestMatch(list, cleanName, "Thị xã") || bestMatch(list, cleanName, "Thành phố");
+      }
+
+      if (!d?.code) throw new Error("Không match được district: " + districtRaw);
+
+      logLine(`✅ Pick district: ${d.type} ${d.name} (${d.code}) [hint=${hint||"none"}]`);
       return d;
     }
 
-    async function findWardInDistrict(districtCode, wardName) {
-      // ✅ FIX: tương tự wards
+    // ✅ FIX: ward dạng số "02" / "P.02" / "Phường 02" -> "2"
+    async function findWardInDistrict(districtCode, wardRaw) {
       const res = await apiGET(`/districts/${encodeURIComponent(districtCode)}/wards`, { limit: 1000, page: 1 });
       const list = res.data || [];
       if (!list.length) throw new Error("API trả 0 wards cho district=" + districtCode);
 
-      let w = bestMatch(list, wardName);
-      if (!w) w = bestMatch(list, wardName.replace(/\b(xã|phường|thị trấn)\b/ig, ""));
-      if (!w?.code) throw new Error("Không match được ward: " + wardName);
+      const hint = detectTypeHint(wardRaw, "ward");
+      const cleanName = normalizeWardDisplayName(wardRaw);
+
+      let w = bestMatch(list, cleanName, hint);
+      if (!w) w = bestMatch(list, stripAdminPrefix(wardRaw, "ward"), hint);
+
+      if (!w?.code) throw new Error("Không match được ward: " + wardRaw);
+
+      logLine(`✅ Pick ward: ${w.type} ${w.name} (${w.code}) [hint=${hint||"none"}]`);
       return w;
     }
 
     async function guessCodesFromAddress(addr) {
-      const { street, wardName, districtName, provinceName } = splitAddress(addr);
+      const { street, wardName, districtName, provinceName, wardHint, districtHint } = splitAddress(addr);
+
       if (!provinceName || !districtName || !wardName) {
         throw new Error("Không tách được tỉnh/huyện/xã (cần 3 cụm cuối cách nhau bởi dấu phẩy).");
       }
@@ -348,28 +1394,107 @@
       setConvertStatus(`Đang dò mã: <b>${provinceName}</b> / <b>${districtName}</b> / <b>${wardName}</b> ...`);
 
       const prov = await findProvince(provinceName);
-      const dist = await findDistrictInProvince(prov.code, districtName);
-      const ward = await findWardInDistrict(dist.code, wardName);
+
+      const districtRawForMatch = (districtHint ? `${districtHint} ${districtName}` : districtName);
+      const dist = await findDistrictInProvince(prov.code, districtRawForMatch);
+
+      const wardRawForMatch = (wardHint ? `${wardHint} ${wardName}` : wardName);
+      const ward = await findWardInDistrict(dist.code, wardRawForMatch);
+
+      $("provinceCode").value = prov.code;
+      $("districtCode").value = dist.code;
+      $("wardCode").value = ward.code;
+      $("streetAddress").value = street || "";
 
       return { provinceCode: prov.code, districtCode: dist.code, wardCode: ward.code, streetAddress: street || "" };
     }
 
-    // ====== QR scanner (html5-qrcode) ======
+    // =======================
+    // ✅ Scanner + auto convert flow
+    // =======================
     let qr = null;
     let currentData = null;
 
-    async function onScanSuccess(decodedText) {
-      try {
-        setScanStatus(`<b class="oktxt">Đã quét</b> • <span class="mono">${decodedText}</span>`);
-        $("rawInput").value = decodedText;
+    let converting = false;
+    let lastQrText = "";
+    let lastConvertAt = 0;
 
-        const data = parseQR(decodedText);
+    async function autoConvertNow(){
+      const apiKey = ($("apiKey").value || "").trim();
+      if (!apiKey) {
+        setConvertStatus(`<span class="warn">Chưa có API key.</span> Nhập API key để tự chuyển đổi sau khi có dữ liệu.`);
+        return;
+      }
+      if (!currentData?.address) {
+        setConvertStatus(`<span class="warn">Chưa có địa chỉ cũ để chuyển đổi.</span>`);
+        return;
+      }
+
+      const now = Date.now();
+      if (converting) return;
+      if (now - lastConvertAt < 800) return;
+      converting = true;
+      lastConvertAt = now;
+
+      try{
+        if ($("log")) $("log").value = "";
+        setNewAddressFields({full:"—", province:"—", ward:"—", street:"—"});
+
+        let payload;
+        if ($("mode").value === "manual") {
+          const provinceCode = ($("provinceCode").value || "").trim();
+          const districtCode = ($("districtCode").value || "").trim();
+          const wardCode = ($("wardCode").value || "").trim();
+          const streetAddress = ($("streetAddress").value || "").trim();
+          if (!provinceCode || !districtCode || !wardCode) throw new Error("Thiếu mã province/district/ward (mode manual).");
+          payload = { provinceCode, districtCode, wardCode, streetAddress };
+        } else {
+          payload = await guessCodesFromAddress(currentData.address);
+        }
+
+        setConvertStatus("<b>Đang gọi API chuyển đổi...</b>");
+        const res = await apiPOST("/convert/address", payload, apiKey);
+
+        const newFull = res?.data?.new?.fullAddress || "";
+        const notes = res?.data?.mergeInfo?.notes || "";
+
+        if (!newFull) {
+          setConvertStatus(`<span class="warn">Có phản hồi nhưng không thấy new.fullAddress.</span> Xem log để debug.`);
+          return;
+        }
+
+        const parts = splitFullAddress(newFull);
+        setNewAddressFields(parts);
+
+        setConvertStatus(
+          `<span class="oktxt">Thành công!</span> ` +
+          (notes ? `<span class="small">Ghi chú: ${notes}</span>` : "")
+        );
+      }catch(e){
+        setConvertStatus(`<span class="error">Lỗi:</span> ${e.message}`);
+      }finally{
+        converting = false;
+      }
+    }
+
+    async function onScanSuccess(decodedText) {
+      const text = (decodedText || "").trim();
+      if (!text) return;
+      if (text === lastQrText) return;
+      lastQrText = text;
+
+      try {
+        setScanStatus(`<b class="oktxt">Đã quét</b>`);
+        $("rawInput").value = text;
+
+        const data = parseQRAny(text);
         currentData = data;
         fillInfo(data);
 
-        setConvertStatus(`<span class="oktxt">Parse OK.</span> Bấm <b>Chuyển đổi địa chỉ</b> để lấy địa chỉ mới.`);
+        await stopScanner();
+        await autoConvertNow();
       } catch (e) {
-        setScanStatus(`<b class="error">Lỗi parse</b> • ${e.message}`);
+        setScanStatus(`<b class="error">Lỗi</b> • ${e.message}`);
       }
     }
 
@@ -378,7 +1503,6 @@
         setScanStatus(`<b class="error">Không load được Html5Qrcode</b> • Kiểm tra đường dẫn script local.`);
         return;
       }
-
       if (!qr) qr = new Html5Qrcode("reader");
 
       $("btnStart").disabled = true;
@@ -386,12 +1510,36 @@
       setScanStatus("<b>Đang mở camera...</b>");
 
       try {
+        lastQrText = "";
+
         await qr.start(
-          { facingMode: "environment" },
-          { fps: 12, qrbox: { width: 280, height: 280 } },
-          onScanSuccess
+          { facingMode: { ideal: "environment" } },
+          {
+            fps: 60,
+            qrbox: (vw, vh) => {
+              const s = Math.floor(Math.min(vw, vh) * 0.88);
+              return { width: s, height: s };
+            },
+            disableFlip: true,
+            videoConstraints: {
+              facingMode: { ideal: "environment" },
+              width: { ideal: 2560 },
+              height: { ideal: 1440 },
+              advanced: [
+                { focusMode: "continuous" },
+                { zoom: 3 }
+              ]
+            },
+            showTorchButtonIfSupported: true,
+            showZoomSliderIfSupported: true,
+            defaultZoomValueIfSupported: 2,
+            experimentalFeatures: { useBarCodeDetectorIfSupported: true },
+          },
+          onScanSuccess,
+          (err) => {}
         );
-        setScanStatus("<b class='oktxt'>Đang quét...</b> Đưa QR vào khung.");
+
+        setScanStatus("<b class='oktxt'>Đang quét...</b> Đưa QR vào khung (thử zoom 2x–3x nếu có).");
       } catch (e) {
         $("btnStart").disabled = false;
         $("btnStop").disabled = true;
@@ -407,26 +1555,36 @@
       setScanStatus("<b>Đã dừng</b>");
     }
 
-    // ====== UI events ======
     $("btnStart").addEventListener("click", startScanner);
     $("btnStop").addEventListener("click", stopScanner);
 
     $("btnClear").addEventListener("click", () => {
       $("rawInput").value = "";
-      $("newAddr").value = "";
       $("log").value = "";
       currentData = null;
+      lastQrText = "";
       fillInfo({});
+      setNewAddressFields({full:"—", province:"—", ward:"—", street:"—"});
       setScanStatus("<b>Chưa quét</b>");
       setConvertStatus("—");
+
+      // OCR reset
+      window.__idFile = null;
+      $("idFile").value = "";
+      $("btnOcrId").disabled = true;
+      $("btnOcrClear").disabled = true;
+      setOcrStatus("—");
+      // Nếu muốn reset tab về QR:
+      // setTab("qr");
     });
 
-    $("btnParse").addEventListener("click", () => {
+    $("btnParse").addEventListener("click", async () => {
       try {
-        const data = parseQR($("rawInput").value);
+        const data = parseQRAny($("rawInput").value);
         currentData = data;
         fillInfo(data);
-        setConvertStatus(`<span class="oktxt">Parse OK.</span> Bấm <b>Chuyển đổi địa chỉ</b> để lấy địa chỉ mới.`);
+        setConvertStatus(`<span class="oktxt">Parse OK.</span> Đang tự chuyển đổi...`);
+        await autoConvertNow();
       } catch (e) {
         setConvertStatus(`<span class="error">Lỗi:</span> ${e.message}`);
       }
@@ -436,84 +1594,441 @@
       $("manualCodes").style.display = (e.target.value === "manual") ? "grid" : "none";
     });
 
-    $("btnGuess").addEventListener("click", async () => {
-      try {
-        $("log").value = "";
-        const addr = currentData?.address || $("oldAddr").textContent;
-        const codes = await guessCodesFromAddress(addr);
-        logLine("✅ Guessed codes: " + JSON.stringify(codes));
-        setConvertStatus(
-          `<span class="oktxt">Dò mã OK.</span> province=<b>${codes.provinceCode}</b>, district=<b>${codes.districtCode}</b>, ward=<b>${codes.wardCode}</b>`
-        );
+    $("apiKey").addEventListener("change", async () => {
+      if (currentData?.address) await autoConvertNow();
+    });
 
-        // đổ sẵn vào ô manual để bạn kiểm tra
-        $("provinceCode").value = codes.provinceCode;
-        $("districtCode").value = codes.districtCode;
-        $("wardCode").value = codes.wardCode;
-        $("streetAddress").value = codes.streetAddress || "";
-      } catch (e) {
-        setConvertStatus(`<span class="error">Dò mã lỗi:</span> ${e.message}`);
+    $("btnCopyAll").addEventListener("click", async () => {
+      const all =
+`CCCD: ${$("cccd").textContent}
+Họ tên: ${$("name").textContent}
+Ngày sinh: ${$("dob").textContent}
+Giới tính: ${$("gender").textContent}
+Địa chỉ cũ: ${$("oldAddr").textContent}
+Ngày cấp: ${$("issue").textContent}
+
+ĐỊA CHỈ MỚI (TỔNG): ${$("addrFull").textContent}
+Tỉnh/TP: ${$("addrProvince").textContent}
+Xã/Phường/Đặc khu: ${$("addrWard").textContent}
+Số nhà/Ấp/KP/Đường: ${$("addrStreet").textContent}
+`.trim();
+
+      await copyText(all);
+    });
+
+    // ✅ Lưu tạm -> mở popup nhập phòng (có thể bỏ qua)
+    $("btnSaveTmp").addEventListener("click", () => {
+      try{
+        buildRowFromUI(""); // validate
+        openRoomModal();
+      }catch(e){
+        toast("❌ " + e.message);
       }
     });
 
-    $("btnConvert").addEventListener("click", async () => {
+// =======================
+// ✅ Điền CT01 & chuyển trang
+// =======================
+const CT01_PREFILL_KEY = "ct01_prefill_v1";
+
+function todayDDMMYYYY(){
+  const d = new Date();
+  const dd = String(d.getDate()).padStart(2,"0");
+  const mm = String(d.getMonth()+1).padStart(2,"0");
+  const yyyy = d.getFullYear();
+  return `${dd}/${mm}/${yyyy}`;
+}
+
+function buildCT01Prefill(){
+  const fullName = ($("name")?.textContent || "").trim();
+  const idNumber = ($("cccd")?.textContent || "").trim();
+  const dob = ($("dob")?.textContent || "").trim();
+  const gender = ($("gender")?.textContent || "").trim();
+
+  // Ưu tiên địa chỉ mới (địa chỉ tổng), fallback địa chỉ cũ
+  const newFull = ($("addrFull")?.textContent || "").trim();
+  const oldAddr = ($("oldAddr")?.textContent || "").trim();
+
+  const tempAddress = (newFull && newFull !== "—") ? newFull : ((oldAddr && oldAddr !== "—") ? oldAddr : "");
+
+  // Nếu không có đủ dữ liệu cơ bản thì báo
+  if (!fullName || fullName === "—" || !idNumber || idNumber === "—"){
+    throw new Error("Chưa có Họ tên/CCCD. Hãy quét/parse/OCR trước.");
+  }
+  if (!tempAddress){
+    // vẫn cho qua nếu bạn muốn, nhưng thường CT01 cần địa chỉ
+    // throw new Error("Chưa có địa chỉ để điền CT01.");
+  }
+
+  // Đẩy theo đúng schema state của ct01.html mình gửi trước đó
+  return {
+    agency: "Công an phường Bình Cơ, TP. Hồ Chí Minh",
+
+    fullName,
+    dob: (dob && dob !== "—") ? dob : "",
+    gender: (gender && gender !== "—") ? gender : "",
+
+    idNumber: idNumber.replace(/\D/g, "").slice(0, 12),
+
+    phone: "",
+    email: "",
+
+    householdHeadName: "",
+    relationToHead: "",
+    headIdNumber: "",
+
+    requestType: "tamtru",
+
+    tempAddress: tempAddress || "",
+    fromDate: todayDDMMYYYY(),
+    toDate: "",
+    reason: "Thuê trọ",
+
+    // để ct01 tự build nếu bạn có logic buildSuggestedContent,
+    // nhưng mình vẫn set sẵn nội dung đơn giản:
+    requestContent: tempAddress
+      ? `Đề nghị đăng ký tạm trú tại: ${tempAddress}. Thời gian tạm trú: từ ngày ${todayDDMMYYYY()}. Lý do: Thuê trọ.`
+      : `Đề nghị đăng ký tạm trú. Thời gian tạm trú: từ ngày ${todayDDMMYYYY()}. Lý do: Thuê trọ.`,
+
+    members: [],
+
+    declareDate: todayDDMMYYYY(),
+    place: "TP. Hồ Chí Minh",
+
+    sigHead: "",
+    sigOwner: "",
+    sigGuardian: "",
+    sigDeclarer: fullName,
+    extraNote: "Tạo từ trang quét QR"
+  };
+}
+
+$("btnGoCT01").addEventListener("click", () => {
+  try{
+    const prefill = buildCT01Prefill();
+    sessionStorage.setItem(CT01_PREFILL_KEY, JSON.stringify(prefill));
+    // chuyển qua ct01.html (đổi đúng tên file của bạn)
+    window.location.href = "./ct01.html";
+  }catch(e){
+    toast("❌ " + (e?.message || e));
+  }
+});
+
+
+    // ✅ Xuất Excel trong bảng tạm
+    $("btnExportExcelInTable").addEventListener("click", exportExcel);
+
+    // ✅ Xóa hết bảng tạm
+    $("btnClearTmpAll").addEventListener("click", () => {
+      const rows = loadTmpRows();
+      if (!rows.length) return toast("Bảng tạm đang trống.");
+      if (!confirm("Xóa toàn bộ dòng trong bảng tạm?")) return;
+      saveTmpRows([]);
+      toast("✅ Đã xóa hết");
+    });
+
+    /* ✅ Upload ảnh QR */
+    $("qrFile").addEventListener("change", async (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
       try {
-        $("newAddr").value = "";
-        $("log").value = "";
-
-        const apiKey = ($("apiKey").value || "").trim();
-        if (!apiKey) throw new Error("Bạn chưa nhập API key.");
-        if (!currentData?.address) throw new Error("Chưa có địa chỉ cũ. Hãy quét QR hoặc parse dữ liệu trước.");
-
-        let payload;
-
-        if ($("mode").value === "manual") {
-          const provinceCode = ($("provinceCode").value || "").trim();
-          const districtCode = ($("districtCode").value || "").trim();
-          const wardCode = ($("wardCode").value || "").trim();
-          const streetAddress = ($("streetAddress").value || "").trim();
-          if (!provinceCode || !districtCode || !wardCode) throw new Error("Thiếu mã province/district/ward.");
-          payload = { provinceCode, districtCode, wardCode, streetAddress };
+        if (qr) {
+          try { await qr.stop(); } catch {}
+          $("btnStart").disabled = false;
+          $("btnStop").disabled = true;
         } else {
-          payload = await guessCodesFromAddress(currentData.address);
+          qr = new Html5Qrcode("reader");
         }
 
-        setConvertStatus("<b>Đang gọi API chuyển đổi...</b>");
-        const res = await apiPOST("/convert/address", payload, apiKey);
+        setScanStatus("<b>Đang đọc ảnh...</b>");
+        const decodedText = await qr.scanFile(file, true);
+        await onScanSuccess(decodedText);
 
-        const newFull = res?.data?.new?.fullAddress || "";
-        const notes = res?.data?.mergeInfo?.notes || "";
+        $("btnStart").disabled = false;
+        $("btnStop").disabled = true;
 
-        if (!newFull) {
-          $("newAddr").value = JSON.stringify(res, null, 2);
-          setConvertStatus(`<span class="warn">Có phản hồi nhưng không thấy new.fullAddress.</span> Đã đổ JSON vào ô kết quả.`);
-          return;
-        }
-
-        $("newAddr").value = notes ? `${newFull}\n\nGhi chú: ${notes}` : newFull;
-        setConvertStatus(`<span class="oktxt">Thành công!</span> Địa chỉ mới đã được cập nhật.`);
-      } catch (e) {
-        setConvertStatus(`<span class="error">Lỗi:</span> ${e.message}`);
+      } catch (err) {
+        setScanStatus(`<b class="error">Không đọc được ảnh</b> • ${err?.message || err}`);
+      } finally {
+        e.target.value = "";
       }
     });
 
-    // ===== Boot: check local lib + enable start =====
+    // =======================
+    // ✅ Groq Vision OCR CCCD
+    // =======================
+    function normalizeGender(g){
+      const s = (g || "").toString().trim().toLowerCase();
+      if (!s) return "";
+      if (s.includes("nam") || s === "m" || s.includes("male")) return "Nam";
+      if (s.includes("nữ") || s.includes("nu") || s === "f" || s.includes("female")) return "Nữ";
+      return g.toString().trim();
+    }
+
+    function cleanField(s){
+      return (s ?? "").toString().trim().replace(/\s+/g, " ");
+    }
+
+    async function compressToDataUrl(file, opts = {}){
+      const maxSide = opts.maxSide ?? 1600;
+      let quality = opts.quality ?? 0.86;
+      const minQuality = opts.minQuality ?? 0.55;
+
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = url; });
+
+      const w = img.naturalWidth || img.width;
+      const h = img.naturalHeight || img.height;
+
+      const scale = Math.min(1, maxSide / Math.max(w, h));
+      const tw = Math.max(1, Math.round(w * scale));
+      const th = Math.max(1, Math.round(h * scale));
+
+      const canvas = document.createElement("canvas");
+      canvas.width = tw;
+      canvas.height = th;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, tw, th);
+
+      URL.revokeObjectURL(url);
+
+      let dataUrl = canvas.toDataURL("image/jpeg", quality);
+
+      const maxLen = 3.8 * 1024 * 1024;
+      while (dataUrl.length > maxLen && quality > minQuality){
+        quality -= 0.06;
+        dataUrl = canvas.toDataURL("image/jpeg", quality);
+      }
+
+      return dataUrl;
+    }
+
+    function safeJsonParseFromText(text){
+      const t = (text || "").toString().trim();
+      try { return JSON.parse(t); } catch {}
+      const m = t.match(/\{[\s\S]*\}/);
+      if (m){
+        try { return JSON.parse(m[0]); } catch {}
+      }
+      throw new Error("Không parse được JSON từ AI. Mở log để xem nội dung trả về.");
+    }
+
+    async function groqVisionOcrIdCard(file){
+      const key = ($("groqKey").value || "").trim();
+      if (!key) throw new Error("Chưa nhập Groq API Key.");
+
+      const model = $("groqModel").value || "meta-llama/llama-4-scout-17b-16e-instruct";
+      const dataUrl = await compressToDataUrl(file);
+
+      const endpoint = "https://api.groq.com/openai/v1/chat/completions";
+
+      const prompt =
+`Bạn là hệ thống trích xuất thông tin từ ảnh CCCD Việt Nam (mặt trước).
+Hãy đọc đúng và trả về DUY NHẤT 1 JSON object theo schema sau (không thêm text khác):
+
+{
+  "cccd": "",
+  "name": "",
+  "dob": "",
+  "gender": "",
+  "address": "là địa chỉ ở dưới",
+  "issue": ""
+}
+
+Quy ước:
+- cccd: chỉ số (9-12-20 ký tự số)
+- dob và issue: ưu tiên dd/MM/yyyy, nếu không thì ddMMyyyy
+- gender: "Nam" hoặc "Nữ"
+- address: địa chỉ thường trú / nơi cư trú (giữ dấu tiếng Việt nếu có)
+Nếu không chắc trường nào, để chuỗi rỗng.
+`.trim();
+
+      const body = {
+        model,
+        messages: [
+          {
+            role: "user",
+            content: [
+              { type: "text", text: prompt },
+              { type: "image_url", image_url: { url: dataUrl } }
+            ]
+          }
+        ],
+        temperature: 0.2,
+        max_completion_tokens: 900,
+        top_p: 1,
+        response_format: { type: "json_object" }
+      };
+
+      logLine("=== GROQ OCR ===");
+      logLine("POST " + endpoint);
+      logLine("model=" + model);
+      logLine("image(dataUrl) length=" + dataUrl.length);
+
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + key
+        },
+        body: JSON.stringify(body)
+      });
+
+      const json = await res.json().catch(() => ({}));
+      logLine("↳ " + res.status + " " + JSON.stringify(json).slice(0, 2000));
+
+      if (!res.ok){
+        const msg = json?.error?.message || json?.message || ("HTTP " + res.status);
+        throw new Error("Groq OCR lỗi: " + msg);
+      }
+
+      const content = json?.choices?.[0]?.message?.content ?? "";
+      const obj = safeJsonParseFromText(content);
+
+      const out = {
+        cccd: cleanField(obj.cccd),
+        name: cleanField(obj.name),
+        dob: cleanField(obj.dob),
+        gender: normalizeGender(obj.gender),
+        address: cleanField(obj.address),
+        issue: cleanField(obj.issue),
+      };
+
+      return out;
+    }
+
+    async function tesseractFallback(file){
+      if (!window.Tesseract) throw new Error("Tesseract.js chưa load được.");
+      logLine("=== TESSERACT FALLBACK ===");
+      const result = await Tesseract.recognize(file, "eng");
+      const text = result?.data?.text || "";
+      logLine("OCR text: " + text.slice(0, 2000));
+
+      const guessed = parseQRFromLabeledText(text);
+      return guessed;
+    }
+
+    async function runOcrFlow(){
+      const file = window.__idFile;
+      if (!file) return toast("Chưa chọn ảnh CCCD.");
+
+      setOcrStatus("<b>Đang OCR...</b>");
+      try{
+        if ($("log")) $("log").value = "";
+
+        let data;
+        const hasGroqKey = !!(($("groqKey").value || "").trim());
+        if (hasGroqKey){
+          data = await groqVisionOcrIdCard(file);
+          setOcrStatus(`<span class="oktxt">Groq OCR OK</span>`);
+        } else {
+          data = await tesseractFallback(file);
+          setOcrStatus(`<span class="warn">Đã OCR bằng Tesseract (fallback)</span>`);
+        }
+
+        if (!data?.cccd && !data?.name){
+          throw new Error("OCR không ra CCCD/Họ tên. Thử ảnh rõ hơn, hoặc dùng Groq key.");
+        }
+
+        currentData = data;
+        fillInfo(data);
+        $("rawInput").value =
+`Số CCCD: ${data.cccd || ""}
+Họ và tên: ${data.name || ""}
+Giới tính: ${data.gender || ""}
+Ngày sinh: ${data.dob || ""}
+Nơi thường trú: ${data.address || ""}
+Ngày cấp CCCD: ${data.issue || ""}`.trim();
+
+        setScanStatus(`<b class="oktxt">Đã OCR (ĐỌC) ảnh CCCD</b>`);
+        toast("✅ OCR xong");
+
+        await autoConvertNow();
+      }catch(e){
+        setOcrStatus(`<span class="error">Lỗi:</span> ${e.message}`);
+        toast("❌ " + e.message);
+      }
+    }
+
+$("idFile").addEventListener("change", async (e) => {
+  const f = e.target.files?.[0] || null;
+  window.__idFile = f;
+
+  // Nếu chọn ảnh CCCD thì tự chuyển qua tab OCR
+  if (f) setTab("ocr");
+
+  // Nếu đang mở camera/QR scanner thì dừng để nhường khung #reader
+  if (qr) {
+    try { await qr.stop(); } catch {}
+    try { await qr.clear(); } catch {}
+    $("btnStart").disabled = false;
+    $("btnStop").disabled = true;
+  }
+
+  // Hiện ảnh CCCD trong khung reader (giống vùng QR)
+  if (f) {
+    showReaderImage(f);
+    setScanStatus(`<b class="oktxt">Đã chọn ảnh CCCD</b> • Đang OCR...`);
+  } else {
+    clearReaderPreview();
+    setScanStatus("<b>Chưa quét</b>");
+  }
+
+  $("btnOcrId").disabled = !f;
+  $("btnOcrClear").disabled = !f;
+  setOcrStatus(f ? `<span class="oktxt">Đã chọn ảnh:</span> ${f.name}` : "—");
+
+  // ✅ OCR luôn (không đổi logic)
+  if (f) {
+    await runOcrFlow();
+  }
+});
+
+
+    $("btnOcrId").addEventListener("click", runOcrFlow);
+$("btnOcrClear").addEventListener("click", () => {
+  window.__idFile = null;
+  $("idFile").value = "";
+  $("btnOcrId").disabled = true;
+  $("btnOcrClear").disabled = true;
+  setOcrStatus("—");
+  clearReaderPreview();
+  toast("✅ Đã xóa ảnh");
+});
+
+
+    // =======================
+    // Boot
+    // =======================
     (function boot() {
+      renderSavedCount();
+      renderTmpTable();
+
       const badge = $("libStatus");
       if (typeof window.Html5Qrcode === "undefined") {
-        badge.textContent = "📦 Không load được Html5Qrcode (local). Kiểm tra đường dẫn ./node_modules/html5-qrcode/html5-qrcode.min.js";
+        badge.textContent = "📦 Không load được Html5Qrcode (local). Kiểm tra ./assets/html5-qrcode.min.js";
         badge.classList.add("error");
         $("btnStart").disabled = true;
-        setScanStatus(`<b class="warn">Không thể quét camera</b> • Bạn vẫn có thể dán chuỗi QR thủ công.`);
+        setScanStatus(`<b class="warn">Không thể quét camera</b> • Bạn vẫn có thể dán chuỗi QR thủ công, upload ảnh QR, hoặc OCR ảnh CCCD.`);
+        setNewAddressFields({full:"—", province:"—", ward:"—", street:"—"});
+        setOcrStatus("—");
         return;
       }
-
-      badge.textContent = "📦 Thư viện QR: OK (local node_modules)";
+      badge.textContent = "📦 Thư viện QR: OK (local)";
       badge.classList.add("oktxt");
       $("btnStart").disabled = false;
       setScanStatus("<b class='oktxt'>Sẵn sàng</b> • Bấm “Bắt đầu quét”.");
+      setNewAddressFields({full:"—", province:"—", ward:"—", street:"—"});
+      setOcrStatus("—");
+      setTab("qr");
     })();
+
+    
   </script>
+  <script src="./script.js"></script>
+
 </body>
 </html>
-

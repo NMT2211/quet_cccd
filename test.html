@@ -1,422 +1,3544 @@
-<!doctype html>
-<html lang="vi">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Quét QR CCCD (Native) + Chuyển đổi địa chỉ</title>
-  <style>
-    :root{
-      --bg:#0b1220; --card:#111a2e; --muted:#9fb0d0; --text:#e7efff;
-      --line: rgba(255,255,255,.10);
-      --btn:#2b6cff; --btn2:#16a34a; --danger:#ef4444; --warn:#f59e0b;
-      --radius:16px;
+
+    $(".box .down").click(function(){
+        $(this).parents(".box").toggleClass("active");
+    })
+    $.i18n().locale = (typeof lang !== "undefined") ? lang : "vn";
+    var arrCitizen = [];
+    var str_URL = window.location.href;
+    var arr_str_URL = str_URL.split("?id=");
+    var dataGet = {};
+    var index_value = '';
+    var my_profile;
+    var addNLT = '';
+    var Array_DDCN = [];
+    let maThuTuc = FormUtil.getRequestParam('ma_thu_tuc');
+    const P_PROC_CODE_DVC = '2.001159';
+	let idHoSoLT = FormUtil.getRequestParam('id');
+	const arrAccomType = ['TYPE_BUSINESS','TYPE_HEALTHCARE','TYPE_DORMITORY','TYPE_HOSTEL'];
+    if (idHoSoLT == undefined || idHoSoLT == null) {
+        document.getElementById("lblQLHS").innerHTML = 'TẠO MỚI THÔNG BÁO LƯU TRÚ';
+    } else if (idHoSoLT != '') {
+        document.getElementById("lblQLHS").innerHTML = 'SỬA THÔNG BÁO LƯU TRÚ';
     }
-    *{box-sizing:border-box}
-    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;background:var(--bg);color:var(--text);padding:24px}
-    .wrap{max-width:1100px;margin:0 auto;display:grid;gap:16px}
-    .grid{display:grid;grid-template-columns:380px 1fr;gap:16px}
-    @media (max-width: 980px){ .grid{grid-template-columns:1fr} }
-    .card{background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:var(--radius);padding:16px}
-    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
-    label{display:block;font-size:12px;color:var(--muted);margin:10px 0 6px}
-    input,textarea,select{width:100%;border-radius:12px;border:1px solid var(--line);background:rgba(0,0,0,.25);color:var(--text);padding:10px 12px;outline:none}
-    textarea{min-height:90px;resize:vertical}
-    .btn{cursor:pointer;border:0;padding:10px 12px;border-radius:12px;color:#fff;font-weight:650;background:var(--btn)}
-    .btn.secondary{background:rgba(255,255,255,.10);border:1px solid var(--line)}
-    .btn.ok{background:var(--btn2)}
-    .btn.danger{background:var(--danger)}
-    .btn:disabled{opacity:.55;cursor:not-allowed}
-    .status{margin-top:10px;color:var(--muted);font-size:12px;line-height:1.5}
-    .error{color:var(--danger)}
-    .warn{color:var(--warn)}
-    .oktxt{color:#86efac}
-    .kv{display:grid;grid-template-columns:160px 1fr;gap:10px;padding:10px 0;border-top:1px dashed var(--line)}
-    .kv:first-child{border-top:0}
-    .k{color:var(--muted);font-size:12px}
-    .v{font-weight:650}
-    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
-    video{width:100%;border-radius:14px;border:1px solid var(--line);background:rgba(0,0,0,.25)}
-    canvas{display:none}
-  </style>
-</head>
 
-<body>
-  <div class="wrap">
-    <div class="row">
-      <div>
-        <div style="font-size:18px;font-weight:800">Quét QR CCCD (Native) → Parse + Chuyển đổi địa chỉ</div>
-        <div class="status">
-          Dùng <span class="mono">BarcodeDetector</span>. Nếu trình duyệt không hỗ trợ, bạn vẫn dán chuỗi QR thủ công.
-        </div>
-      </div>
-      <div id="support" class="status"></div>
-    </div>
+    window.operateEvents = {
+        'click .delNGUOILTR': function (e, value, row, index) {
 
-    <div class="grid">
-      <!-- LEFT -->
-      <div class="card">
-        <div class="row">
-          <div style="font-weight:800">📷 Quét QR (không thư viện)</div>
-          <div style="display:flex;gap:10px">
-            <button class="btn" id="btnStart">Bắt đầu</button>
-            <button class="btn secondary" id="btnStop" disabled>Dừng</button>
-          </div>
-        </div>
+            DlgUtil.showConfirm("Bạn muốn bỏ thông tin: " + row.CITIZENNAME + " khỏi danh sách người lưu trú?", function (flag) {
+                if (flag) {
+                    arrCitizen.splice(index, 1);
+                    reloadGrid();
+                };
+            });
+        },
+        'click .editNGUOILTR': function (e, value, row, index) {
 
-        <div style="height:12px"></div>
-        <video id="video" playsinline muted></video>
-        <canvas id="canvas"></canvas>
+            $('#addpersonLT').modal('show');
+            addNLT = 'edit';
+            document.getElementById("title_guest_stay").innerHTML = 'SỬA NGƯỜI LƯU TRÚ';
+            loadCaterogy();
 
-        <div class="status" id="scanStatus">Trạng thái: <b>Chưa quét</b></div>
+            $('#guest_txtSTART_DATE').datepicker({
+                todayBtn: "linked",
+                format: 'dd/mm/yyyy',
+                language: "it",
+                autoclose: true,
+                todayHighlight: true
+            }).inputmask("datetime", {inputFormat: "dd/mm/yyyy", "clearIncomplete": true});
 
-        <label>Dán chuỗi QR thủ công</label>
-        <textarea id="rawInput" placeholder='034205011440|---|Nguyễn Minh Tuấn|22082005|Nam|Tổ 4B, Kp 1, Hội Nghĩa, Thị xã Tân Uyên, Bình Dương|19042021'></textarea>
-        <div style="display:flex;gap:10px;margin-top:10px">
-          <button class="btn secondary" id="btnParse">Parse</button>
-          <button class="btn danger" id="btnClear">Xóa</button>
-        </div>
-      </div>
+            $('#guest_txtEND_DATE').datepicker({
+                todayBtn: "linked",
+                format: 'dd/mm/yyyy',
+                language: "it",
+                autoclose: true,
+                todayHighlight: true
+            }).inputmask("datetime", {inputFormat: "dd/mm/yyyy", "clearIncomplete": true});
 
-      <!-- RIGHT -->
-      <div class="card">
-        <div style="font-weight:800">🪪 Dữ liệu CCCD</div>
-        <div style="height:10px"></div>
-        <div class="kv"><div class="k">Số CCCD</div><div class="v mono" id="cccd">—</div></div>
-        <div class="kv"><div class="k">Họ tên</div><div class="v" id="name">—</div></div>
-        <div class="kv"><div class="k">Ngày sinh</div><div class="v" id="dob">—</div></div>
-        <div class="kv"><div class="k">Giới tính</div><div class="v" id="gender">—</div></div>
-        <div class="kv"><div class="k">Địa chỉ (cũ)</div><div class="v" id="oldAddr">—</div></div>
-        <div class="kv"><div class="k">Ngày cấp</div><div class="v" id="issue">—</div></div>
+            let objBeforeView = {...arrCitizen[index]};
 
-        <hr style="border:0;border-top:1px solid var(--line);margin:14px 0" />
+            if (objBeforeView.OCCUPATION == '') objBeforeView.OCCUPATION = -1;
+            if (objBeforeView.ETHNIC_ID == '') objBeforeView.ETHNIC_ID = -1;
+            if (objBeforeView.RDPROVINCE_ID == '') objBeforeView.RDPROVINCE_ID = -1;
+            // if (objBeforeView.RDDISTRICT_ID == '') objBeforeView.RDDISTRICT_ID = -1;
+            if (objBeforeView.RDADDRESS_ID == '') objBeforeView.RDADDRESS_ID = -1;
+            if (objBeforeView.IDCARD_NUMBER == '') objBeforeView.IDCARD_NUMBER = objBeforeView.IDENTIFIER_NUMBER;
+            if (objBeforeView.COUNTRY == '') objBeforeView.COUNTRY = -1;
+            
+            FormUtil.setObjectToForm('form_add_luutru', 'guest_', objBeforeView);
+            if (objBeforeView.IS_CHANGED_PERSON == "1") {
+                document.getElementById('chkIS_CHANGED_PERSON').checked = true;
+                
+                $('#form_add_luutru :input').attr('disabled', true);
+                $('#form_add_luutru :input#guest_txtPHONE_NUMBER').attr('disabled', false);
+                $('#form_add_luutru :input#guest_txtROOM').attr('disabled', false);
+                $('#form_add_luutru :input#guest_txtSTART_DATE').attr('disabled', false);
+                $('#form_add_luutru :input#guest_txtEND_DATE').attr('disabled', false);
+                $('#form_add_luutru #guest_txtREASON').attr('disabled', false);
+                $('#form_add_luutru #guest_txtPLACE_OF_WORK').attr('disabled', false);
+                $('#form_add_luutru #guest_cboOCCUPATION').attr('disabled', false);
 
-        <div style="font-weight:800">🔁 Chuyển đổi địa chỉ</div>
-        <div class="status">POST <span class="mono">https://tinhthanhpho.com/api/v1/convert/address</span> (Bearer API key)</div>
+                $('#addpersonLT').on('shown.bs.modal', function () {
+                    //$('#addpersonLT #form_add_luutru #guest_txtPHONE_NUMBER').focus();
+                    $('#form_add_luutru #guest_cboOCCUPATION').next().find('.select2-selection').focus();
+                });
 
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px">
-          <div>
-            <label>API Key (Bearer)</label>
-            <input id="apiKey" placeholder="Bearer token..." />
-          </div>
-          <div>
-            <label>Chế độ</label>
-            <select id="mode">
-              <option value="smart" selected>Tự dò mã từ địa chỉ</option>
-              <option value="manual">Nhập mã tay</option>
-            </select>
-          </div>
-        </div>
+            } else {
+                document.getElementById('chkIS_CHANGED_PERSON').checked = false;
+                $('#form_add_luutru :input').attr('disabled', false);
+                $('#addpersonLT').on('shown.bs.modal', function () {
+                    $('#addpersonLT #form_add_luutru #guest_txtCITIZENNAME').focus();
+                });
+            }
+            $('#form_add_luutru').find('.form-group').removeClass("has-success");
+            $('#guest_cboCOUNTRY').val(objBeforeView.COUNTRY).change();
 
-        <div id="manualCodes" style="display:none; margin-top:10px">
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-            <div><label>provinceCode</label><input id="provinceCode" placeholder="VD: 74" /></div>
-            <div><label>districtCode</label><input id="districtCode" placeholder="..." /></div>
-            <div><label>wardCode</label><input id="wardCode" placeholder="..." /></div>
-            <div><label>streetAddress</label><input id="streetAddress" placeholder="Tổ 4B, Kp 1" /></div>
-          </div>
-        </div>
+            $("#guest_cboRDPROVINCE_ID").val(objBeforeView.RDPROVINCE_ID).trigger('change');
+            // $("#guest_cboRDDISTRICT_ID").val(objBeforeView.RDDISTRICT_ID).trigger('change');
+            $("#guest_cboRDADDRESS_ID").val(objBeforeView.RDADDRESS_ID).trigger('change');
+            $("#guest_txtRDADDRESS").val(objBeforeView.RDADDRESS).trigger('change');
 
-        <div style="display:flex;gap:10px;margin-top:10px">
-          <button class="btn ok" id="btnConvert">Chuyển đổi</button>
-          <button class="btn secondary" id="btnGuess">Dò mã (log)</button>
-        </div>
+            $('#guest_txtDOB').val(row.DOB.trim()).datepicker("update");
+            $('#guest_txtSTART_DATE').val(row.START_DATE.trim()).datepicker("update");
+            $('#guest_txtEND_DATE').val(row.END_DATE.trim()).datepicker("update");
+            $('#btnSaveNLT_Edit').css('display', 'inline');
+            $('#btnSaveNLT').css('display', 'none');
+            setEndDisCtl(['btnSaveNLT_Edit'], ['btnSaveNLT'],'')
+            index_value = index;
+        }
+    };
 
-        <div class="status" id="convertStatus" style="margin-top:10px">—</div>
+    $('#formTTLT').bootstrapValidator({
+        excluded: ':hidden',
+        live: 'disabled',
+        fields: {
+            txtNAME: {
+                validators: {
+                    notEmpty: {
+                        message: 'Bạn không được bỏ trống trường này'
+                    },
+                    stringLength: {
+                        max: 100,
+                        message: 'Độ dài họ và tên người thông báo tối đa 100 ký tự'
+                    }
+                    // regexp: {
+                        // regexp: /[^\[\!\@\#\$\%\^\&\*\(\)\,\?\"\:\{\}\|\<\>\+\\\'\;\]\\\/\[\=\\{\}]+$/i,
+                        // message: 'Tên đầy đủ có thể chỉ bao gồm các ký tự chữ cái và dấu cách'
+                    // }
+                }
+            },
+            txtIDENTIFIER_NUMBER: {
+                message: 'Số ĐDCN/CCCD/CMND không hợp lệ',
+                validators: {
+                    callback: {
+                        message: 'Số ĐDCN/CCCD/CMND không hợp lệ',
+                        callback: function (value, validator, $field) {
+                            if (value.length === 0) {
+                                return true;
+                            }
+                            var flag = false;
+                            if (!value.match(/^[0-9]+$/)) {
+                                flag = false;
+                                return {
+                                    valid: false,
+                                    message: 'Số ĐDCN/CCCD/CMND chỉ được nhập số'
+                                }
+                            } else {
+                                flag = true;
+                            }
 
-        <label>Địa chỉ mới</label>
-        <textarea id="newAddr" readonly></textarea>
+                            if ((value.length === 9 && flag) || (value.length === 12 && flag)) {
+                                return true;
+                            }
 
-        <label>Log</label>
-        <textarea id="log" readonly class="mono"></textarea>
-      </div>
-    </div>
-  </div>
+                            if (value.length !== 9 || value.length !== 12) {
+                                return {
+                                    valid: false,
+                                    message: 'Số ĐDCN/CCCD/CMND chỉ có thể là 9 hoặc 12 số'
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            // txtPHONE_NUMBER: {
+            //    message: 'Số điện thoại không hợp lệ',
+            //    validators: {
+            //        integer: {
+            //            message: 'Số điện thoại phải là số'
+            //        },
+            //        callback: {
+            //            message: 'Số điện thoại không hợp lệ',
+            //            callback: function (value, validator, $field) {
+            //                if (value.length === 0) {
+            //                    return true;
+            //                }
+            //                var flag = false;
+            //                var phone = value.replace('(+84)', '0').replace('+84', '0');
+            //                if (!phone.match(/((09|03|07|08|05)+([0-9]{8})+$)/)) {
+            //                    flag = false;
+            //                    return {
+            //                        valid: false,
+            //                        message: 'Số điện thoại không hợp lệ'
+            //                    }
+            //                } else {
+            //                    return true;
+            //                }
+            //
+            //             }
+            //         }
+            //    }
+            //  },
+            accomStay_cboPROVINCE_ID: {
+                message: 'Sai định dạng dữ liệu',
+                validators: {
+                    callback: {
+                        message: 'Vui lòng chọn tỉnh/thành phố',
+                        callback: function (value, validator) {
+                            // Get the selected options
+                            var options = validator.getFieldElements('accomStay_cboPROVINCE_ID').val();
+                            console.log('tỉnh nơi tiếp nhận', options);
+                            return (options != -1 && options != null);
+                        }
+                    }
+                }
+            },
+            // accomStay_cboDISTRICT_ID: {
+            //     validators: {
+            //         callback: {
+            //             message: 'Vui lòng chọn quận/huyện',
+            //             callback: function (value, validator) {
+            //                 // Get the selected options
+            //                 var options = validator.getFieldElements('accomStay_cboDISTRICT_ID').val();
+            //                 console.log(options);
+            //                 return (options != -1 && options != null);
+            //             }
+            //         }
+            //     }
+            // },
+            accomStay_cboADDRESS_ID: {
+                validators: {
+                    callback: {
+                        message: 'Vui lòng chọn xã/phường/đặc khu',
+                        callback: function (value, validator) {
+                            // Get the selected options
+                            let isDisabled = $('#accomStay_cboADDRESS_ID').is(':disabled');
+                            if (!isDisabled) {
+                                var options = validator.getFieldElements('accomStay_cboADDRESS_ID').val();
+                                return (options != -1 && options != null);
+                            }
+                            return true;
+                        }
+                    }
+                }
+            },
+            cboRECEIVE_ORG: {
+                validators: {
+                    callback: {
+                        
+                        callback: function (value, validator) {
+							if(value == null || value == -1){
+								let opt_add = $('#accomStay_cboADDRESS_ID').val();
+                                // let opt_dis = $('#accomStay_cboDISTRICT_ID').val();
+								if(opt_add != -1 && opt_add != null){
+									return {
+                                        valid: false,
+                                        message: 'Cơ quan đăng ký QLCT chưa được thiết lập trên địa bàn '+ $('#accomStay_cboADDRESS_ID option:selected').text() +'. Vui lòng không thực hiện gửi hồ sơ DVC cho đơn vị này. Trân trọng cảm ơn!'
+                                    };
+								}
+                                // if(opt_dis != -1 && opt_dis != null){
+                                // 	return {
+                                //         valid: false,
+                                //         message: 'Cơ quan đăng ký QLCT chưa được thiết lập trên địa bàn '+ $('#accomStay_cboDISTRICT_ID option:selected').text() +'. Vui lòng không thực hiện gửi hồ sơ DVC cho đơn vị này. Trân trọng cảm ơn!'
+                                //     };
+                                // }
+								if(value == -1 || value == null){
+									return {
+                                        valid: false,
+                                        message: 'Cơ quan đăng ký QLCT không được rỗng'
+                                    };
+								}
+								return true;
+							}
+                            return true;
+                        }
+                    }
+                }
+            },
+            cboPROVINCE_ID: {
+                message: 'Sai định dạng dữ liệu',
+                validators: {
+                    callback: {
+                        message: 'Vui lòng chọn tỉnh/thành phố',
+                        callback: function (value, validator) {
+                            // Get the selected options
+                            if (cslt_info == null && typeof {"sub":"cbd1902e-f3c3-4fc6-8c31-50c6594c98d1","TechID":"76517dc6-ee60-4bb2-8428-a9cf1a2a7249","NoiSinh":"Xã Ngự Thiên,Tỉnh Hưng Yên","LoaiTaiKhoan":"1","loAs":"[{\n  \"level\" : 2,\n  \"claim\" : \"GioiTinh\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"NoiSinh\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"NguyenQuan\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"NoiSinhPhuongXa\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"QueQuanPhuongXa\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"QueQuanTinhThanhPho\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"DiaChiThuongTruPhuongXa\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"DiaChiThuongTruTinhThanhPho\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"HoVaTen\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"NgayThangNamSinh\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"CCCD\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"SoDienThoai\",\n  \"src\" : \"Viettel\"\n}]","QueQuan":"Xã Ngự Thiên, Tỉnh Hưng Yên","GioiTinh":"1","techIdVneid":"cbd1902e-f3c3-4fc6-8c31-50c6594c98d1","HoVaTen":"Nguyễn Minh Tuấn","ThuDienTu":"nguyentuanw135@gmail.com","SoDienThoai":"0972786005","SoDinhDanh":"034205011440","NgayThangNamSinh":"20050822"} != 'undefined') {
+                                var options = validator.getFieldElements('cboPROVINCE_ID').val();
+                                return (options != -1 && options != null);
+                            }
+                            return true
+                        }
+                    }
+                }
+            },
+            // cboDISTRICT_ID: {
+            //     validators: {
+            //         callback: {
+            //             message: 'Vui lòng chọn quận/huyện',
+            //             callback: function (value, validator) {
+            //                 // Get the selected options
+            //                 if (cslt_info == null && typeof {"sub":"cbd1902e-f3c3-4fc6-8c31-50c6594c98d1","TechID":"76517dc6-ee60-4bb2-8428-a9cf1a2a7249","NoiSinh":"Xã Ngự Thiên,Tỉnh Hưng Yên","LoaiTaiKhoan":"1","loAs":"[{\n  \"level\" : 2,\n  \"claim\" : \"GioiTinh\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"NoiSinh\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"NguyenQuan\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"NoiSinhPhuongXa\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"QueQuanPhuongXa\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"QueQuanTinhThanhPho\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"DiaChiThuongTruPhuongXa\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"DiaChiThuongTruTinhThanhPho\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"HoVaTen\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"NgayThangNamSinh\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"CCCD\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"SoDienThoai\",\n  \"src\" : \"Viettel\"\n}]","QueQuan":"Xã Ngự Thiên, Tỉnh Hưng Yên","GioiTinh":"1","techIdVneid":"cbd1902e-f3c3-4fc6-8c31-50c6594c98d1","HoVaTen":"Nguyễn Minh Tuấn","ThuDienTu":"nguyentuanw135@gmail.com","SoDienThoai":"0972786005","SoDinhDanh":"034205011440","NgayThangNamSinh":"20050822"} != 'undefined') {
+            //                     var options = validator.getFieldElements('cboDISTRICT_ID').val();
+            //                     return (options != -1 && options != null);
+            //                 }
+            //                 return true;
 
-<script>
-  const $ = (id) => document.getElementById(id);
-  const video = $("video");
-  const canvas = $("canvas");
-  const ctx = canvas.getContext("2d", { willReadFrequently: true });
+            //             }
+            //         }
+            //     }
+            // },
+            cboADDRESS_ID: {
+                validators: {
+                    callback: {
+                        message: 'Vui lòng chọn xã/phường/đặc khu',
+                        callback: function (value, validator) {
+                            // Get the selected options
+                            if (cslt_info == null && typeof {"sub":"cbd1902e-f3c3-4fc6-8c31-50c6594c98d1","TechID":"76517dc6-ee60-4bb2-8428-a9cf1a2a7249","NoiSinh":"Xã Ngự Thiên,Tỉnh Hưng Yên","LoaiTaiKhoan":"1","loAs":"[{\n  \"level\" : 2,\n  \"claim\" : \"GioiTinh\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"NoiSinh\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"NguyenQuan\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"NoiSinhPhuongXa\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"QueQuanPhuongXa\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"QueQuanTinhThanhPho\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"DiaChiThuongTruPhuongXa\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"DiaChiThuongTruTinhThanhPho\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"HoVaTen\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"NgayThangNamSinh\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"CCCD\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"SoDienThoai\",\n  \"src\" : \"Viettel\"\n}]","QueQuan":"Xã Ngự Thiên, Tỉnh Hưng Yên","GioiTinh":"1","techIdVneid":"cbd1902e-f3c3-4fc6-8c31-50c6594c98d1","HoVaTen":"Nguyễn Minh Tuấn","ThuDienTu":"nguyentuanw135@gmail.com","SoDienThoai":"0972786005","SoDinhDanh":"034205011440","NgayThangNamSinh":"20050822"} != 'undefined') {
+                                let isDisabled = $('#cboADDRESS_ID').is(':disabled');
+                                if (!isDisabled) {
+                                    var options = validator.getFieldElements('cboADDRESS_ID').val();
+                                    return (options != -1 && options != null);
+                                }
+                                return true;
+                            }
+                            return true;
 
-  let stream = null;
-  let detector = null;
-  let rafId = null;
-  let lastText = "";
-  let currentData = null;
+                        }
+                    }
+                }
+            },
+            txtADDRESS: {
+                validators: {
+					stringLength: {
+                        max: 200,
+                        message: 'Địa chỉ chi tiết người thông báo tối đa 200 ký tự'
+                    },
+                    callback: {
+                        message: 'Vui lòng nhập địa chỉ số nhà',
+                        callback: function (value, validator) {
+                            var opt = $("input[name='radADDRESS_TYPE']:checked").val();
+                            if (cslt_info == null && typeof {"sub":"cbd1902e-f3c3-4fc6-8c31-50c6594c98d1","TechID":"76517dc6-ee60-4bb2-8428-a9cf1a2a7249","NoiSinh":"Xã Ngự Thiên,Tỉnh Hưng Yên","LoaiTaiKhoan":"1","loAs":"[{\n  \"level\" : 2,\n  \"claim\" : \"GioiTinh\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"NoiSinh\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"NguyenQuan\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"NoiSinhPhuongXa\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"QueQuanPhuongXa\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"QueQuanTinhThanhPho\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"DiaChiThuongTruPhuongXa\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"DiaChiThuongTruTinhThanhPho\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"HoVaTen\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"NgayThangNamSinh\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"CCCD\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"SoDienThoai\",\n  \"src\" : \"Viettel\"\n}]","QueQuan":"Xã Ngự Thiên, Tỉnh Hưng Yên","GioiTinh":"1","techIdVneid":"cbd1902e-f3c3-4fc6-8c31-50c6594c98d1","HoVaTen":"Nguyễn Minh Tuấn","ThuDienTu":"nguyentuanw135@gmail.com","SoDienThoai":"0972786005","SoDinhDanh":"034205011440","NgayThangNamSinh":"20050822"} != 'undefined') {
+                                if (value.trim() == '') {
+                                    if (opt != 2) {
+                                        return false;
+                                    }
+                                    return true;
+                                }
+                                return true;
+                            }
+                            return true;
+                        }
+                    }
+                }
+            },
+            accomStay_cboACCOMMODATION_TYPE: {
+                validators: {
+                    callback: {
+                        message: 'Vui lòng chọn loại hình cơ sở lưu trú',
+                        callback: function (value, validator) {
+                            // Get the selected options
+                            console.log(value);
+                            return (value != null && value != -1);
+                        }
+                    }
+                }
+            },
+            accomStay_cboNAME: {
+                validators: {
+                    stringLength: {
+                        max: 100,
+                        message: 'Tên cơ sở lưu trú tối đa 100 ký tự !'
+                    },
+                    callback: {
+                        message: 'Vui lòng nhập tên cơ sở lưu trú',
+                        callback: function (value, validator) {
+                            var coso_luutru = $('#accomStay_cboACCOMMODATION_TYPE').val();
+                            if (arrAccomType.indexOf(coso_luutru) != -1) {
+                                return (value != null && value != -1);
+                            }
+                            return true;
+                        }
+                    }
+                }
+            },
+            accomStay_txtADDRESS: {
+                validators: {
+                    notEmpty: {
+                        message: 'Địa chỉ chi tiết cơ sở lưu trú không được rỗng'
+                    },
+                    stringLength: {
+                        max: 200,
+                        message: 'Địa chỉ chi tiết cơ sở lưu trú tối đa 200 ký tự'
+                    }
+                }
+            },
+            cboDECLARETYPE: {
+                validators: {
+                    callback: {
+                        message: 'Vui lòng chọn hình thức thông báo',
+                        callback: function (value, validator) {
+                            // Get the selected options
+                            console.log(value);
+                            return (value != -1 && value != null);
+                        }
+                    }
+                }
+            },
+            txtDECLAREDATEUIUX: {
+                validators: {
+                    notEmpty: {
+                        message: 'Thời gian thông báo lưu trú không được trống'
+                    },
+                    date: {
+                        format: 'DD/MM/YYYY HH:mm',
+                        message: 'Thời gian sai định dạng'
 
-  // ===== UI helpers
-  function logLine(s){ $("log").value += ( $("log").value ? "\n" : "" ) + s; $("log").scrollTop = $("log").scrollHeight; }
-  function setScanStatus(html){ $("scanStatus").innerHTML = `Trạng thái: ${html}`; }
-  function setConvertStatus(html){ $("convertStatus").innerHTML = html; }
-  function fmtDDMMYYYY(s){
-    if (!s) return "—";
-    const t = (""+s).trim();
-    if (/^\d{8}$/.test(t)) return `${t.slice(0,2)}/${t.slice(2,4)}/${t.slice(4,8)}`;
-    return t;
-  }
+                    },
+                    callback: {
+                        message: 'Thời gian thông báo lưu trú không được lớn hơn ngày hiện tại',
+                        callback: function (value, validator) {
+                            // Get the selected options
+                            if (value != '') {
+                                var declare = validator.getFieldElements('txtDECLAREDATEUIUX').val();
 
-  // ===== CCCD parse
-  function normalizeQR(raw){ return (raw||"").trim().replace(/\|\s*---\s*\|/g, "|"); }
-  function parseQR(raw){
-    const s = normalizeQR(raw);
-    const parts = s.split("|").map(x => (x||"").trim()).filter(Boolean);
-    if (parts.length < 6) throw new Error("Chuỗi QR không đúng định dạng (cần tối thiểu 6 trường).");
-    return { cccd: parts[0], name: parts[1], dob: parts[2], gender: parts[3], address: parts[4], issue: parts[5] };
-  }
-  function fillInfo(d){
-    $("cccd").textContent = d?.cccd || "—";
-    $("name").textContent = d?.name || "—";
-    $("dob").textContent = fmtDDMMYYYY(d?.dob);
-    $("gender").textContent = d?.gender || "—";
-    $("oldAddr").textContent = d?.address || "—";
-    $("issue").textContent = fmtDDMMYYYY(d?.issue);
-  }
+                                if (getDayTimeToString(declare) > getTodayTime()) {
+                                    return {
+                                        valid: false,
+                                        message: 'Thời gian thông báo lưu trú không được lớn hơn ngày hiện tại'
+                                    };
+                                } else {
+                                    return true;
+                                }
+                            }
+                        }
+                    }
 
-  // ===== Address split + soft match
-  function splitAddress(addr){
-    const chunks = (addr||"").trim().split(",").map(x=>x.trim()).filter(Boolean);
-    if (chunks.length < 3) return { street:(addr||"").trim(), wardName:"", districtName:"", provinceName:"" };
-    return { street: chunks.slice(0,-3).join(", ").trim(), wardName: chunks.at(-3), districtName: chunks.at(-2), provinceName: chunks.at(-1) };
-  }
-  function stripDiacritics(s){
-    return (s||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/đ/g,"d").replace(/Đ/g,"D");
-  }
-  function normName(s){
-    return stripDiacritics(s).toLowerCase()
-      .replace(/\b(thanh pho|thi xa|quan|huyen|thi tran|xa|phuong|tp)\b/g,"")
-      .replace(/[^\w\s]/g," ")
-      .replace(/\s+/g," ").trim();
-  }
-  function bestMatch(list, target){
-    if (!list?.length) return null;
-    const t = normName(target);
-    let f = list.find(x => normName(x.name) === t);
-    if (f) return f;
-    f = list.find(x => normName(x.name).includes(t) || t.includes(normName(x.name)));
-    if (f) return f;
-    return null;
-  }
+                }
+            },
+            cboNOTIFICATION_TYPE: {
+                validators: {
+                    notEmpty: {
+                        message: 'Vui lòng chọn hình thức nhận thông báo tình trạng hồ sơ',
+                    },
+                    callback:
+                        {
+                            message: 'Hình thức nhận thông báo tình trạng hồ sơ bắt buộc phải có Qua cổng thông tin',
+                            callback: function (value, validator, $field) {
+                                if (value.indexOf("5") == -1) {
+                                    return false;
+                                }
+                                return true;
+                            }
+                        }
+                }
+            },
+            txtNOTIFICATION_PHONE: {
+                message: 'Thông tin số điện thoại nhận thông báo tình trạng hồ sơ bắt buộc với hình thức nhận qua SMS',
+                validators: {
+                    callback: {
+                        message: 'Thông tin số điện thoại nhận thông báo tình trạng hồ sơ bắt buộc với hình thức nhận qua SMS',
+                        callback: function (value, validator, $field) {
+                            let notiArr = $('#result_mulNOTIFICATION_TYPE').val();
+                            if (notiArr.indexOf("3") != -1) {
+                                if (!value) {
+                                    return {
+                                        valid: false,
+                                        message: 'Thông tin số điện thoại nhận thông báo tình trạng hồ sơ bắt buộc với hình thức nhận qua SMS'
+                                    }
+                                }
 
-  // ===== API tinhthanhpho.com
-  const BASE = "https://tinhthanhpho.com/api/v1";
-  async function apiGET(path, params){
-    const url = new URL(BASE + path);
-    Object.entries(params||{}).forEach(([k,v]) => { if (v!==undefined && v!==null && (""+v).length) url.searchParams.set(k,v); });
-    logLine("GET " + url.toString());
-    const res = await fetch(url.toString(), { headers: { "Accept":"application/json" }});
-    const data = await res.json().catch(()=>({}));
-    logLine("↳ " + res.status + " " + JSON.stringify(data).slice(0,1000));
-    if (!res.ok) throw new Error("GET lỗi HTTP " + res.status);
-    if (data?.success === false) throw new Error(data.message || "API success=false");
-    return data;
-  }
-  async function apiPOST(path, body, apiKey){
-    const url = BASE + path;
-    logLine("POST " + url);
-    logLine("Body: " + JSON.stringify(body));
-    const res = await fetch(url, {
-      method:"POST",
-      headers:{
-        "Content-Type":"application/json",
-        "Accept":"application/json",
-        "Authorization":"Bearer " + apiKey
-      },
-      body: JSON.stringify(body)
+                                if (!value.match(/^[0-9]+$/)) {
+                                    return {
+                                        valid: false,
+                                        message: 'Số điện thoại phải là số'
+                                    }
+                                }
+                                return true
+                            }
+                            return true;
+                        }
+                    }
+                }
+            },
+            txtNOTIFICATION_EMAIL: {
+                message: 'Thông tin Email nhận thông báo tình trạng hồ sơ bắt buộc với hình thức nhận qua Email',
+                validators: {
+                    emailAddress: {
+                        message: 'Email không đúng định dạng'
+                    },
+                    stringLength: {
+                        max: 255,
+                        message: 'Email tối đa 255 ký tự'
+                    },
+                    callback: {
+                        message: 'Thông tin Email nhận thông báo tình trạng hồ sơ bắt buộc với hình thức nhận qua Email',
+                        callback: function (value, validator, $field) {
+                            let notiArr = $('#result_mulNOTIFICATION_TYPE').val();
+                            if (notiArr.indexOf("4") != -1) {
+                                if (!value) {
+                                    return false;
+                                }
+                                return true;
+                            }
+                            return true;
+                        }
+                    }
+                }
+            },
+        }
+    }).on('error.form.bv', function (e) {
+        $('#formTTLT').find('.form-group').removeClass("has-success");
     });
-    const data = await res.json().catch(()=>({}));
-    logLine("↳ " + res.status + " " + JSON.stringify(data).slice(0,1500));
-    if (!res.ok) throw new Error("POST lỗi HTTP " + res.status + (data?.message?(": "+data.message):""));
-    if (data?.success === false) throw new Error(data.message || "API success=false");
-    return data;
-  }
 
-  async function guessCodesFromAddress(addr){
-    const { street, wardName, districtName, provinceName } = splitAddress(addr);
-    if (!provinceName || !districtName || !wardName) throw new Error("Địa chỉ thiếu 3 cụm cuối (xã/huyện/tỉnh) phân tách bằng dấu phẩy.");
+    $('#txtDECLAREDATEUIUX').on('dp.change', function (e) {
+        $(this).data('DateTimePicker').hide();
+    });
 
-    setConvertStatus(`Đang dò mã: <b>${provinceName}</b> / <b>${districtName}</b> / <b>${wardName}</b> ...`);
+    $('#accomStay_cboACCOMMODATION_TYPE').on('change', function (e) {
+        $('#accomStay_txtNAME_T').val('');
+        $('#accomStay_txtADDRESS').val('');
 
-    const provRes = await apiGET("/provinces", { keyword: provinceName, limit: 20, page: 1 });
-    const prov = bestMatch(provRes.data||[], provinceName) || (provRes.data||[])[0];
-    if (!prov?.code) throw new Error("Không tìm thấy provinceCode.");
+        if (arrAccomType.indexOf(this.value) != -1) {
 
-    // IMPORTANT: fetch ALL districts then match (không dùng keyword)
-    const distRes = await apiGET(`/provinces/${encodeURIComponent(prov.code)}/districts`, { limit: 300, page: 1 });
-    let dist = bestMatch(distRes.data||[], districtName);
-    if (!dist) dist = bestMatch(distRes.data||[], districtName.replace(/thị xã/ig,"thành phố"));
-    if (!dist?.code) throw new Error("Không match được district.");
+            let isDisabled = $('#accomStay_cboADDRESS_ID').is(':disabled');
+            if (!isDisabled) {
+                if ($('#accomStay_cboADDRESS_ID').val() == -1) {
+                    toastr.error('Vui lòng chọn cơ quan thực hiện thông báo lưu trú');
+                    $('#accomStay_cboACCOMMODATION_TYPE').val('-1').change();
+                    $('#accomStay_cboADDRESS_ID').select2('open');
+                    return false;
+                }
+            }
+            // if (isDisabled) {
+            //     if ($('#accomStay_cboDISTRICT_ID').val() == -1) {
+            //         toastr.error('Vui lòng chọn cơ quan thực hiện thông báo lưu trú');
+            //         $('#accomStay_cboACCOMMODATION_TYPE').val('-1').change();
+            //         $('#accomStay_cboDISTRICT_ID').select2('open');
+            //         return false;
+            //     }
+            // }
+            $('#csctlt_name').show();
+            $('.csctlt_name_1').show();
+            $('#accomStay_txtNAME_T').hide();
+            if ($('#accomStay_cboADDRESS_ID').val() != -1 && $('#accomStay_cboADDRESS_ID').val() != null && $('#accomStay_cboADDRESS_ID').val() != '') {
+                if(cslt_info != null && fullAddressCslt.length != 0){
+                    get_accommodation_list($('#accomStay_cboADDRESS_ID').val(), fullAddressCslt[0].ACCOM_CODE, this.value);
+                   // $('#accomStay_cboNAME').find('option').not(':first').val().trigger('change');
+                }else{
+                    get_accommodation_list($('#accomStay_cboADDRESS_ID').val(), '', this.value);
+                }
 
-    // fetch ALL wards then match
-    const wardRes = await apiGET(`/districts/${encodeURIComponent(dist.code)}/wards`, { limit: 500, page: 1 });
-    let ward = bestMatch(wardRes.data||[], wardName);
-    if (!ward) ward = bestMatch(wardRes.data||[], wardName.replace(/\b(xã|phường|thị trấn)\b/ig,""));
-    if (!ward?.code) throw new Error("Không match được ward.");
+            } else {
+                toastr.error('Vui lòng chọn cơ quan thực hiện thông báo lưu trú');
+                // if ($('#accomStay_cboDISTRICT_ID').val() != -1) {
+                //     if(cslt_info != null && fullAddressCslt.length != 0){
+                //         get_accommodation_list($('#accomStay_cboDISTRICT_ID').val(), fullAddressCslt[0].ACCOM_CODE, this.value);
+                //     }else{
+                //         get_accommodation_list($('#accomStay_cboDISTRICT_ID').val(), '', this.value);
+                //     }
 
-    return { provinceCode: prov.code, districtCode: dist.code, wardCode: ward.code, streetAddress: street || "" };
-  }
+                // }
+            }
+        } else {
+            $('#csctlt_name').hide();
+            $('.csctlt_name_1').hide();
+            $('#accomStay_txtNAME_T').show();
+        }
+    });
 
-  // ===== Native QR scan loop
-  async function start(){
-    if (!("BarcodeDetector" in window)) {
-      setScanStatus(`<b class="warn">Trình duyệt không hỗ trợ BarcodeDetector</b> • Dán chuỗi QR thủ công.`);
-      return;
+    $('#accomStay_cboNAME').on('change', function (e) {
+        if (this.value != '-1' && this.value != null && this.value != '') {
+            if(cslt_info != null && fullAddressCslt.length != 0){
+                if(!idHoSoLT){
+                    $('#accomStay_txtADDRESS').val(fullAddressCslt[0].ADDRESS);
+                }
+
+            }else{
+                let get_accomm = [];
+                get_accomm = get_accommodation_list($('#accomStay_cboADDRESS_ID').val(), this.value, $('#accomStay_cboACCOMMODATION_TYPE').val());
+                $('#accomStay_txtADDRESS').val(get_accomm[0].ADDRESS);
+            }
+
+        } else {
+            $('#accomStay_txtADDRESS').val('');
+        }
+    });
+
+
+    //Edit hồ sơ lưu trú
+    function test_param_get_without_base64(ID) {
+        console.log('2');
+        var obj = new Object();
+        obj.type = "jsonclob";
+        obj.provider = "dancuportal";
+        obj.service = "get_json_clob_by_sumb_id_service";
+        obj.SUBM_ID = ID;
+        obj.TECHNICAL_ID = typeof (userInfo) != 'undefined' ? userInfo.TechID : 'cbd1902e-f3c3-4fc6-8c31-50c6594c98d1';
+        var result = apiservice.AjaxJson.executeQuery(obj);
+        console.log("get_json_clob_without_base64 after call: ", result);
+        if (Object.keys(result).length > 0) {
+            return result;
+        }
+        return '';
+
     }
 
-    detector = new BarcodeDetector({ formats: ["qr_code"] });
+    function resetform() {
+        $('#guest_mulNATIONALITY').val([]).change();
+        FormUtil.clearForm("form_add_luutru", "guest_");
+        $('#guest_cboETHNIC_ID').prop('disabled', false);
+        $('#form_add_luutru').bootstrapValidator('resetForm');
+        $('#form_add_luutru').find('.form-group').removeClass("has-success");
+        $('#chkIS_CHANGED_PERSON').prop('checked', false);
 
-    try {
-      stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio:false });
-      video.srcObject = stream;
-      await video.play();
-
-      $("btnStart").disabled = true;
-      $("btnStop").disabled = false;
-      setScanStatus(`<b class="oktxt">Đang quét...</b> Đưa QR vào camera.`);
-
-      loop();
-    } catch (e) {
-      setScanStatus(`<b class="error">Không mở được camera</b> • ${e.message}`);
-    }
-  }
-
-  async function loop(){
-    if (!video.videoWidth || !video.videoHeight) {
-      rafId = requestAnimationFrame(loop);
-      return;
+        $('#form_add_luutru :input').attr('disabled', false);
+        $('#form_add_luutru').find('select').val('').trigger('change');
+        $('#form_add_luutru').find('input:text').val('');
+        $('#guest_cboDOB_FMT').val('dd/mm/yyyy').trigger('change');
+            
+        $('#guest_cboOCCUPATION').val('-1').trigger('change');
+        $('#guest_txtPLACE_OF_WORK').val('');
+        $('#guest_txtREASON').val('');
+        //$("#guest_txtSTART_DATE").datepicker("setDate", new Date());
+        $('#guest_cboGENDER_ID').val('-1').trigger('change');
+        $("input[name='guest_radADDRESS_TYPE']").filter('[value="0"]').prop('checked', true); 
     }
 
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    function loadAddress(data_address, arrSelectId, type_addr) {
+        if (data_address != null) {
+            if (data_address.city_res_id != null) {
+                $('#' + arrSelectId[0]).val(data_address.city_res_id).change();
+            } else {
+                $('#' + arrSelectId[0]).val('-1').change();
+            }
+            // if (data_address.district_res_id != null) {
+            //     $('#' + arrSelectId[1]).val(data_address.district_res_id).change();
+            // } else {
+            //     $('#' + arrSelectId[1]).val('-1').change();
+            // }
+            if (data_address.village_res_id != null) {
+                $('#' + arrSelectId[2]).val(data_address.village_res_id).change();
+            } else {
+                $('#' + arrSelectId[2]).val('-1').change();
+            }
+            if (type_addr == 0) {
+                $('#' + arrSelectId[3]).val(data_address.permanent_address);
+            }
+            if (type_addr == 1) {
+                $('#' + arrSelectId[3]).val(data_address.temp_res_address);
+            }
+            if (type_addr == 2) {
+                $('#' + arrSelectId[3]).val(data_address.living_address);
+            }
+        }
+    }
 
-    try {
-      const bitmap = await createImageBitmap(canvas);
-      const codes = await detector.detect(bitmap);
+    function getInf() {
+        var settings = {
+            // "url": "http://ords.dcqg.vn:9000/ords-kho-cu-tru/csdl_cutruchung_oldap/cutrutracuu/tamvang_congdan?name_match_type=0&fullName=Nguyễn&permanentCityName=01&permanentDistrictName=001&permanentVillageName=00001",
+            // "url": "http://ords.dcqg.vn:9000/ords-kho-dan-cu/csdl_dancuqg/dancutracuu_vngoai/sochungminhthu-congdan/000013196712",
+            "url": "http://ords.dcqg.vn:9000/ords-kho-dan-cu/csdl_dancuqg/dancutracuu_vngoai/sochungminhthu-congdan/" + userInfo.SoCMND + "/" + userInfo.NgayThangNamSinh,
+            "method": "GET",
+            "timeout": 0,
+            "async": false
+        };
 
-      if (codes && codes.length) {
-        const text = (codes[0].rawValue || "").trim();
-        if (text && text !== lastText) {
-          lastText = text;
-          $("rawInput").value = text;
-          setScanStatus(`<b class="oktxt">Đã quét</b> • <span class="mono">${text}</span>`);
+        $.ajax(settings).done(function (response) {
+            console.log(response);
+            paramInfo_new = {...response};
+            //reloadGrid(response.items);
+        });
 
-          try {
-            const d = parseQR(text);
-            currentData = d;
-            fillInfo(d);
-            setConvertStatus(`<span class="oktxt">Parse OK.</span> Bấm <b>Chuyển đổi</b> để lấy địa chỉ mới.`);
-          } catch (pe) {
-            setConvertStatus(`<span class="error">Lỗi parse:</span> ${pe.message}`);
-          }
+
+    }
+
+    let fullAddressCslt = [];
+
+    function load_thongtin_congdan() {
+        if (!idHoSoLT) {
+            if (cslt_info != null && typeof {"sub":"cbd1902e-f3c3-4fc6-8c31-50c6594c98d1","TechID":"76517dc6-ee60-4bb2-8428-a9cf1a2a7249","NoiSinh":"Xã Ngự Thiên,Tỉnh Hưng Yên","LoaiTaiKhoan":"1","loAs":"[{\n  \"level\" : 2,\n  \"claim\" : \"GioiTinh\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"NoiSinh\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"NguyenQuan\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"NoiSinhPhuongXa\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"QueQuanPhuongXa\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"QueQuanTinhThanhPho\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"DiaChiThuongTruPhuongXa\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"DiaChiThuongTruTinhThanhPho\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"HoVaTen\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"NgayThangNamSinh\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"CCCD\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"SoDienThoai\",\n  \"src\" : \"Viettel\"\n}]","QueQuan":"Xã Ngự Thiên, Tỉnh Hưng Yên","GioiTinh":"1","techIdVneid":"cbd1902e-f3c3-4fc6-8c31-50c6594c98d1","HoVaTen":"Nguyễn Minh Tuấn","ThuDienTu":"nguyentuanw135@gmail.com","SoDienThoai":"0972786005","SoDinhDanh":"034205011440","NgayThangNamSinh":"20050822"} == 'undefined') {
+                //co sở lưu trú
+                document.getElementById("lblname").innerHTML = 'Tên cơ sở';
+                $('#txtNAME').val(cslt_info[0].FULLNAME);
+                setEndDisCtl([], ['txtIDENTIFIER_NUMBER'],'');
+                $('#so_dinhdanh').css('display', 'none');
+                $('.hidden_cslt').css('display', 'none');
+                // if (cslt_info[0].CODE_USER_TYPE != '' && cslt_info[0].CODE_USER_TYPE == 'USER_TYPE_STAY') {
+                    fullAddressCslt = get_address_cslt('cbd1902e-f3c3-4fc6-8c31-50c6594c98d1');
+                    if (fullAddressCslt.length != 0) {
+                        $('#txtPHONE_NUMBER').val(fullAddressCslt[0].MOBILE);
+                        $('#accomStay_cboPROVINCE_ID').val(fullAddressCslt[0].TINH).change();
+                    // $('#accomStay_cboDISTRICT_ID').val(fullAddressCslt[0].HUYEN).change();
+                        $('#accomStay_cboADDRESS_ID').val(fullAddressCslt[0].XA).change();
+                        $('#accomStay_cboACCOMMODATION_TYPE').val(fullAddressCslt[0].ACCOMMODATION_TYPE).trigger('change');
+
+                    // setEndDisCtl([], ['accomStay_cboPROVINCE_ID', 'accomStay_cboDISTRICT_ID', 'accomStay_cboADDRESS_ID', 'cboRECEIVE_ORG', 'accomStay_cboACCOMMODATION_TYPE','accomStay_cboNAME'],'')
+                    setEndDisCtl([], ['accomStay_cboPROVINCE_ID', 'accomStay_cboADDRESS_ID', 'cboRECEIVE_ORG', 'accomStay_cboACCOMMODATION_TYPE','accomStay_cboNAME'],'')
+                    }
+                // }
+            } else {
+                document.getElementById("lblname").innerHTML = 'Họ và tên';
+                $('#txtPHONE_NUMBER').val(userInfo.SoDienThoai);
+                $('#so_dinhdanh').css('display', 'block');
+                $('.hidden_cslt').css('display', 'block');
+                if (paramInfo_new != null && paramInfo_new.full_name != null) {
+                    $('#txtNAME').val(paramInfo_new.full_name);
+                    $('#txtIDENTIFIER_NUMBER').val(paramInfo_new.citizen_pid != null ? paramInfo_new.citizen_pid : paramInfo_new.identify_number);
+                } else {
+                    $('#txtNAME').val(userInfo.HoVaTen);
+                    $('#txtIDENTIFIER_NUMBER').val(userInfo.SoCMND);
+                }
+
+                if (paramInfo_new != null) {
+                    let opt_loai = $("input[name='radADDRESS_TYPE']:checked").val();
+                    if (opt_loai == 0) {
+                        loadAddress(paramInfo_new.permanent_place, ['cboPROVINCE_ID', 'cboDISTRICT_ID', 'cboADDRESS_ID', 'txtADDRESS'], 0);
+                        // loadAddress(paramInfo_new.permanent_place, ['cboPROVINCE_ID', 'cboADDRESS_ID', 'txtADDRESS'], 0);
+                    }
+                    if (opt_loai == 1) {
+                        loadAddress(paramInfo_new.temp_res_place, ['cboPROVINCE_ID', 'cboDISTRICT_ID', 'cboADDRESS_ID', 'txtADDRESS'], 1);
+                        // loadAddress(paramInfo_new.temp_res_place, ['cboPROVINCE_ID', 'cboADDRESS_ID', 'txtADDRESS'], 1);
+                    }
+                    if (opt_loai == 2) {
+                        loadAddress(paramInfo_new.living_place, ['cboPROVINCE_ID', 'cboDISTRICT_ID', 'cboADDRESS_ID', 'txtADDRESS'], 2);
+                        // loadAddress(paramInfo_new.living_place, ['cboPROVINCE_ID', 'cboADDRESS_ID', 'txtADDRESS'], 2);
+                    }
+                } else {
+                    // refreshForm(['cboPROVINCE_ID', 'cboDISTRICT_ID', 'cboADDRESS_ID', 'txtADDRESS'], '');
+                    refreshForm(['cboPROVINCE_ID', 'cboADDRESS_ID', 'txtADDRESS'], '');
+                }
+            }
+
+        } else {
+            // alert('Sửa thông báo lưu trú');
+            document.getElementById("lblSOHOSO_LT").innerHTML = "Số hồ sơ : " + dataGet.DECLARECODE;
+            if (dataGet.ADDRESS_ID == '') dataGet.ADDRESS_ID = -1;
+            if (dataGet.IDENTIFIER_NUMBER == '') dataGet.IDENTIFIER_NUMBER = dataGet.IDCARD_NUMBER;
+
+            FormUtil.setObjectToForm('formTTLT', 'accomStay_', dataGet.ACCOMMODATION);
+            FormUtil.setObjectToForm('formTTLT', '', dataGet);
+
+            $('.disable_edit').attr('disabled', true);
+
+            if (dataGet.ACCOMMODATION.CODE) {
+                $('#accomStay_cboNAME').val(dataGet.ACCOMMODATION.CODE).change();
+            } else {
+                $('#accomStay_txtNAME_T').val(dataGet.ACCOMMODATION.NAME);
+            }
+            $('#accomStay_txtADDRESS').val(dataGet.ACCOMMODATION.ADDRESS);
+            if (cslt_info != null && typeof {"sub":"cbd1902e-f3c3-4fc6-8c31-50c6594c98d1","TechID":"76517dc6-ee60-4bb2-8428-a9cf1a2a7249","NoiSinh":"Xã Ngự Thiên,Tỉnh Hưng Yên","LoaiTaiKhoan":"1","loAs":"[{\n  \"level\" : 2,\n  \"claim\" : \"GioiTinh\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"NoiSinh\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"NguyenQuan\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"NoiSinhPhuongXa\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"QueQuanPhuongXa\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"QueQuanTinhThanhPho\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"DiaChiThuongTruPhuongXa\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"DiaChiThuongTruTinhThanhPho\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"HoVaTen\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"NgayThangNamSinh\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"CCCD\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"SoDienThoai\",\n  \"src\" : \"Viettel\"\n}]","QueQuan":"Xã Ngự Thiên, Tỉnh Hưng Yên","GioiTinh":"1","techIdVneid":"cbd1902e-f3c3-4fc6-8c31-50c6594c98d1","HoVaTen":"Nguyễn Minh Tuấn","ThuDienTu":"nguyentuanw135@gmail.com","SoDienThoai":"0972786005","SoDinhDanh":"034205011440","NgayThangNamSinh":"20050822"} == 'undefined') {
+                document.getElementById("lblname").innerHTML = 'Tên cơ sở';
+                $('#so_dinhdanh').css('display', 'none');
+                $('.hidden_cslt').css('display', 'none');
+                setEndDisCtl([], ['accomStay_cboACCOMMODATION_TYPE', 'accomStay_txtNAME_T', 'accomStay_cboNAME'],'')
+
+            } else {
+                document.getElementById("lblname").innerHTML = 'Họ và tên';
+                $('#so_dinhdanh').css('display', 'block');
+                $('.hidden_cslt').css('display', 'block');
+                setEndDisCtl(['accomStay_cboACCOMMODATION_TYPE', 'accomStay_txtNAME_T', 'accomStay_cboNAME'], [],'')
+            }
+            // $('#txtDECLAREDATEUIUX').val(dataGet.DECLAREDATE);
+            if (dataGet.LIST_CITIZEN.length > 0) {
+                for (var i = 0; i < dataGet.LIST_CITIZEN.length; i++) {
+                    arrCitizen.push(dataGet.LIST_CITIZEN[i])
+                }
+            } else {
+                arrCitizen = [];
+            }
+            reloadGrid();
+            FormUtil.setObjectToForm('formTTLT', 'result_', dataGet.RECEIVER_RESULT_INFO);
+            $('#result_txtNOTIFICATION_PHONE').val(dataGet.RECEIVER_RESULT_INFO.NOTIFICATION_PHONE);
+            $('#result_txtNOTIFICATION_EMAIL').val(dataGet.RECEIVER_RESULT_INFO.NOTIFICATION_EMAIL);
+
+        }
+    }
+
+    function loadCaterogy() {
+        arrToCbo('guest_cboOCCUPATION', occupArr, 'OCCUPATION_CODE,ICON,OCCUPATION_NAME');
+        arrToCbo('guest_cboETHNIC_ID', ethnicArr, 'ETHNIC_CODE,ICON,ETHNIC_NAME');
+        arrToCbo('guest_mulNATIONALITY', nationArr, 'NATIONALITY_CODE,ICON,NATIONALITY_NAME');
+        arrToCbo('guest_cboCOUNTRY', countryArr, 'COUNTRY_CODE,ICON,COUNTRY_NAME');
+        arrToCbo('guest_cboGENDER_ID', genArr, 'CODE,ICON,NAME');
+        arrToCbo('guest_cboRDPROVINCE_ID', cityArr, 'CODE,ICON,NAME');
+    }
+
+    $("#btnAddPersonLT").on('click', function () {
+        // $('#form_add_luutru').bootstrapValidator('resetForm');
+        // arrCitizen = [];
+        $('#guest_mulNATIONALITY').val([]).change();
+        $('#addpersonLT').modal('show');
+        addNLT = 'add';
+        document.getElementById("title_guest_stay").innerHTML = 'THÊM MỚI NGƯỜI LƯU TRÚ';
+		
+		setInputFilter(document.getElementById('guest_txtIDCARD_NUMBER'), function (value) {
+            return /^\d*$/.test(value) && (value === "" || parseInt(value) < 1000000000000);
+        });
+		
+        $('#btnSaveNLT_Edit').css('display', 'none');
+        $('#btnSaveNLT').css('display', 'inline');
+        setEndDisCtl(['btnSaveNLT'], ['btnSaveNLT_Edit'],'')
+        $('#guest_cboDOB_FMT').val('dd/mm/yyyy').change();
+
+        loadCaterogy();
+
+        $('#guest_txtSTART_DATE').datepicker({
+            todayBtn: "linked",
+            format: 'dd/mm/yyyy',
+            language: "it",
+            defaultDate: new Date(),
+            autoclose: true,
+            todayHighlight: true
+        }).inputmask("datetime", {inputFormat: "dd/mm/yyyy", "clearIncomplete": true});
+        $("#guest_txtSTART_DATE").datepicker("setDate", new Date());
+        $('#guest_txtEND_DATE').datepicker({
+            todayBtn: "linked",
+            format: 'dd/mm/yyyy',
+            language: "it",
+            defaultDate: 0,
+            autoclose: true,
+            todayHighlight: true
+        }).inputmask("datetime", {inputFormat: "dd/mm/yyyy", "clearIncomplete": true});
+
+        $('#addpersonLT').on('shown.bs.modal', function () {
+            $('#addpersonLT #form_add_luutru #guest_txtCITIZENNAME').focus();
+        });
+    });
+
+    $('#form_add_luutru').bootstrapValidator({
+        message: 'Sai định dạng dữ liệu',
+        excluded: ':hidden',
+        live: 'disabled',
+        fields: {
+            txtCITIZENNAME: {
+                validators: {
+                    notEmpty: {
+                        message: 'Bạn không được bỏ trống trường này'
+                    },
+                    stringLength: {
+                        max: 100,
+                        message: 'Độ dài họ và tên người lưu trú tối đa 100 ký tự'
+                    },
+                    callback: {
+                        message: 'Họ và Tên đầy đủ có thể chỉ bao gồm các ký tự chữ cái và dấu cách',
+                        callback: function (input) {
+                            if (input.length == 0) {
+                                return true;
+                            }
+                            input = input.normalize('NFC');
+                            input = removeAscent(input.trim());
+                            var myRegEx = new RegExp("^[A-Za-z ]{1,}[']{0,1}[A-Za-z ]{0,}$");
+                            if (!myRegEx.test(input)) {
+                                return false;
+                            }
+                            return true;
+                        }
+                    }
+
+                }
+            },
+            txtDOB: {
+                validators: {
+                    /*notEmpty: {
+                        message: 'Bạn không được bỏ trống thời gian',
+                    },*/
+                    callback: {
+                        message: 'Ngày sinh phải nhỏ hơn ngày hiện tại.',
+                        callback: function (value, validator) {
+                            // Get the selected options
+                            var birth_day = $('#guest_txtDOB').val();
+                            var opt = $('#guest_cboDOB_FMT').val();
+                            // var age = getAge(value, opt);
+
+                            if (opt.trim().length == 10 && birth_day.trim() != '') {
+								if (birth_day.trim().length != 10 || !moment(birth_day, "DD/MM/YYYY", true).isValid()){
+									return {
+										valid: false,
+										message: 'Sai định dạng ngày, tháng, năm'
+									};
+								}
+                            }
+                            if (opt.trim().length == 7 && birth_day.trim() != '') {
+								if (birth_day.trim().length != 7 || !moment(birth_day, "MM/YYYY", true).isValid()){
+									return {
+										valid: false,
+										message: 'Sai định dạng tháng, năm'
+									};
+								}
+                            }
+                            if (opt.trim().length == 4 && birth_day.trim() != '') {
+								if (birth_day.trim().length != 4 || !moment(birth_day, "YYYY", true).isValid()){
+									return {
+										valid: false,
+										message: 'Sai định dạng năm'
+									};
+								} 
+                            }
+
+                            if (opt.trim().length == 10 && birth_day.trim() != '' &&
+                                birth_day.trim().length == 10 && (getDayToStringYYYYMMDD(birth_day) > getToday2YYYYMMDD())) {
+                                return {
+                                    valid: false,
+                                    message: 'Ngày sinh phải nhỏ hơn ngày hiện tại.'
+                                };
+                            }
+                            if (opt.trim().length == 7 && birth_day.trim() != '' &&
+                                birth_day.trim().length == 7 && (getDayToStringYYYYMMDD(birth_day) > getTodayYYYYMM())) {
+                                return {
+                                    valid: false,
+                                    message: 'Ngày sinh phải nhỏ hơn ngày hiện tại.'
+                                };
+                            }
+                            if (opt.trim().length == 4 && birth_day.trim() != '' &&
+                                birth_day.trim().length == 4 && (getDayToStringYYYYMMDD(birth_day) > getTodayYYYY())) {
+                                return {
+                                    valid: false,
+                                    message: 'Ngày sinh phải nhỏ hơn ngày hiện tại.'
+                                };
+                            }
+                            return true;
+                        }
+                    }
+                }
+            },
+            /*cboGENDER_ID: {
+                message: 'Sai định dạng dữ liệu',
+                validators: {
+                    callback: {
+                        message: 'Vui lòng chọn giới tính.',
+                        callback: function (value, validator, $field) {
+                            return (value != -1 && value != null);
+                        }
+                    }
+                }
+            },*/
+            txtIDCARD_NUMBER: {
+                message: 'Số ĐDCN/CCCD/CMND không hợp lệ',
+                validators: {
+                    callback: {
+                        message: 'Số ĐDCN/CCCD/CMND không hợp lệ',
+                        callback: function (value, validator, $field) {
+                            if (value.length === 0) {
+                                return true;
+                            }
+                            var flag = false;
+                            if (!value.match(/^[0-9]+$/)) {
+                                flag = false;
+                                return {
+                                    valid: false,
+                                    message: 'Số ĐDCN/CCCD/CMND chỉ được nhập số'
+                                }
+                            } else {
+                                flag = true;
+                            }
+
+                            if ((value.length === 9 && flag) || (value.length === 12 && flag)) {
+                                return true;
+                            }
+
+                            if (value.length !== 9 || value.length !== 12) {
+                                return {
+                                    valid: false,
+                                    message: 'Số ĐDCN/CCCD/CMND chỉ có thể là 9 hoặc 12 số'
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            /*guest_mulNATIONALITY: {
+                validators: {
+                    notEmpty: {
+                        message: 'Vui lòng chọn Quốc tịch',
+                    }
+                }
+            },*/
+            txtPASSPORT_NO: {
+                validators: {
+					stringLength: {
+                        max: 30,
+                        message: 'Độ dài số hộ chiếu tối đa 30 ký tự!'
+                    },
+                    /*callback: {
+                        message: 'Vui lòng nhập số hộ chiếu. Thông tin số hộ chiếu bắt buộc với công dân nước ngoài',
+                        callback: function (value, validator, $field) {
+                            let nationalityArr = $('#guest_mulNATIONALITY').val();
+                            if (nationalityArr.indexOf("VN") < 0) {
+                                if (!value) {
+                                    return false;
+                                }
+                            }
+                            return true;
+                        }
+                    }*/
+                }
+            },
+			txtOTHER_PAPERS: {
+                validators: {
+                    stringLength: {
+                        max: 200,
+                        message: 'Độ dài giấy tờ khác tối đa 200 ký tự!'
+                    }
+
+                }
+            },
+            cboRDPROVINCE_ID: {
+                validators: {
+                    callback:
+                        {
+                            callback: function (value, validator, $field) {
+                                var opt = $("input[name='guest_radADDRESS_TYPE']:checked").val();
+                                var opt_country = $("#guest_cboCOUNTRY").val();
+                                if (opt_country == 'VN') {
+									if(!value){
+										return {
+											valid: false,
+											message: 'Địa chỉ thông tin người lưu trú không được rỗng'
+										};
+									}
+									if(value){
+										if (value == -1 && opt == 0) {
+											return {
+												valid: false,
+												message: 'Địa chỉ Tỉnh/Thành phố nơi thường trú không được rỗng'
+											};
+										}
+										if (value == -1 && opt == 1) {
+											return {
+												valid: false,
+												message: 'Địa chỉ Tỉnh/Thành phố nơi tạm trú không được rỗng'
+											};
+										}
+										if (value == -1 && opt == 2) {
+											return {
+												valid: false,
+												message: 'Địa chỉ Tỉnh/Thành phố địa chỉ khác không được rỗng'
+											};
+										}
+									}
+									return true;
+                                }
+                                return true;
+                            }
+                        }
+
+                }
+            },
+            // cboRDDISTRICT_ID: {
+            //     validators: {
+            //         callback:
+            //             {
+            //                 callback: function (value, validator, $field) {
+            //                     var opt = $("input[name='guest_radADDRESS_TYPE']:checked").val();
+            //                     var opt_country = $("#guest_cboCOUNTRY").val();
+            //                     if (opt_country == 'VN') {
+            // 						if(!value){
+            // 							return {
+            // 								valid: false,
+            // 								message: 'Địa chỉ thông tin người lưu trú không được rỗng'
+            // 							};
+            // 						}
+            // 						if(value){
+            // 							if (value == -1 && opt == 0) {
+            // 								return {
+            // 									valid: false,
+            // 									message: 'Địa chỉ Quận/Huyện nơi thường trú không được rỗng'
+            // 								};
+            // 							}
+            // 							if (value == -1 && opt == 1) {
+            // 								return {
+            // 									valid: false,
+            // 									message: 'Địa chỉ Quận/Huyện nơi tạm trú không được rỗng'
+            // 								};
+            // 							}
+            // 							if (value == -1 && opt == 2) {
+            // 								return {
+            // 									valid: false,
+            // 									message: 'Địa chỉ Quận/Huyện địa chỉ khác không được rỗng'
+            // 								};
+            // 							}
+            // 						}
+            // 						return true;
+            //                     }
+            //                     return true;
+            //                 }
+            //             }
+
+            //     }
+            // },
+			cboRDADDRESS_ID: {
+                validators: {
+                    callback:
+                        {
+                            callback: function (value, validator, $field) {
+                                var opt = $("input[name='guest_radADDRESS_TYPE']:checked").val();
+                                var opt_country = $("#guest_cboCOUNTRY").val();
+								let isDisabled = $('#guest_cboRDADDRESS_ID').is(':disabled');
+                                if (opt_country == 'VN') {
+									if (!isDisabled) {
+										if(!value){
+											return {
+												valid: false,
+												message: 'Địa chỉ thông tin người lưu trú không được rỗng'
+											};
+										}
+										if(value){
+											if (value == -1 && opt == 0) {
+												return {
+													valid: false,
+                                                    message: 'Địa chỉ Xã/Phường/Đặc khu nơi thường trú không được rỗng'
+												};
+											}
+											if (value == -1 && opt == 1) {
+												return {
+													valid: false,
+                                                    message: 'Địa chỉ Xã/Phường/Đặc khu nơi tạm trú không được rỗng'
+												};
+											}
+											if (value == -1 && opt == 2) {
+												return {
+													valid: false,
+                                                    message: 'Địa chỉ Xã/Phường/Đặc khu địa chỉ khác không được rỗng'
+												};
+											}
+										}
+										return true;
+									}
+                                    return true;
+                                }
+                                return true;
+                            }
+                        }
+
+                }
+            },
+            txtPHONE_NUMBER: {
+                message: 'Số điện thoại không hợp lệ với nhà mạng',
+                validators: {
+                    callback: {
+                        message: 'Số điện thoại không hợp lệ với nhà mạng',
+                        callback: function (value, validator, $field) {
+                            if (value.length === 0) {
+                                return true;
+                            }
+                            let flag = false;
+                            // var phone = value.replace('(+84)', '0').replace('+84', '0');
+                            // if (!phone.match(/((09|03|07|08|05)+([0-9]{8})+$)/)) {
+                            //     flag = false;
+                            //     return {
+                            //         valid: false,
+                            //         message: 'Số điện thoại không hợp lệ với nhà mạng'
+                            //     }
+                            // } else {
+                            //     return true;
+                            // }
+                            if (!value.match(/^[0-9]+$/)) {
+                                flag = false;
+                                return {
+                                    valid: false,
+                                    message: 'Số điện thoại chỉ được nhập số'
+                                }
+                            }
+                            return true;
+
+                        }
+                    }
+                }
+            },
+			txtPLACE_OF_WORK: {
+                validators: {
+                    stringLength: {
+                        max: 200,
+                        message: 'Độ dài địa chỉ chi tiết nơi làm việc tối đa 200 ký tự!'
+                    }
+
+                }
+            },
+			txtRDADDRESS_FOREIGN: {
+                validators: {
+                    stringLength: {
+                        max: 400,
+                        message: 'Độ dài địa chỉ chi tiết nơi thường trú hoặc tạm trú hoặc địa chỉ khác tối đa 400 ký tự!'
+                    }
+
+                }
+            },
+			txtRDADDRESS: {
+                validators: {
+                    stringLength: {
+                        max: 400,
+                        message: 'Độ dài Số nhà, đường phố, thôn, xóm làng, ấp, bản, buôn,phum, sóc/tên, địa chỉ nơi thường trú hoặc tạm trú hoặc địa chỉ khác tối đa 400 ký tự!'
+                    }
+
+                }
+            },
+            txtREASON: {
+                validators: {
+                    notEmpty: {
+                        message: 'Vui lòng nhập Lý do lưu trú'
+                    },
+                    stringLength: {
+                        max: 250,
+                        message: 'Độ dài tối đa 250 ký tự!'
+                    }
+
+                }
+            },
+            txtSTART_DATE: {
+                validators: {
+                    notEmpty: {
+                        message: 'Bạn không được bỏ trống thời gian'
+                    },
+                    date: {
+                        format: 'DD/MM/YYYY',
+                        message: 'Thời gian sai định dạng'
+
+                    },
+                    callback: {
+                        message: 'Thời gian không hợp lệ',
+                        callback: function (value, validator, $field) {
+                            // Get the selected options
+                            let from = $('#guest_txtSTART_DATE').val();
+                            let to = $('#guest_txtEND_DATE').val();
+                            if (from != '' && to != '') {
+                                if (getDayToStringYYYYMMDD(from) > getDayToStringYYYYMMDD(to)) {
+                                    return {
+                                        valid: false,
+                                        message: 'Ngày bắt đầu lưu trú phải nhỏ hơn ngày kết thúc lưu trú!'
+                                    };
+                                }
+                                return true;
+                            }
+                            return true
+                        }
+                    }
+
+                }
+            },
+            txtEND_DATE: {
+                validators: {
+                    date: {
+                        format: 'DD/MM/YYYY',
+                        message: 'Thời gian sai định dạng'
+                    },
+                    callback: {
+                        message: 'Thời gian không hợp lệ',
+                        callback: function (value, validator, $field) {
+                            // Get the selected options
+                            var from = $('#guest_txtSTART_DATE').val();
+                            var to = $('#guest_txtEND_DATE').val();
+                            if (value) {
+                                if (getDayToStringYYYYMMDD(from) > getDayToStringYYYYMMDD(to)) {
+                                    return {
+                                        valid: false,
+                                        message: 'Ngày bắt đầu lưu trú phải nhỏ hơn ngày kết thúc lưu trú!'
+                                    };
+                                } else if (!check30DayStay(from, to)) {
+                                    return {
+                                        valid: false,
+                                        message: 'Thời gian lưu trú không được vượt quá 30 ngày'
+                                    };
+                                }
+                                return true;
+                            }
+                            return true;
+                        }
+                    }
+
+                }
+            }
+        }
+    }).on('error.form.bv', function (e) {
+        $('#form_add_luutru').find('.form-group').removeClass("has-success");
+    });
+
+
+    function setInputFilter(textbox, inputFilter) {
+        ["input", "keydown", "keyup", "mousedown", "mouseup", "select", "contextmenu", "drop"].forEach(function (event) {
+            textbox.addEventListener(event, function () {
+                if (inputFilter(this.value)) {
+                    this.oldValue = this.value;
+                    this.oldSelectionStart = this.selectionStart;
+                    this.oldSelectionEnd = this.selectionEnd;
+                } else if (this.hasOwnProperty("oldValue")) {
+                    this.value = this.oldValue;
+                    this.setSelectionRange(this.oldSelectionStart, this.oldSelectionEnd);
+                } else {
+                    this.value = "";
+                }
+            });
+        });
+    }
+
+    function getCboOrg(idCbo, id) {
+        Array_DDCN = [];
+        var obj = new Object();
+        obj.type = "ref";
+        obj.provider = "default";
+        obj.service = "get_org_with_code_area_v2";
+        obj.ID = id; //MÃ ID
+        var result = apiservice.AjaxJson.executeQuery(obj);
+        if (Array.isArray(result)) {
+            Array_DDCN = [...result];
+            $('#' + idCbo).find('option').not(':first').remove();
+            ComboUtil.select2Load(idCbo, result, 'ID,ICON,NAME');
+        }
+
+    }
+
+    $("#cboRECEIVE_ORG").on('change', function () {
+        if (idHoSoLT == undefined || idHoSoLT == null) {
+            if ($("#cboRECEIVE_ORG").val() == undefined || $("#cboRECEIVE_ORG").val() == -1 || $("#cboRECEIVE_ORG").val() == null) {
+                $('#txtDECLARECODE').val('');
+            } else {
+                var id_org = $("#cboRECEIVE_ORG").val();
+                var obj = new Object();
+                obj.p_cfg_key = "IDX_TBLUUTRU_STT";
+                obj.p_org_id = id_org;
+                obj.type = "val";
+                obj.provider = "dancuportal";
+                obj.service = "get_dcs_no";
+                var result = apiservice.AjaxJson.executeQuery(obj);
+
+                if (result == 'ERR') {
+                    DlgUtil.showMsg('Đã hết số lượng hồ sơ tại cơ quan ' + $("#cboRECEIVE_ORG").find('option').not(':first').text() + ' trong ngày hôm nay. Mời bạn hãy quay lại vào ngày mai !', myFunction);
+                } else {
+
+                    var val_date = result.split(',')[0];
+                    var val_stt_hs = result.split(',')[1];
+                    $('#txtDECLARECODE').val(orgIdToMACOQUAN(Array_DDCN, id_org) + '-' + val_date + '-' + val_stt_hs);
+                    $('#txtPHONE_NUMBER_ORG').val(orgIdToPHONE(Array_DDCN, id_org).PHONE);
+                }
+            }
+        }
+
+    });
+
+    function orgIdToMACOQUAN(arr, orgId) {
+        for (let i = 0; i < arr.length; i++) {
+            if (arr[i].ID == orgId) {
+                return arr[i].MACOQUAN;
+            }
+        }
+        return '';
+    }
+
+    function orgIdToPHONE(arr, orgId) {
+        for (let i = 0; i < arr.length; i++) {
+            if (arr[i].ID == orgId) {
+                return arr[i];
+            }
+        }
+        return '';
+    }
+
+    function checkLiability() {
+        return $('#chkCHECK_LIABILITY').is(':checked');
+    }
+
+    $("#btnBack").on('click', function () {
+        if (idHoSoLT == undefined || idHoSoLT == null) {
+            DlgUtil.showConfirm("Bạn có chắc muốn hủy đăng ký thông báo lưu trú ?", function (flag) {
+                if (flag) {
+                    window.location.replace('dvc-gioi-thieu.html');
+                }
+            })
+        } else {
+            DlgUtil.showConfirm("Bạn có chắc muốn hủy sửa thông báo lưu trú ?", function (flag) {
+                if (flag) {
+                    window.location.replace('ho-so.html?type=edit');
+                }
+            })
+        }
+    })
+
+    $("#btnCloseNLT").on('click', function () {
+
+        if (addNLT == 'add') {
+            DlgUtil.showConfirm("Bạn có chắc muốn hủy thêm mới thông tin người lưu trú này?", function (flag) {
+                if (flag) {
+                    $('#addpersonLT').modal('hide');
+                    $('body').removeClass('modal-open');
+                    $('.modal-backdrop').remove();
+                }
+            })
+        } else if (addNLT == 'edit') {
+            DlgUtil.showConfirm("Bạn có chắc muốn hủy sửa thông tin người lưu trú này?", function (flag) {
+                if (flag) {
+                    $('#addpersonLT').modal('hide');
+                    $('body').removeClass('modal-open');
+                    $('.modal-backdrop').remove();
+                }
+            })
+        }
+
+    })
+
+    function getToday() {
+        //var str = new Date().toLocaleString("en-US", {timeZone: "Asia/Ho_Chi_Minh"});
+		var str = getDateServer("en-US");
+        var p1 = str.split(',');
+        var p2 = p1[0].split('/');
+        var m = (p2[0].length == 2) ? p2[0] : ('0' + p2[0]);
+        var d = (p2[1].length == 2) ? p2[1] : ('0' + p2[1]);
+        return d + '/' + m + '/' + p2[2];
+    }
+
+    function saveHoSo(flag) {
+        openAllBoxLegend()
+        $('#formTTLT').bootstrapValidator('resetForm');
+        $('#formTTLT').bootstrapValidator('validate');
+
+        var objForm = new Object();
+        FormUtil.setFormToObject("formTTLT", "", objForm);
+
+        let objAccomStay = new Object();
+        FormUtil.setFormToObject("formTTLT", "accomStay_", objAccomStay);
+
+        let objKQ = new Object();
+        FormUtil.setFormToObject("formTTLT", "result_", objKQ);
+
+        if ($("#formTTLT").has('.has-error').length > 0) {
+            toastr.error('Dữ liệu không hợp lệ. Vui lòng kiểm tra lại');
+            return false;
+        }
+        if (!checkLiability()) {
+            toastr.error('Bạn phải chấp nhận chịu trách nhiệm trước pháp luật về lời khai trên');
+            return;
+        }
+
+        objForm.DECLAREDATE = formatDateDDMMYYYYHHMM(new Date());
+        if (objForm.IDENTIFIER_NUMBER.trim().length == 12) {
+            objForm.IDENTIFIER_NUMBER = objForm.IDENTIFIER_NUMBER.trim();//căn cước công dân
+            objForm.IDCARD_NUMBER = "";
+        } else if (objForm.IDENTIFIER_NUMBER.trim().length == 9) {
+            objForm.IDCARD_NUMBER = objForm.IDENTIFIER_NUMBER.trim();//cmnd
+            objForm.IDENTIFIER_NUMBER = "";
+        } else {
+            objForm.IDENTIFIER_NUMBER = "";
+            objForm.IDCARD_NUMBER = "";//cmnd
+        }
+
+        objForm.PROVINCE_ID = (objForm.PROVINCE_ID && objForm.PROVINCE_ID != -1) ? objForm.PROVINCE_ID : '';
+        // objForm.DISTRICT_ID = (objForm.DISTRICT_ID && objForm.DISTRICT_ID != -1) ? objForm.DISTRICT_ID : '';
+        objForm.ADDRESS_ID = (objForm.ADDRESS_ID && objForm.ADDRESS_ID != -1) ? objForm.ADDRESS_ID : '';   //Nơi thường trú
+
+        var acc = {};
+        objAccomStay.ADDRESS_ID = (objAccomStay.ADDRESS_ID && objAccomStay.ADDRESS_ID != -1) ? objAccomStay.ADDRESS_ID : '';
+
+        if (arrAccomType.indexOf(objAccomStay.ACCOMMODATION_TYPE) != -1) {
+            objAccomStay.CODE = objAccomStay.NAME;
+            objAccomStay.NAME = $('#accomStay_cboNAME option:selected').text();
+
+        } else {
+            objAccomStay.NAME = objAccomStay.NAME_T;
+            objAccomStay.CODE = '';
+        }
+		
+		//if(objAccomStay.CODE != '')	objForm.ADDRESS_TYPE = '';
+		
+        objForm.ACCOMMODATION = objAccomStay;
+        if ($('#listCitizens #listTTNguoiLuuTru').bootstrapTable('getData').length != 0) {
+            if ($('#listCitizens #listTTNguoiLuuTru').bootstrapTable('getData')[0].CITIZENNAME != undefined) {
+                objForm.LIST_CITIZEN = $('#listCitizens #listTTNguoiLuuTru').bootstrapTable('getData');
+            } else {
+                toastr.error('Phải có ít nhất 1 thông tin người lưu trú !');
+                return false;
+            }
+        } else {
+            toastr.error('Phải có ít nhất 1 thông tin người lưu trú !');
+            return false;
+            // obj.LIST_CITIZEN = [];
+        }
+
+        if ($('#chkCHECK_LIABILITY').is(':checked')) {
+            objForm.CHECK_LIABILITY = 1; //có
+        } else {
+            objForm.CHECK_LIABILITY = 0; //không
+        }
+
+        objKQ.NOTIFICATION_TEXT = getTextMulCbo('result_mulNOTIFICATION_TYPE');
+        objForm.RECEIVER_RESULT_INFO = objKQ;
+
+        objForm.TEXT_RECEIVE_ORG = $('#cboRECEIVE_ORG option:selected').text();
+        objForm.TEXT_PROC_TYPE = 'Thông báo lưu trú';
+        objForm.TEXT_PROC_CASE = '';
+
+        objForm.SUBM_INFO = {
+            PROC_TYPE_ID: 3,
+            SUBM_CODE: objForm.DECLARECODE,
+            PROC_NAME: "Thông báo lưu trú",
+            PROCEDURE_CODE: "TBLUUTRU",
+            CREATE_DATE: getToday(),
+            ORG_ID: objForm.RECEIVE_ORG,
+            PROC_CODE_DVC: P_PROC_CODE_DVC,
+            PAYMENT_INFO: {
+                TRANSACTION_ID: 11021301230129,
+                PAYMENT_CONTENT: "Thanh toán hồ sơ",
+                PAYMENT_STATUS: "00",
+                AMOUNT: "500000",
+                CURRENCY: "VND",
+                BENEFICIARY_ACCOUNT: 1028309871286,
+                BENEFICIARY_NAME: "Ngân hàng Công thương",
+                BENEFICIARY_BANK_CODE: "VCB",
+                ORG_CODE: orgIdToMACOQUAN(Array_DDCN, objForm.RECEIVE_ORG),
+                ORG_NAM: orgIdToPHONE(Array_DDCN, objForm.RECEIVE_ORG).NAME_ORG,
+                PAYER_NAME: objForm.NAME,
+                PAYER_ID_NUMBER: 12312312,
+                PAYER_ADDRESS: objForm.ADDRESS,
+                // PAYER_DISTRICT: objForm.DISTRICT_ID,
+                PAYER_PROVINCE: objForm.PROVINCE_ID,
+                BILLS_DETAIL: [
+                    {
+                        CONTENT: "Thanh toán hồ sơ",
+                        AMOUNT: 50000
+                    },
+                    {
+                        CONTENT: "Thanh toán hồ sơ lần 2",
+                        AMOUNT: 888888
+                    }
+                ],
+            },
+            VNPOST_INFO: ""
+        }
+        let objDB = new Object();
+        objDB.type = "clobinput";
+        objDB.provider = "dancuportal";
+        objDB.SUBM_DATA = escapeHTMLEncode(JSON.stringify(normalizeJsonValues(objForm)));
+        objDB.PROC_CODE_DVC = P_PROC_CODE_DVC;
+        objDB.P_PROC_CASE_CODE = '';
+        objDB.P_SUBM_REF = '';
+        objDB.SUBM_NAME = "Thông báo lưu trú"
+        objDB.PROCEDURE_CODE = "TBLUUTRU";
+        objDB.P_PHONE_NUMBER = objKQ.NOTIFICATION_PHONE;
+        objDB.P_EMAIL = objKQ.NOTIFICATION_EMAIL;
+        objDB.P_PHONE_NUMBER_RECEIVE_RESULT = '';
+        objDB.P_EMAIL_RECEIVE_RESULT = '';
+        objDB.ORG_NAME = orgIdToPHONE(Array_DDCN, objForm.RECEIVE_ORG).NAME_ORG;
+        objDB.DECLARE_PERSON = objForm.NAME;
+		objDB.SOURCE_APP = "DVCQLCT";
+        //Gửi vào nghiệp vùng trong
+        let body_data = new Object();
+        body_data.service = 'rd_stay_ins_lt_declare_api_json_service';
+        body_data.type = 'clobinput';
+        body_data.p_user_ip = '127.0.0.1';
+        body_data.p_params = escapeHTMLEncode(JSON.stringify(normalizeJsonValues(objForm)));
+
+        let _header = {};
+        let _param = new Object();
+        var _data = new Object();
+
+        if (flag == 1) {
+            _header = JSON.parse(headerLT);
+			_header['x-sync-reference-code'] =  objForm.DECLARECODE;
+            _param.FORWARD_URL = 'sync_datadiode_callback_luutru_v2';
+            _param.FORWARD_METHOD = "POST";
+            _param.PARAMS = body_data;
+            _param.HEADER = _header;
+            _param.PARAM_NAME_DATA = 'p_params';
+
+            _data.param = JSON.stringify(_param)
+            var k = $.Deferred();
+
+            objTest = {
+                "LoaiBanTin": "INIT",
+                "PhienBan": "1.0.6",
+                "MaDoiTac": "000.00.00.G01.001",
+                "MaThamChieu": "00000" + Math.floor(1000 + Math.random() * 9000),
+                "SoTien": "50000",
+                "LoaiHinhThanhToan": "PAY",
+                "MaKenhThanhToan": "1",
+                "MaThietBi": "1",
+                "NgonNgu": "vi-VN",
+                "MaTienTe": "VND",
+                "MaNganHang": "PAYMENT",
+                "ThongTinGiaoDich": "",
+                "ThoiGianGD": "20210520154100",
+                "Ip": "10.11.13.15",
+                "ThongTinBienLai": {
+                    "MaDichVu": "2",
+                    "TKThuHuong": "37130103415000000",
+                    "MaNHThuHuong": "01701004",
+                    "TenTKThuHuong": "TRUONG MINH THUAN",
+                    "PhiLePhi": [
+                        {
+                            "LoaiPhiLePhi": "1",
+                            "MaPhiLePhi": "P.123.456",
+                            "TenPhiLePhi": "Phí đổi giấy phép lái xe",
+                            "SoTien": "50000"
+                        }
+                    ],
+                    "MaDonVi": "000.00.08.H46",
+                    "TenDonVi": "Sở Giao thông vận tải - tỉnh Quảng Bình",
+                    "MaHoSo": "",
+                    "MaDVC": "1.002809.000.00.00.H46.01",
+                    "TenDVC": "Đổi Giấy phép lái xe",
+                    "MaTTHC": "1.002809.000.00.00.H46",
+                    "TenTTHC": "Đổi Giấy phép lái xe do ngành Giao thông vận tải cấp",
+                    "NoiDungThanhToan": "",
+                    "MaLoaiHinhThuPhat": "",
+                    "TenLoaiHinhThuPhat": "",
+                    "HoTenNguoiNop": "Nguyễn Mạnh Hùng",
+                    "SoCMNDNguoiNop": "145334908",
+                    "DiaChiNguoiNop": "57 Huỳnh Thúc Kháng, Láng Hạ, Đống Đa, Hà Nội",
+                    // "HuyenNguoiNop": "Đống Đa",
+                    "TinhNguoiNop": "Hà Nội",
+                    "MaCoQuanQD": "",
+                    "TenCoQuanQD": "",
+                    "KhoBac": "",
+                    "NgayQD": "",
+                    "SoQD": "",
+                    "ThoiGianViPham": "",
+                    "DiaDiemViPham": "",
+                    "TenNguoiViPham": "",
+                    "TaiKhoanThuNSNN": "",
+                    "DSKhoanNop": [
+                        {
+                            "NoiDung": "Thanh toan le phi cho ho so " + objForm.DECLARECODE,
+                            "SoTien": "50000"
+                        }
+                    ]
+                }
+            }
+        }
+
+        if (idHoSoLT == undefined || idHoSoLT == null) {
+
+            objDB.service = "add_subm_info_v2";
+            objDB.SUBM_TYPE_ID = "3";
+            objDB.SUBM_CODE = objForm.DECLARECODE; //"11";
+            objDB.TECHNICAL_ID = typeof (userInfo) != 'undefined' ? userInfo.TechID : 'cbd1902e-f3c3-4fc6-8c31-50c6594c98d1';
+            objDB.STATUS_ID = "0";
+            objDB.ORG_ID = objForm.RECEIVE_ORG;
+
+
+            var result = apiservice.AjaxJson.executeQuery(objDB);
+
+            if (result.MSG_CODE == "OK") {
+                toastr.success('Thêm mới thành công!');
+
+                if (flag == 1) {
+                    sendHoSoDVC(_data,objForm.DECLARECODE,P_PROC_CODE_DVC);
+
+                } else {
+                    setTimeout(function () {
+                        window.location.replace('dvc-gioi-thieu.html');
+                    }, 1000)
+                }
+            } else if (result.MSG_CODE == "ERR") {
+                toastr.error('Mã hồ sơ đã tồn tại. Thêm mới hồ sơ thất bại');
+
+            } else {
+                toastr.error('Thêm mới hồ sơ thất bại');
+
+            }
+        } else if (idHoSoLT != undefined && idHoSoLT != '') {
+            objDB.service = "update_subm_info";
+            objDB.SUBM_ID = idHoSoLT;
+
+            var result = apiservice.AjaxJson.executeQuery(objDB);
+            if (result.MSG_CODE == "OK") {
+                toastr.success('Sửa thành công !');
+                if (flag == 1) {
+                    sendHoSoDVC(_data,objForm.DECLARECODE,P_PROC_CODE_DVC);
+                } else {
+                    setTimeout(function () {
+                        window.location.replace('ho-so.html?type=edit');
+                    }, 1000)
+                }
+
+            } else {
+                toastr.error('Có lỗi xảy ra');
+
+            }
+        }
+    }
+
+    $("#btnAdd").on('click', function () {
+        saveHoSo(0);
+    });
+
+    $("#btnSaveSend").on('click', function () {
+        saveHoSo(1);
+    });
+
+    function refreshForm(disValueArr, _prefix) {
+        disValueArr.forEach(item => {
+            if (item.substring((_prefix).length).substring(0, 3) == 'txt') {
+                $('#' + item).val('');
+            }
+            if (item.substring((_prefix).length).substring(0, 3) == 'cbo') {
+                $('#' + item).val('-1').change();
+            }
+        })
+    }
+
+
+    $("input[name='radADDRESS_TYPE']").change(function () {
+        $("#formTTLT").bootstrapValidator('resetForm');
+        var opt = $("input[name='radADDRESS_TYPE']:checked").val();
+        $(this).blur();
+        switch (opt) {
+            case '0':
+                if (paramInfo_new != null) {
+                    loadAddress(paramInfo_new.permanent_place, ['cboPROVINCE_ID', 'cboDISTRICT_ID', 'cboADDRESS_ID', 'txtADDRESS'], 0);
+                    // loadAddress(paramInfo_new.permanent_place, ['cboPROVINCE_ID', 'cboADDRESS_ID', 'txtADDRESS'], 0);
+                }else{
+                    $('#cboPROVINCE_ID').val('-1').change();
+                }
+                $('#addres_hidden_cslt').show();
+                break;
+            case '1':
+                if (paramInfo_new != null) {
+                    loadAddress(paramInfo_new.temp_res_place, ['cboPROVINCE_ID', 'cboDISTRICT_ID', 'cboADDRESS_ID', 'txtADDRESS'], 1);
+                    // loadAddress(paramInfo_new.temp_res_place, ['cboPROVINCE_ID', 'cboADDRESS_ID', 'txtADDRESS'], 1);
+                }else{
+                    $('#cboPROVINCE_ID').val('-1').change();
+                }
+                $('#addres_hidden_cslt').show();
+                break;
+            case '2':
+                if (paramInfo_new != null) {
+                    loadAddress(paramInfo_new.living_place, ['cboPROVINCE_ID', 'cboDISTRICT_ID', 'cboADDRESS_ID', 'txtADDRESS'], 2);
+                    // loadAddress(paramInfo_new.living_place, ['cboPROVINCE_ID', 'cboADDRESS_ID', 'txtADDRESS'], 2);
+                }else{
+                    $('#cboPROVINCE_ID').val('-1').change();
+                }
+                $('#addres_hidden_cslt').hide();
+                break;
+            default:
+                if (paramInfo_new != null) {
+                    loadAddress(paramInfo_new.permanent_place, ['cboPROVINCE_ID', 'cboDISTRICT_ID', 'cboADDRESS_ID', 'txtADDRESS'], 1);
+                    // loadAddress(paramInfo_new.permanent_place, ['cboPROVINCE_ID', 'cboADDRESS_ID', 'txtADDRESS'], 1);
+                }else{
+                    $('#cboPROVINCE_ID').val('-1').change();
+                }
+                $('#addres_hidden_cslt').show();
+        }
+
+    })
+
+    function escapeHTMLEncode(str) {
+        var div = document.createElement('div');
+        var text = document.createTextNode(str);
+        div.appendChild(text);
+        return div.innerHTML;
+    }
+
+    $("#accomStay_cboPROVINCE_ID").on('change', function () {
+        resetSelection(['accomStay_cboADDRESS_ID']);
+        // changeSelectAddress("accomStay_cboDISTRICT_ID", $("#accomStay_cboPROVINCE_ID").val());
+        changeSelectAddress("accomStay_cboADDRESS_ID", $("#accomStay_cboPROVINCE_ID").val());
+
+        // $('#DISTRICT_ACCOM').val('');
+        $('#VILLAGE_ACCOM').val('');
+        $('#PROVINCE_ACCOM').val($("#accomStay_cboPROVINCE_ID option:selected").text());
+
+    });
+
+    // $("#accomStay_cboDISTRICT_ID").on('change', function () {
+    //     resetSelection(['accomStay_cboADDRESS_ID']);
+    //     changeSelectAddress("accomStay_cboADDRESS_ID", $("#accomStay_cboDISTRICT_ID").val());
+    //     $('#VILLAGE_ACCOM').val('');
+    //     $('#DISTRICT_ACCOM').val($("#accomStay_cboDISTRICT_ID option:selected").text());
+    //     let isDisabled = $('#accomStay_cboADDRESS_ID').is(':disabled');
+    //     if (isDisabled) {
+    //         if ($('#accomStay_cboDISTRICT_ID').val() != -1) {
+    //             getCboOrg('cboRECEIVE_ORG', $('#accomStay_cboDISTRICT_ID').val());
+    //             setTimeout(
+    //                 function () {
+    //                     $('#cboRECEIVE_ORG').val($('#cboRECEIVE_ORG option').eq(1).val()).change();
+    //                 }, 100);
+    //         } else {
+    //             setTimeout(
+    //                 function () {
+    //                     $('#cboRECEIVE_ORG').val('-1').trigger('change');
+    //                 }, 100);
+    //         }
+    //     }
+
+    // });
+
+    $("#accomStay_cboADDRESS_ID").on('change', function () {
+        $('#VILLAGE_ACCOM').val($("#accomStay_cboADDRESS_ID option:selected").text()); //getCboOrg
+        let isDisabled = $('#accomStay_cboADDRESS_ID').is(':disabled');
+        if (!isDisabled) {
+            if ($('#accomStay_cboADDRESS_ID').val() != -1) {
+                getCboOrg('cboRECEIVE_ORG', $('#accomStay_cboADDRESS_ID').val());
+                setTimeout(
+                    function () {
+                        $('#cboRECEIVE_ORG').val($('#cboRECEIVE_ORG option').eq(1).val()).change();
+                        if (arrAccomType.indexOf($('#accomStay_cboACCOMMODATION_TYPE').val()) != -1) {
+                            if (!idHoSoLT && cslt_info == null) {
+                                $('#accomStay_cboACCOMMODATION_TYPE').val($('#accomStay_cboACCOMMODATION_TYPE').val()).change();
+                            }
+
+                        }
+                    }, 100);
+            } else {
+                setTimeout(
+                    function () {
+                        $('#cboRECEIVE_ORG').val('-1').trigger('change');
+                    }, 100);
+            }
+        }
+    });
+
+    //Thông tin người thông báo - Nơi thường trú
+    $("#cboPROVINCE_ID").on('change', function () {
+        // resetSelection(['cboDISTRICT_ID', 'cboADDRESS_ID']);
+        // changeSelectAddress("cboDISTRICT_ID", $("#cboPROVINCE_ID").val());
+        resetSelection(['cboADDRESS_ID']);
+        changeSelectAddress("cboADDRESS_ID", $("#cboPROVINCE_ID").val());
+
+    });
+
+    // $("#cboDISTRICT_ID").on('change', function () {
+    //     resetSelection(['cboADDRESS_ID']);
+    //     changeSelectAddress("cboADDRESS_ID", $("#cboDISTRICT_ID").val());
+
+    // });
+
+    function get_to_date() {
+        var d = new Date();
+        var minu = d.getMinutes();
+        var hour = d.getHours();
+        var get_date = $("#txtDECLAREDATEUIUX").val() + " " + hour + ":" + minu;
+        $("#txtDECLAREDATEUIUX").val(get_date.trim());
+    }
+
+    function operateFormatter(value, row, index) {
+        var _delCONFIG = '<a rel="tooltip" title="Xóa" class="btn-icon table-action pointer delNGUOILTR"><i class="act nc-icon-outline ui-1_trash"></i></a>';
+        return [_delCONFIG].join('');
+    }
+
+    function operateNameFormatter(value, row, index) {
+        var _editNguoiLT = '<a rel="tooltip" title="Sửa" class="btn-icon table-action pointer editNGUOILTR">' + value + '</a>';
+        return [_editNguoiLT].join('');
+    }
+
+    function operateCMNDFormatter(value, row, index) {
+        if (row.IDENTIFIER_NUMBER != '' && row.IDCARD_NUMBER == '') {
+            return '<div class="center">' + row.IDENTIFIER_NUMBER + '</div>';
+        } else if (row.IDCARD_NUMBER != '' && row.IDENTIFIER_NUMBER == '') {
+            return '<div class="center">' + row.IDCARD_NUMBER + '</div>';
+        } else {
+            return '<div class="center"></div>';
+        }
+    }
+
+    function operateTimeLTFormatter(value, row, index) {
+        var time_luutru = '<div class="center">' + row.START_DATE;
+        if (row.END_DATE != '') {
+            time_luutru += ' - ' + row.END_DATE;
+        }
+        time_luutru += '</div>';
+        return [time_luutru].join('');
+    }
+
+    var _columnsCitizens = [{field: '', radio: true, align: 'center', valign: 'middle', class: "hidden"},
+        {field: 'STT', title: 'STT', sortable: false, align: 'center', width: '30', formatter: stt},
+        {
+            field: 'CITIZENNAME',
+            title: 'Họ và tên',
+            sortable: false,
+            align: 'center',
+            width: '100',
+            formatter: operateNameFormatter,
+            events: window.operateEvents
+        },
+        {
+            field: 'IDENTIFIER_NUMBER',
+            title: 'ĐDCN/CCCD/CMND',
+            sortable: false,
+            align: 'center',
+            width: '100',
+            formatter: operateCMNDFormatter
+        },
+        {field: 'PASSPORT_NO', title: 'Số hộ chiếu', sortable: false, align: 'center', width: '100'},
+        {field: 'DOB', title: 'Ngày, tháng, năm sinh', sortable: false, align: 'center', width: '70'},
+        {field: 'PHONE_NUMBER', title: 'Số điện thoại', sortable: false, align: 'center', width: '70'},
+        {
+            field: 'START_DATE',
+            title: 'Thời gian lưu trú',
+            sortable: false,
+            align: 'center',
+            width: '200',
+            formatter: operateTimeLTFormatter
+        },
+        {
+            field: 'operate',
+            title: '<button rel="tooltip" title="Xóa tất cả" onclick="javascript:delAllNguoiLT();" style="border: 0px" class="btn btn-line btn-icon table-action delAllGuest"><i class="act nc-icon-outline ui-1_trash"></i></button>',
+            sortable: false,
+            align: 'center',
+            width: '30',
+            clickToSelect: false,
+            formatter: operateFormatter,
+            events: window.operateEvents
+        }
+    ]
+
+    function stt(value, row, index) {
+        return index + 1;
+    };
+
+    function reloadGrid() {
+
+        $('#listCitizens #listTTNguoiLuuTru').bootstrapTable('destroy').bootstrapTable({
+            idField: "STT",
+            columns: _columnsCitizens,
+            data: arrCitizen,
+            pageSize: 10,
+            pageList: [10, 20, 50],
+            pagination: true,
+            sidePagination: 'client',
+            clickToSelect: true,
+            singleSelect: false
+        }).on('check.bs.table uncheck.bs.table ' + 'check-all.bs.table uncheck-all.bs.table',
+            function () {
+                obj = new Object();
+                obj.SELECTED = $('#listCitizens #listTTNguoiLuuTru').bootstrapTable('getSelections');
+
+            });
+        $('#listCitizens #listTTNguoiLuuTru').on('click', '.clickable-row', function (event) {
+            $(this).addClass('active').siblings().removeClass('active');
+        });
+    };
+
+    function resetSelection(selectNameArr) {
+        if (selectNameArr.length > 0) {
+            selectNameArr.forEach(items => {
+                $('#' + items).find('option').not(':first').remove();
+                $('#' + items).change();
+            })
+        }
+    }
+
+    function changeSelectAddress(idSelect, codeParent) {
+        var obj = new Object();
+        obj.type = "qry";
+        obj.provider = "default";
+        obj.service = "get_comm_area_address_code_parent_combo";
+        obj.P_PARENT_CODE = codeParent;
+        var result = apiservice.AjaxJson.executeQuery(obj);
+        if (Array.isArray(result)) {
+            if (result.length == 0) {
+                $('#' + idSelect).prop('disabled', true);
+            } else {
+                $('#' + idSelect).prop('disabled', false);
+            }
+            ComboUtil.select2Load(idSelect, result, 'CODE,ICON,NAME');
+        }
+    }
+
+    function myFunction() {
+        if (!idHoSoLT) {
+            window.location.replace('dvc-gioi-thieu.html');
+        } else {
+            window.location.replace('pt-quan-ly-ho-so-dvc.html?type=edit');
+        }
+        return true;
+    }
+
+    // Thêm người lưu trú
+
+    $("#guest_cboCOUNTRY").on('change', function () {
+        if (this.value != 'VN') {
+
+            // setEndDisCtl([], ['guest_cboRDPROVINCE_ID', 'guest_cboRDDISTRICT_ID', 'guest_txtRDADDRESS', 'guest_cboRDADDRESS_ID'],'')
+            setEndDisCtl([], ['guest_cboRDPROVINCE_ID', 'guest_txtRDADDRESS', 'guest_cboRDADDRESS_ID'],'')
+            // refreshForm(['guest_cboETHNIC_ID', 'guest_cboRDPROVINCE_ID', 'guest_cboRDDISTRICT_ID', 'guest_cboRDADDRESS_ID', 'guest_txtRDADDRESS'], 'guest_')
+            refreshForm(['guest_cboETHNIC_ID', 'guest_cboRDPROVINCE_ID', 'guest_cboRDADDRESS_ID', 'guest_txtRDADDRESS'], 'guest_')
+
+            $('#noForeign').hide();
+            $('#noForeign_1').hide();
+            $('#isForeign').show();
+        } else {
+            // setEndDisCtl(['guest_cboRDPROVINCE_ID', 'guest_cboRDDISTRICT_ID', 'guest_txtRDADDRESS', 'guest_cboRDADDRESS_ID'], [],'')
+            setEndDisCtl(['guest_cboRDPROVINCE_ID', 'guest_txtRDADDRESS', 'guest_cboRDADDRESS_ID'], [],'')
+            if ($("#guest_cboRDPROVINCE_ID").val() == -1) {
+                changeSelectAddress('guest_cboRDPROVINCE_ID', '0');
+                // refreshForm(['guest_cboRDDISTRICT_ID', 'guest_cboRDADDRESS_ID'], 'guest_');
+                refreshForm(['guest_cboRDADDRESS_ID'], 'guest_');
+            }
+
+            $('#noForeign').show();
+            $('#isForeign').hide();
+            $('#noForeign_1').show();
+
+        }
+    })
+
+    const DATE_PATTERN_MAPPING = [
+        {"CBO_DATE_VAL": "DDMMYYYY", "DATE_PICKER_FORMAT": "dd/mm/yyyy", "MIN_VIEW_MODEL": 0, "MAX_VIEW_MODEL": 4},
+        {"CBO_DATE_VAL": "MMYYYY", "DATE_PICKER_FORMAT": "mm/yyyy", "MIN_VIEW_MODEL": 1, "MAX_VIEW_MODEL": 2},
+        {"CBO_DATE_VAL": "YYYY", "DATE_PICKER_FORMAT": "yyyy", "MIN_VIEW_MODEL": 2, "MAX_VIEW_MODEL": 3}
+    ]
+
+    $("#guest_cboDOB_FMT").on('change', function () {
+        datePickerWithPattern('guest_cboDOB_FMT', 'guest_txtDOB', DATE_PATTERN_MAPPING);
+    });
+
+    $("#guest_cboRDPROVINCE_ID").on('change', function () {
+
+        // resetSelection(['guest_cboRDDISTRICT_ID', 'guest_cboRDADDRESS_ID']);
+        resetSelection(['guest_cboRDADDRESS_ID']);
+        if ($("#guest_cboRDPROVINCE_ID").val() != -1) {
+            // changeSelectAddress("guest_cboRDDISTRICT_ID", $("#guest_cboRDPROVINCE_ID").val());
+            changeSelectAddress("guest_cboRDADDRESS_ID", $("#guest_cboRDPROVINCE_ID").val());
+        }
+    });
+    // $("#guest_cboRDDISTRICT_ID").on('change', function () {
+    //     resetSelection(['guest_cboRDADDRESS_ID']);
+    //     if ($("#guest_cboRDDISTRICT_ID").val() != -1) {
+    //         changeSelectAddress("guest_cboRDADDRESS_ID", $("#guest_cboRDDISTRICT_ID").val());
+    //     }
+    // });
+    let occupArr = [], cityArr = [], ethnicArr = [];
+    let nationArr = [], countryArr = [], genArr = [];
+    $.when(load_accommodation_type_sync(), load_declare_type_sync(),
+        load_Occupation(), load_Ethnic(), load_Nationality(),
+        load_quoc_gia(), load_Gender(), getReceiveStatusType(), getAllCity())
+        .then(function (res_accom, res_declare_type, res_occup, res_ethnic, res_nation, res_country, res_gen, res_noti_type, res_city) {
+            // getInf();
+            arrToCbo('accomStay_cboACCOMMODATION_TYPE', res_accom[0], 'CODE,ICON,NAME')
+            arrToCbo('cboDECLARETYPE', res_declare_type[0], 'CODE,ICON,NAME')
+            $('#cboDECLARETYPE').val('TYPE_INTERNET_PORTAL').change();
+            arrToCbo('result_mulNOTIFICATION_TYPE', res_noti_type[0], 'CODE,ICON,NAME')
+            $('#result_mulNOTIFICATION_TYPE').val("5").change();
+            occupArr = res_occup[0];
+            ethnicArr = res_ethnic[0];
+            nationArr = res_nation[0];
+            countryArr = res_country[0];
+            genArr = res_gen[0];
+            cityArr = res_city[0];
+            load_thongtin_congdan();
+
+        })
+
+    $(document).ready(function () {
+
+        load_file_upload();
+        getTodayTime();
+        changeSelectAddress('accomStay_cboPROVINCE_ID', '0');
+        changeSelectAddress('cboPROVINCE_ID', '0');
+
+        $('#csctlt_name').hide();
+        if (!idHoSoLT) {
+
+            $('.disable_edit').attr('disabled', false);
+            $("#txtDECLAREDATEUIUX").datetimepicker({
+                format: 'DD/MM/YYYY HH:mm',
+                defaultDate: new Date(),
+                maxDate: new Date()
+            });
+
+        } else {
+
+            dataGet = {};
+            let result_data = test_param_get_without_base64(idHoSoLT);
+            dataGet = result_data.SUBM_DATA;
+            if (!dataGet) {
+                DlgUtil.showMsg('Bạn không có quyền sửa hồ sơ này !', myFunction);
+            }
+            if (result_data.STATUS_ID != 0) {
+                DlgUtil.showMsg('Hồ sơ này đã hoặc đang xử lý. Không thể sửa!', myFunction);
+            }
+
+            $("#txtDECLAREDATEUIUX").datetimepicker({
+                format: 'DD/MM/YYYY HH:mm',
+                defaultDate: dataGet.DECLAREDATE,
+                maxDate: new Date()
+            });
+        }
+        if(maThuTuc){
+             getSession();
+             getMATTHC(maThuTuc,'',0);
+         } 
+    });
+
+    $("#btnSaveNLT").on('click', function () {
+        index_value = '';
+        save_nlt('add');
+    });
+
+    $("#btnSaveNLT_Edit").on('click', function () {
+        save_nlt('edit');
+    });
+
+    function checkConflictGuest(arrCitizenEdit,objGuest) {
+        let is_conflict = 0;
+        if(arrCitizenEdit.length == 0){
+            for (var i = 0; i < arrCitizen.length; i++) {
+                if (arrCitizen[i].CITIZENNAME.toUpperCase() == objGuest.CITIZENNAME.toUpperCase() &&
+                    (((arrCitizen[i].IDENTIFIER_NUMBER == objGuest.IDENTIFIER_NUMBER) &&
+                        (arrCitizen[i].IDCARD_NUMBER == objGuest.IDCARD_NUMBER)) &&
+                        (arrCitizen[i].PASSPORT_NO == objGuest.PASSPORT_NO))
+                    && arrCitizen[i].DOB == objGuest.DOB &&
+                    (arrCitizen[i].START_DATE == objGuest.START_DATE && arrCitizen[i].END_DATE == objGuest.END_DATE)) {
+                    is_conflict = 1;
+                    break;
+                } else {
+                    is_conflict = 0;
+                }
+            }
+        }else{
+            for (var i = 0; i < arrCitizenEdit.length; i++) {
+                if (arrCitizenEdit[i].CITIZENNAME.toUpperCase() == objGuest.CITIZENNAME.toUpperCase() &&
+                    (((arrCitizenEdit[i].IDENTIFIER_NUMBER == objGuest.IDENTIFIER_NUMBER) &&
+                        (arrCitizenEdit[i].IDCARD_NUMBER == objGuest.IDCARD_NUMBER)) &&
+                        (arrCitizenEdit[i].PASSPORT_NO == objGuest.PASSPORT_NO))
+                    && arrCitizenEdit[i].DOB == objGuest.DOB &&
+                    (arrCitizenEdit[i].START_DATE == objGuest.START_DATE && arrCitizenEdit[i].END_DATE == objGuest.END_DATE)) {
+                    is_conflict = 1;
+                    break;
+                } else {
+                    is_conflict = 0;
+                }
+            }
+        }
+
+        if(is_conflict == 0){
+            return true;
+        }
+        return false;
+    }
+
+    //Người thong bao la nguoi luu tru
+    function check_NTB_is_NLT() {
+        var checkBox = document.getElementById("chkIS_CHANGED_PERSON");
+        $('#form_add_luutru').bootstrapValidator('resetForm');
+        
+        if (checkBox.checked) {
+
+            $('#guest_mulNATIONALITY').val([]).change();
+            FormUtil.clearForm("form_add_luutru", "guest_");
+            $('#form_add_luutru').bootstrapValidator('resetForm');
+            $('#form_add_luutru').find('.form-group').removeClass("has-success");
+
+            $('#form_add_luutru :input').attr('disabled', false);
+            $('#form_add_luutru').find('select').val('').trigger('change');
+            $('#form_add_luutru').find('input:text').val('');
+            $('#guest_cboDOB_FMT').val('dd/mm/yyyy').trigger('change');
+                
+            $('#guest_cboOCCUPATION').val('-1').trigger('change');
+            $('#guest_txtPLACE_OF_WORK').val('');
+            $('#guest_txtREASON').val('');
+            $("#guest_txtSTART_DATE").datepicker("setDate", new Date());
+            $('#guest_cboGENDER_ID').val('-1').trigger('change');
+            $("input[name='guest_radADDRESS_TYPE']").filter('[value="0"]').prop('checked', true);
+
+            if (userInfo){
+                if (userInfo.SoDienThoai){
+                    $('#guest_txtPHONE_NUMBER').val(userInfo.SoDienThoai);
+                }
+            }
+            if (paramInfo_new){
+
+                $('#form_add_luutru :input').attr('disabled', true);
+                $('#form_add_luutru :input#guest_txtPHONE_NUMBER').attr('disabled', false);
+                $('#form_add_luutru :input#guest_txtROOM').attr('disabled', false);
+                $('#form_add_luutru :input#guest_txtSTART_DATE').attr('disabled', false);
+                $('#form_add_luutru :input#guest_txtEND_DATE').attr('disabled', false);
+                $('#form_add_luutru #guest_txtREASON').attr('disabled', false);
+                $('#form_add_luutru #guest_txtPLACE_OF_WORK').attr('disabled', false);
+
+                $('#form_add_luutru #type_add :input').attr('disabled', false);
+                $('#form_add_luutru #guest_cboOCCUPATION').attr('disabled', false);
+
+                //$('#form_add_luutru #guest_txtCITIZENNAME').focus();
+                $('#guest_cboOCCUPATION').next().find('.select2-selection').focus();
+                if (paramInfo_new.full_name && paramInfo_new.birth_date && paramInfo_new.gender && (paramInfo_new.citizen_pid || paramInfo_new.identify_number)) {
+                    $('#guest_txtCITIZENNAME').val(paramInfo_new.full_name.toUpperCase());
+                    $('#guest_cboGENDER_ID').val(paramInfo_new.gender).trigger('change');
+                    var strDate = convertDOBUserInfo(paramInfo_new.birth_date);
+                    if (paramInfo_new.birth_date.length == 8){
+                        $('#guest_cboDOB_FMT').val('dd/mm/yyyy').trigger('change');
+                    } else if(paramInfo_new.birth_date.length == 6) {
+                        $('#guest_cboDOB_FMT').val('mm/yyyy').trigger('change');
+                    } else if(paramInfo_new.birth_date.length == 4) {
+                        $('#guest_cboDOB_FMT').val('yyyy').trigger('change');
+                    }
+                    $('#guest_txtDOB').datepicker('setDate', strDate);
+                    if (paramInfo_new.citizen_pid) {
+                        $('#guest_txtIDCARD_NUMBER').val(paramInfo_new.citizen_pid);
+                        //document.getElementById('chkDDCN_NTD').checked = true;
+                    } else {
+                        $('#guest_txtIDCARD_NUMBER').val(paramInfo_new.identify_number);
+                        //document.getElementById('chkCMND_NTD').checked = true;
+                    }
+
+                    if (paramInfo_new.occupation && paramInfo_new.occupation.length > 0) {
+                        $('#guest_cboOCCUPATION').val(paramInfo_new.occupation[0].occupation_res_id).trigger('change');
+                    }
+                    if(paramInfo_new.work){
+                        let fullWorkPlace = "";
+                        let address = paramInfo_new.work.work_place;
+                        let villageWork = paramInfo_new.work.village_name;
+                        // let districtWork = paramInfo_new.work.district_name;
+                        let provinceWork = paramInfo_new.work.city_name;
+                        let countryWork = paramInfo_new.work.country_name;
+                        // if(districtWork && provinceWork){
+                        if(provinceWork){
+                            if(address){
+                                fullWorkPlace += address + ", ";
+                            }
+                            if(villageWork){
+                                // fullWorkPlace += villageWork + ", " + districtWork  + ", " + provinceWork;
+                                fullWorkPlace += villageWork + ", " + provinceWork;
+                            }
+                            else{
+                                // fullWorkPlace += districtWork  + ", " + provinceWork;
+                                fullWorkPlace += provinceWork;
+                            }
+                            if(countryWork){
+                                fullWorkPlace += ", " + countryWork;
+                            }
+                        }
+                        else if(countryWork){
+                            fullWorkPlace = countryWork;
+                        }
+                        $('#guest_txtPLACE_OF_WORK').val(fullWorkPlace);
+                    }
+
+                    if (paramInfo_new.nationality && paramInfo_new.nationality.length > 0) {
+                        var nation_array = [];
+                        for (var i = 0; i < paramInfo_new.nationality.length; i++) {
+                            nation_array.push(paramInfo_new.nationality[i].nationality_res_id);
+                        }
+                        $('#guest_mulNATIONALITY').val(nation_array).change();
+
+                        if (paramInfo_new.ethnic) {
+                            $('#guest_cboETHNIC_ID').val(paramInfo_new.ethnic.res_id).trigger('change');
+                            $('#guest_cboETHNIC_ID').attr('disabled', true);
+                        }
+
+                        if (nation_array.indexOf("VN") != -1) {
+                            if (paramInfo_new.permanent_place.city_res_id) {
+                                $("#guest_cboRDPROVINCE_ID").val(paramInfo_new.permanent_place.city_res_id).trigger('change');
+                                $("input[name='guest_radADDRESS_TYPE']").filter('[value="0"]').prop('checked', true);
+                                $("input[name='guest_radADDRESS_TYPE']").prop('disabled', true);
+                                // if (paramInfo_new.permanent_place.district_res_id) {
+                                //     $("#guest_cboRDDISTRICT_ID").val(paramInfo_new.permanent_place.district_res_id).trigger('change');
+                                // }
+
+                                if (paramInfo_new.permanent_place.village_res_id) {
+                                    $("#guest_cboRDADDRESS_ID").val(paramInfo_new.permanent_place.village_res_id).trigger('change');
+                                }
+
+                                if (paramInfo_new.permanent_place.permanent_address) {
+                                    $("#guest_txtRDADDRESS").val(paramInfo_new.permanent_place.permanent_address).trigger('change');
+                                }
+                            } else if (paramInfo_new.temp_res_place.city_res_id) {
+                                $("#guest_cboRDPROVINCE_ID").val(paramInfo_new.temp_res_place.city_res_id).trigger('change');
+                                $("input[name='guest_radADDRESS_TYPE']").filter('[value="1"]').prop('checked', true);
+                                $("input[name='guest_radADDRESS_TYPE']").prop('disabled', true);
+                                // if (paramInfo_new.temp_res_place.district_res_id) {
+                                //     $("#guest_cboRDDISTRICT_ID").val(paramInfo_new.temp_res_place.district_res_id).trigger('change');
+                                // }
+
+                                if (paramInfo_new.temp_res_place.village_res_id) {
+                                    $("#guest_cboRDADDRESS_ID").val(paramInfo_new.temp_res_place.village_res_id).trigger('change');
+                                }
+
+                                if (paramInfo_new.temp_res_place.temp_res_address) {
+                                    $("#guest_txtRDADDRESS").val(paramInfo_new.temp_res_place.temp_res_address).trigger('change');
+                                }
+                            } else if (paramInfo_new.living_place.city_res_id){
+                                $("#guest_cboRDPROVINCE_ID").val(paramInfo_new.living_place.city_res_id).trigger('change');
+                                $("input[name='guest_radADDRESS_TYPE']").filter('[value="2"]').prop('checked', true);
+                                $("input[name='guest_radADDRESS_TYPE']").prop('disabled', true);
+                                // if (paramInfo_new.living_place.district_res_id) {
+                                //     $("#guest_cboRDDISTRICT_ID").val(paramInfo_new.living_place.district_res_id).trigger('change');
+                                // }
+
+                                if (paramInfo_new.living_place.village_res_id) {
+                                    $("#guest_cboRDADDRESS_ID").val(paramInfo_new.living_place.village_res_id).trigger('change');
+                                }
+
+                                if (paramInfo_new.living_place.living_address) {
+                                    $("#guest_txtRDADDRESS").val(paramInfo_new.living_place.living_address).trigger('change');
+                                }
+                            }
+                            $('#guest_cboCOUNTRY').prop('disabled', true);
+                            $("#guest_cboRDPROVINCE_ID").prop('disabled', true);
+                            // $("#guest_cboRDDISTRICT_ID").prop('disabled', true);
+                            $("#guest_cboRDADDRESS_ID").prop('disabled', true);
+                            $("#guest_txtRDADDRESS").prop('disabled', true);
+                            
+                        } else {
+                            $('#guest_cboCOUNTRY').prop('disabled', false);
+                            $("#guest_cboRDPROVINCE_ID").prop('disabled', false);
+                            // $("#guest_cboRDDISTRICT_ID").prop('disabled', false);
+                            $("#guest_cboRDADDRESS_ID").prop('disabled', false);
+                            $("#guest_txtRDADDRESS").prop('disabled', false);    
+                            $("input[name='guest_radADDRESS_TYPE']").prop('disabled', false);
+                        }
+                    }
+
+                    /*if (paramInfo_new.citizen_pid) {
+                        $('#guest_txtIDCARD_NUMBER').val(paramInfo_new.citizen_pid);
+                    }*/
+                    
+                } else {
+                    //$('#chkIS_NOT_CHANGED_PERSON').prop('checked', true);
+                    Show_Mes_Miss_Info(false);
+                    return false;
+                }
+                
+                
+            } else {
+                //$('#chkIS_CHANGED_PERSON').prop('checked', false);
+                Show_Mes_Miss_Info(true);
+                checkBox.checked = false;
+                return false;
+            }
+        } else {
+            $('#form_add_luutru :input').attr('disabled', false);
+            $('#form_add_luutru').find('select').val('').trigger('change');
+            $('#form_add_luutru').find('input:text').val('');
+            $('#guest_cboDOB_FMT').val('dd/mm/yyyy').trigger('change');
+            
+            $('#guest_cboOCCUPATION').val('-1').trigger('change');
+            $('#guest_txtPLACE_OF_WORK').val('');
+            $('#guest_txtREASON').val('');
+            $("#guest_txtSTART_DATE").datepicker("setDate", new Date());
+            $('#guest_cboGENDER_ID').val('-1').trigger('change');
+            $("input[name='guest_radADDRESS_TYPE']").filter('[value="0"]').prop('checked', true);
+            $('#guest_txtCITIZENNAME').focus();
+        }
+    }
+    //checkchuacothongtin = true là chưa có thông tin paramInfo_new
+    function Show_Mes_Miss_Info(checkchuacothongtin) {
+        $('#Noti_Miss_Info').modal('show');
+        if (checkchuacothongtin){
+            document.getElementById("lblNAME_CITIZEN").innerHTML = userInfo.HoVaTen;
+            document.getElementById("lblCheck_Du_Thong_Tin").innerHTML = ' chưa có trong CSDL QGDC.';
+            document.getElementById("lblTHUTUC_TRUONGHOP").innerHTML = '';
+        } else {
+            document.getElementById("lblNAME_CITIZEN").innerHTML = userInfo.HoVaTen;
+            document.getElementById("lblCheck_Du_Thong_Tin").innerHTML = ' chưa có đủ thông tin để thực hiện nghiệp vụ ';
+            document.getElementById("lblTHUTUC_TRUONGHOP").innerHTML = $('#cboBPROC_TYPE_CODE').select2('data')[0].text+' - '+$('#cboBPROC_CASE_CODE').select2('data')[0].text;
+        }
+        var checkBox = document.getElementById("chkIS_CHANGED_PERSON");
+        checkBox.checked = false;
+        $('#divCheck_NKB :input').attr('disabled', false);
+        $('#divCheck_NKB').find('select').val('').trigger('change');
+        $('#divCheck_NKB').find('input:text').val('');
+        $('#cboFORMAT_DATE').val('1').trigger('change');
+        // $('#chkIS_CHANGED_PERSON').click();
+    }
+
+    function convertDOBUserInfo(dateStr) {
+        if (dateStr !== undefined){
+            if (dateStr.length == 8){
+                return dateStr.substring(6, 8) + '/' + dateStr.substring(4, 6) + '/' + dateStr.substring(0, 4);
+            } else if(dateStr.length == 6) {
+                return dateStr.substring(4, 6) + '/' + dateStr.substring(0, 4);
+            } else if(dateStr.length == 4) {
+                return dateStr.substring(0, 4);
+            }
+        }
+    }
+
+    function save_nlt(action) {
+        $('#form_add_luutru').bootstrapValidator('resetForm');
+        $('#form_add_luutru').bootstrapValidator('validate');
+
+        var obj = new Object();
+        FormUtil.setFormToObject('form_add_luutru', 'guest_', obj);
+        console.log(" obj ", obj);
+
+        if (obj.CITIZENNAME.trim() != '' && obj.START_DATE != '' ) {
+
+            if ($("#form_add_luutru").has('.has-error').length > 0) {
+                toastr.error("Thông tin không hợp lệ, vui lòng kiểm tra lại thông tin đã nhập.");
+                let selector = $('#form_add_luutru .has-error:first').children().find('.form-control').attr("id");
+                if (selector != undefined && selector.substring(0, 3) == 'txt') {
+                    $('#' + selector).focus();
+                } else if (selector != undefined && selector.substring(0, 3) == 'cbo') {
+                    $('#' + selector).select2('open');
+                }
+                return false;
+            } else {
+
+                if (obj.IDCARD_NUMBER.trim() || obj.PASSPORT_NO.trim() || obj.OTHER_PAPERS.trim()) {
+
+                } else {
+                    toastr.error("Bắt buộc có ít nhất 1 trong 3 trường dữ liệu Số CMND/CCCD hoặc Số Hộ chiếu hoặc Giấy tờ khác");
+                    $("#guest_txtIDCARD_NUMBER").focus();
+                    return false;
+                }
+                /* if (obj.NATIONALITY.length > 1) {
+                    if (obj.COUNTRY == -1) {
+                        toastr.error("Quốc gia không được rỗng.");
+                        $("#guest_cboCOUNTRY").select2('open');
+                        return false;
+                    }
+                } else if (obj.NATIONALITY.length == 1 && obj.NATIONALITY != 'VN') {
+                    if (obj.COUNTRY == -1) {
+                        toastr.error("Quốc gia không được rỗng.");
+                        $("#guest_cboCOUNTRY").select2('open');
+                        return false;
+                    }
+                } */
+                if (obj.COUNTRY == 'VN') {
+                    if (obj.RDPROVINCE_ID == -1) {
+                        toastr.error("Địa chỉ tỉnh thành nơi thường trú/tạm trú không được rỗng.");
+                        $("#guest_cboRDPROVINCE_ID").select2('open');
+                        return false;
+                    }
+                }
+                if (obj.START_DATE && obj.END_DATE) {
+                    if (getDayToStringYYYYMMDD(obj.START_DATE) > getDayToStringYYYYMMDD(obj.END_DATE)) {
+                        toastr.error("Thời gian bắt đầu lưu trú phải nhỏ hơn thời gian kết thúc lưu trú.");
+                        $('#txtEND_DATE').datepicker("show");
+                        return false;
+                    } else if (!check30DayStay(obj.START_DATE, obj.END_DATE)) {
+                        toastr.error("Thời gian lưu trú không được vượt quá 30 ngày.");
+                        $('#txtEND_DATE').datepicker("show");
+                        return false;
+                    }
+                }
+
+                obj.OCCUPATION = (obj.OCCUPATION && obj.OCCUPATION != -1) ? obj.OCCUPATION : '';
+                obj.ETHNIC_ID = (obj.ETHNIC_ID && obj.ETHNIC_ID != -1) ? obj.ETHNIC_ID : '';
+                obj.NATIONALITY = obj.NATIONALITY.toString();
+                obj.IDENTIFIER_NUMBER = (obj.IDCARD_NUMBER.trim().length == 12) ? obj.IDCARD_NUMBER.trim() : '';//căn cước công dân
+                obj.IDCARD_NUMBER = (obj.IDCARD_NUMBER.trim().length == 9) ? obj.IDCARD_NUMBER.trim() : '';
+                if (obj.RDADDRESS && !obj.RDADDRESS_FOREIGN) {
+                    obj.RDADDRESS = obj.RDADDRESS;//trong nước
+                } else if (!obj.RDADDRESS && obj.RDADDRESS_FOREIGN) {
+                    obj.RDADDRESS = obj.RDADDRESS_FOREIGN;//nước ngoài
+                } else {
+                    obj.RDADDRESS = '';
+                }
+                obj.RDPROVINCE_ID = (obj.RDPROVINCE_ID && obj.RDPROVINCE_ID != -1) ? obj.RDPROVINCE_ID : '';
+                // obj.RDDISTRICT_ID = (obj.RDDISTRICT_ID && obj.RDDISTRICT_ID != -1) ? obj.RDDISTRICT_ID : '';
+                obj.RDADDRESS_ID = (obj.RDADDRESS_ID && obj.RDADDRESS_ID != -1) ? obj.RDADDRESS_ID : '';
+                obj.ADDRESS_TYPE = $("input[name='guest_radADDRESS_TYPE']:checked").val();
+                //var checkBox = document.getElementById("chkIS_CHANGED_PERSON");
+                if ($('#chkIS_CHANGED_PERSON').is(':checked'))
+                    obj.IS_CHANGED_PERSON = "1";
+                else 
+                    obj.IS_CHANGED_PERSON = "0";
+
+                if (action == 'add') {
+
+                    if (arrCitizen.length > 0) {
+                        if(!checkConflictGuest([],obj)) {
+                            toastr.error("Thông tin người lưu trú " + obj.CITIZENNAME + " đã tồn tại");
+                            return;
+                        }
+                    }
+
+                    arrCitizen.push(obj);
+                    toastr.success("Thêm mới người lưu trú thành công");
+                    $('#addpersonLT').modal('hide');
+                    $('body').removeClass('modal-open');
+                    $('.modal-backdrop').remove();
+                    reloadGrid();
+                } else if (action == 'edit') {
+                    console.log('Sửa index người lưu trú :', index_value);
+                    DlgUtil.showConfirm("Bạn có chắc muốn sửa thông tin người lưu trú này?", function (flag) {
+                        if (flag) {
+
+                            if (arrCitizen.length > 1) {
+                                let objEdit = {...arrCitizen[index_value]};
+                                arrCitizen.splice(index_value, 1);
+                                let arrCitizenEdit = arrCitizen;
+
+                                if(!checkConflictGuest(arrCitizenEdit,obj)) {
+                                    toastr.error("Thông tin người lưu trú " + obj.CITIZENNAME + " đã tồn tại");
+                                    arrCitizen.splice(index_value, 0,objEdit);
+                                    console.log('arrCitizen errorr ', arrCitizen);
+                                    return;
+                                }
+                                arrCitizen.splice(index_value, 0,obj);
+                            }else {
+                                arrCitizen[index_value] = obj;
+                            }
+
+                            // arrCitizen[index_value] = obj;
+                            toastr.success('Lưu người lưu trú. Sửa thành công');
+                            $('#addpersonLT').modal('hide');
+                            $('body').removeClass('modal-open');
+                            $('.modal-backdrop').remove();
+                            reloadGrid();
+                        }
+                    });
+                }
+            }
+        } else {
+            toastr.error("Bạn cần nhập các trường bắt buộc");
+            if (obj.CITIZENNAME.trim() == '') {
+                $('#guest_txtCITIZENNAME').focus();
+                return false;
+            } else if ($('#guest_txtSTART_DATE').val() == '') {
+                $('#guest_txtSTART_DATE').datepicker("show");
+                return false;
+            }
+        }
+    }
+
+    const oneDay = 86400000;
+
+    function getMiliSecondVal(date) {
+        date = date.split('/')[1] + '/' + date.split('/')[0] + '/' + date.split('/')[2];
+        return new Date(date).getTime();
+    }
+
+    function check30DayStay(fromDay, toDay) {
+        let timeStay = (getMiliSecondVal(toDay) + oneDay) - (getMiliSecondVal(fromDay));
+        return !(timeStay > oneDay * 30);
+    }
+
+
+    $("#btnSaveExcelNLT").on('click', function () {
+        // importExcel
+        if ($('#listExcel').bootstrapTable('getData')[0].CITIZENNAME != undefined) {
+            $('#importExcel').modal('hide');
+
+            var data = $('#listExcel').bootstrapTable('getData');
+            for (i = 0; i < data.length; i++) {
+                arrCitizen.push(data[i]);
+            }
+            reloadGrid();
+        } else {
+            toastr.error("Vui lòng thực hiện upload lên file danh sách");
+            return false;
+        }
+
+    });
+
+    $("#btnCloseNLT_EXCEL").on('click', function () {
+        // importExcel
+        DlgUtil.showConfirm("Bạn có chắc muốn hủy thêm mới danh sách người lưu trú ?", function (flag) {
+            if (flag) {
+                $('#importExcel').modal('hide');
+            }
+        });
+    });
+
+    $("#upload-file-excel").on('click', function () {
+        FormUtil.clearForm('divformImportExcel', '');
+        $('#FileUpload').val('');
+        $('#listExcel').bootstrapTable('destroy'); //Destroy bootstrap table
+
+    });
+
+    $("#guest_mulNATIONALITY").on('change', function () {
+        let nationalityArr = $('#guest_mulNATIONALITY').val();
+
+        if (nationalityArr.indexOf("VN") != -1) {
+            $('#guest_cboCOUNTRY').val('VN').change();
+            $('#dan_toc').show();
+            setEndDisCtl(['guest_cboETHNIC_ID'], [],'')
+        } else {
+            $('#guest_cboCOUNTRY').val('-1').change();
+            $('#guest_cboETHNIC_ID').val('-1').change();
+            $('#dan_toc').hide();
+            setEndDisCtl([], ['guest_cboETHNIC_ID'],'')
+        }
+    });
+
+    function delAllNguoiLT() {
+        DlgUtil.showConfirm("Bạn có chắc muốn xóa tất cả người lưu trú ?", function (flag) {
+            if (flag) {
+
+                if ($('#listCitizens #listTTNguoiLuuTru').bootstrapTable('getData') != undefined
+                    && $('#listCitizens #listTTNguoiLuuTru').bootstrapTable('getData') != ''
+                    && $('#listCitizens #listTTNguoiLuuTru').bootstrapTable('getData') != null) {
+                    $('#listCitizens #listTTNguoiLuuTru').bootstrapTable('removeAll');
+                    arrCitizen = [];
+                    toastr.success('Xoá thành công', 'Thành công');
+                } else {
+                    toastr.error('Không có dữ liệu', 'Thất bại');
+                }
+
+            }
+        });
+    }
+
+    //import excel
+    var file;
+    const regex_excel_import_file = /^.+\.(xlsx|xlsm)$/g;
+	 function validateDatePattern(strDate){
+        const regex = /(^(((0[1-9]|1[0-9]|2[0-8])[\/](0[1-9]|1[012]))|((29|30|31)[\/](0[13578]|1[02]))|((29|30)[\/](0[4,6,9]|11)))[\/](19|[2-9][0-9])\d\d$)|(^29[\/]02[\/](19|[2-9][0-9])(00|04|08|12|16|20|24|28|32|36|40|44|48|52|56|60|64|68|72|76|80|84|88|92|96)$)/g;
+        return (strDate != null &&  strDate != '' ) ? regex.test(strDate) : true;
+    }
+    function loadFileAsTextNew() {
+		let nationCodeArr = nationArr.map(item=> item.NATIONALITY_CODE);
+        if (file != undefined && file.length == 1) {
+            $("#importExcel #loading_excel").show();
+            var sFilename = file[0].name;
+            regex_excel_import_file.lastIndex = 0;
+            if (!regex_excel_import_file.test(sFilename)) {
+                toastr.error('Vui lòng chọn file đúng định dạng file mẫu để tải lên');
+                $("#importExcel #loading_excel").hide();
+                return false;
+            }
+            var reader = new FileReader();
+            // var arrayTitle = ['CITIZENNAME', 'DOB', 'GENDER_ID', 'GENDER_ID_DESC', 'IDENTIFIER_NUMBER', 'PASSPORT_NO',
+            //     'OTHER_PAPERS', 'PHONE_NUMBER', 'OCCUPATION', 'OCCUPATION_DESC', 'PLACE_OF_WORK', 'ETHNIC_ID',
+            //     'ETHNIC_ID_DESC', 'NATIONALITY', 'NATIONALITY_DESC', 'COUNTRY', 'COUNTRY_DESC', 'RDPROVINCE_ID',
+            //     'RDDISTRICT_ID', 'RDADDRESS_ID', 'RDADDRESS', 'FULL_RDADDRESS', 'ADDRESS_TYPE',
+            //     'ADDRESS_TYPE_DESC', 'START_DATE', 'END_DATE', 'REASON'];
+            var arrayTitle = ['CITIZENNAME', 'DOB', 'GENDER_ID', 'GENDER_ID_DESC', 'IDENTIFIER_NUMBER', 'PASSPORT_NO',
+                'OTHER_PAPERS', 'PHONE_NUMBER', 'OCCUPATION', 'OCCUPATION_DESC', 'PLACE_OF_WORK', 'ETHNIC_ID',
+                'ETHNIC_ID_DESC', 'NATIONALITY', 'NATIONALITY_DESC', 'COUNTRY', 'COUNTRY_DESC', 'RDPROVINCE_ID',
+                'RDADDRESS_ID', 'RDADDRESS', 'FULL_RDADDRESS', 'ADDRESS_TYPE',
+                'ADDRESS_TYPE_DESC', 'START_DATE', 'END_DATE', 'REASON'];
+
+            reader.onload = function (e) {
+                try {
+                    $("#dLoading").removeClass("hidden");
+                    var data = e.target.result;
+
+                    var wb = XLSX.read(data, {
+                        type: 'binary'
+                    });
+                    if(wb.Props.Author != "Phuong Phan"){
+                        toastr.error("Vui lòng chọn đúng file mẫu để import dữ liệu!");
+                        $("#importExcel #loading_excel").hide();
+                        return false;
+                    }
+                    // var listDataImport = getDataforExcel("Import", wb, _opt._proAttribute);
+                    var data = XLSX.utils.sheet_to_json(wb.Sheets["extracted"], {header: arrayTitle, raw: false});
+                    // console.log('data excel: ', data);
+
+                    var fullArray = [];
+                    for (let i = 0; i < data.length; i++) {
+                        let row = data[i];
+                        if ((row.CITIZENNAME == "0" || row.CITIZENNAME == "") && (row.DOB == "0" || row.DOB == "") &&
+                            (row.IDENTIFIER_NUMBER == "0" || row.IDENTIFIER_NUMBER == "") &&
+                            (row.PASSPORT_NO == "0" || row.PASSPORT_NO == "") && (row.OTHER_PAPERS == "0" || row.OTHER_PAPERS == "") &&
+                            (row.START_DATE == "0" || row.START_DATE == "") && (row.NATIONALITY_DESC == "0" || row.NATIONALITY_DESC == "")) {
+                            break;
+                        }
+                        if (row.DOB == "0") {
+                            row.DOB == "";
+                        } else {
+                            if (row.DOB.length > 7) row.DOB_FMT = 'dd/mm/yyyy';
+                            else if (row.DOB.length > 4) row.DOB_FMT = 'mm/yyyy';
+                            else row.DOB_FMT = 'yyyy';
+
+                            if (row.DOB.trim().length == 4) {
+                                row.DOB_FMT = "yyyy";
+                            } else if (row.DOB.trim().length == 7) {
+                                row.DOB_FMT = "dd/yyyy";
+                            } else if (row.DOB.trim().length == 10) {
+                                row.DOB_FMT = "dd/mm/yyyy";
+                            } else {
+                                toastr.error("Định dạng ngày sinh không hợp lệ !");
+                                $("#importExcel #loading_excel").hide();
+                                return false;
+                                break;
+                            }
+                        }
+                        if (row.CITIZENNAME == "0") row.CITIZENNAME = '';
+                        if (row.IDENTIFIER_NUMBER == "0") row.IDENTIFIER_NUMBER = '';
+                        if (row.PHONE_NUMBER == "0") row.PHONE_NUMBER = '';
+                        if (row.PASSPORT_NO == "0") row.PASSPORT_NO = '';
+                        if (row.OTHER_PAPERS == "0") row.OTHER_PAPERS = '';
+                        if (row.OCCUPATION_DESC == "0" || row.OCCUPATION_DESC == "") row.OCCUPATION = '';
+                        if (row.PLACE_OF_WORK == "0") row.PLACE_OF_WORK = '';
+                        if (row.RDADDRESS == "0") row.RDADDRESS = '';
+                        if (row.END_DATE == "0") row.END_DATE = '';
+                        if (row.REASON == "0") row.REASON = '';
+                        if (row.ETHNIC_ID_DESC == "0" || row.ETHNIC_ID_DESC == "") row.ETHNIC_ID = '';
+                        // if(row.COUNTRY != 'VN' && (row.RDPROVINCE_ID || row.RDDISTRICT_ID || row.RDADDRESS_ID)){
+                        if(row.COUNTRY != 'VN' && (row.RDPROVINCE_ID || row.RDADDRESS_ID)){
+							$("#importExcel #loading_excel").hide();
+                            toastr.error("Dữ liệu địa bàn nơi thường trú hoặc tạm trú hoặc địa chỉ khác của người lưu trú " + row.CITIZENNAME + " không hợp lệ!");
+                            return false;
+                            break;
+						}
+                        let objs_row = new Object();
+                        objs_row.CITIZENNAME = row.CITIZENNAME;
+                        objs_row.DOB_FMT = row.DOB_FMT;
+                        objs_row.DOB = row.DOB;
+                        objs_row.GENDER_ID = row.GENDER_ID;
+                        objs_row.OCCUPATION = row.OCCUPATION;
+                        objs_row.ETHNIC_ID = row.ETHNIC_ID;
+                        objs_row.NATIONALITY = row.NATIONALITY;
+                        objs_row.COUNTRY = row.COUNTRY;
+                        objs_row.IDENTIFIER_NUMBER = row.IDENTIFIER_NUMBER;
+                        objs_row.PASSPORT_NO = row.PASSPORT_NO;
+                        objs_row.OTHER_PAPERS = row.OTHER_PAPERS;
+                        objs_row.RDPROVINCE_ID = (row.COUNTRY == 'VN' && row.RDPROVINCE_ID) ? row.RDPROVINCE_ID : '';
+                        // objs_row.RDDISTRICT_ID = (row.COUNTRY == 'VN' && row.RDDISTRICT_ID) ? row.RDDISTRICT_ID : '';
+                        objs_row.RDADDRESS_ID = (row.COUNTRY == 'VN' && row.RDADDRESS_ID) ? row.RDADDRESS_ID : '';
+                        objs_row.RDADDRESS = row.RDADDRESS;
+                        objs_row.FULL_RDADDRESS = row.FULL_RDADDRESS;
+                        objs_row.ADDRESS_TYPE = row.ADDRESS_TYPE;
+                        objs_row.PHONE_NUMBER = row.PHONE_NUMBER;
+                        objs_row.PLACE_OF_WORK = row.PLACE_OF_WORK;
+                        objs_row.REASON = row.REASON;
+                        objs_row.START_DATE = row.START_DATE;
+                        objs_row.END_DATE = row.END_DATE;
+                        fullArray.push(objs_row);
+                    }
+
+                    console.log('fullArray: ', fullArray);
+
+                    if (fullArray.length > 0) {
+                        for (var j = 0; j < fullArray.length; j++) {
+                            var count = 1;
+                            console.log('validate info : ', fullArray[j].IDENTIFIER_NUMBER);
+
+                            if (!validate_name_citizen(fullArray[j].CITIZENNAME)) {
+                                $("#importExcel #loading_excel").hide();
+                                return;
+                                break;
+                            }
+                            ;
+                            if (!validate_birthday_citizen(fullArray[j].DOB)) {
+                                $("#importExcel #loading_excel").hide();
+                                return;
+                                break;
+                            }
+                            if (fullArray[j].IDENTIFIER_NUMBER != '' || fullArray[j].PASSPORT_NO != '' || fullArray[j].OTHER_PAPERS != '') {
+								if (fullArray[j].IDENTIFIER_NUMBER.trim() && !fullArray[j].IDENTIFIER_NUMBER.trim().match(/^[0-9]+$/)){
+									$("#importExcel #loading_excel").hide();
+                                    toastr.error(" ĐDCN/CCCD/CMND " + fullArray[j].CITIZENNAME + " phải là số!");
+                                    return false;
+                                    break;
+								}
+                                if (fullArray[j].IDENTIFIER_NUMBER != '' && fullArray[j].IDENTIFIER_NUMBER.length != 9 && fullArray[j].IDENTIFIER_NUMBER.length != 12) {
+                                    $("#importExcel #loading_excel").hide();
+                                    toastr.error(" ĐDCN/CCCD/CMND " + fullArray[j].CITIZENNAME + " phải là 9 hoặc 12 ký tự số!");
+                                    return false;
+                                    break;
+                                }
+                            } else {
+                                $("#importExcel #loading_excel").hide();
+                                toastr.error("Bắt buộc có ít nhất 1 trong 3 trường dữ liệu Số ĐDCN/CCCD/CMND hoặc Số Hộ chiếu hoặc Giấy tờ khác");
+                                return false;
+                                break;
+                            }
+                            if (fullArray[j].ADDRESS_TYPE != '0' && fullArray[j].ADDRESS_TYPE != '1' && fullArray[j].ADDRESS_TYPE != '2') {
+                                $("#importExcel #loading_excel").hide();
+                                toastr.error("Loại địa chỉ thường trú hoặc tạm trú hoặc địa chỉ khác không hợp lệ!");
+                                return false;
+                                break;
+                            }
+                            if (fullArray[j].START_DATE == '') {
+                                $("#importExcel #loading_excel").hide();
+                                toastr.error("Thời gian bắt đầu lưu trú không được rỗng!");
+                                return false;
+                                break;
+                            }
+							if(fullArray[j].START_DATE && !validateDatePattern(fullArray[j].START_DATE)){
+                                $("#importExcel #loading_excel").hide();
+                                toastr.error("Ngày bắt đầu lưu trú phải đúng định dạng dd/mm/yyyy");
+                                return false;
+                            }
+                            if(fullArray[j].END_DATE && !validateDatePattern(fullArray[j].END_DATE)){
+                                $("#importExcel #loading_excel").hide();
+                                toastr.error("Ngày kết thúc lưu trú phải đúng định dạng dd/mm/yyyy");
+                                return false;
+                            }
+							if(nationCodeArr.indexOf(fullArray[j].NATIONALITY) == -1){
+                                $("#importExcel #loading_excel").hide();
+                                toastr.error("Quốc tịch không tồn tại trong danh mục!");
+                                return false;
+                            }
+                            if (fullArray[j].START_DATE != '' && fullArray[j].END_DATE != '') {
+                                if (getDayToStringYYYYMMDD(fullArray[j].START_DATE) > getDayToStringYYYYMMDD(fullArray[j].END_DATE)) {
+                                    $("#importExcel #loading_excel").hide();
+                                    toastr.error("Ngày bắt đầu lưu trú phải nhỏ hơn ngày kết thúc lưu trú!");
+                                    return false;
+                                    break;
+                                }
+								if (!check30DayStay(fullArray[j].START_DATE, fullArray[j].END_DATE)) {
+									$("#importExcel #loading_excel").hide();
+									toastr.error("Thời gian lưu trú không được vượt quá 30 ngày.");
+									return false;
+									break;
+								}								
+                            }
+							if (fullArray[j].REASON == '') {
+                                $("#importExcel #loading_excel").hide();
+                                toastr.error("Lý do lưu trú không được rỗng!");
+                                return false;
+                                break;
+                            }
+                            for (var n = j + 1; n < fullArray.length; n++) {
+                                if (fullArray[j].IDENTIFIER_NUMBER === fullArray[n].IDENTIFIER_NUMBER && fullArray[j].CITIZENNAME.toUpperCase() === fullArray[n].CITIZENNAME.toUpperCase()
+                                    && fullArray[j].DOB === fullArray[n].DOB && (fullArray[j].START_DATE === fullArray[n].START_DATE || fullArray[j].END_DATE === fullArray[n].END_DATE)) {
+                                    count = 0;
+                                    console.log('trùng Thông tin người lưu trú ', count);
+                                    break;
+                                }
+                            }
+                            if (count == 0) {
+                                $("#importExcel #loading_excel").hide();
+                                toastr.error("Thông tin người lưu trú " + fullArray[j].CITIZENNAME + " thứ " + (j + 1) + " đã tồn tại !");
+                                return false;
+                                break;
+                            }
+
+                            var cmthu = fullArray[j].IDENTIFIER_NUMBER;
+                            fullArray[j].IDCARD_NUMBER = (cmthu.trim().length == 9) ? cmthu.trim() : '';
+                            fullArray[j].IDENTIFIER_NUMBER = (cmthu.trim().length == 12) ? cmthu.trim() : '';
+                        }
+                        // console.log('fullArray 2: ',fullArray);
+                        reloadGridExcel(fullArray);
+                    } else {
+                        toastr.error("File danh dách không có dữ liệu. Vui lòng kiểm tra lại !");
+                        $("#importExcel #loading_excel").hide();
+                        // setEndDisCtl(['btnUpload','FileUpload','btnCloseNLT_EXCEL'],[],'');
+                        return false;
+                    }
+
+                } catch (err) {
+                    toastr.error("File không đúng mẫu hoặc dữ liệu bị lỗi, vui lòng kiểm tra lại !");
+                    $("#importExcel #loading_excel").hide();
+                    // setEndDisCtl(['btnUpload','FileUpload','btnCloseNLT_EXCEL'],[],'');
+                    return false;
+                }
+                $("#dLoading").addClass("hidden");
+            };
+            reader.readAsBinaryString(file[0]);
+        } else {
+            toastr.error("Vui lòng chọn file upload!");
+        }
+
+    }
+
+    function validate_name_citizen(name) {
+
+        if (name.trim() == '') {
+            toastr.error("Tên người lưu trú không được rỗng!");
+            return false;
+        }
+        var myRegEx = new RegExp("^[A-Za-z ]{1,}[']{0,1}[A-Za-z ]{0,}$");
+        if (!myRegEx.test(removeAscent(name.trim()))) {
+            toastr.error("Tên đầy đủ có thể chỉ bao gồm các ký tự chữ cái và dấu cách!");
+            return false;
+        }
+        return true;
+    }
+
+    function validate_phone_number_citizen(name) {
+        // const fileNameRegex = new RegExp(/#|\^|\=|\+|\,|\"|!|@|%|&|,|\*|:|;|<|>|\?|\/|'|\[|\]|\(|\)|\{|\}/);
+        let fileNameRegex = new RegExp('/[^\[\!\@\#\$\%\^\&\*\(\)\,\?\"\:\{\}\|\<\>\+\\\'\;\]\\\/\[\=\\{\}]+$/i');
+        if (name.trim() == '') {
+            toastr.error("Tên người lưu trú không được rỗng!");
+            return false;
+        }
+        return true;
+    }
+
+    function validate_birthday_citizen(bithday) {
+        if (bithday.trim() == '') {
+            toastr.error("Ngày sinh không được rỗng!");
+            return false;
+        }
+
+        if (bithday.trim() != ''){
+            if (bithday.trim().length != 10 && bithday.trim().length != 7 && bithday.trim().length != 4){
+                toastr.error("Ngày sinh không đúng định dạng!");
+                return false;
+            }
+
+            if (bithday.trim().length == 10){
+                if (!moment(bithday, "DD/MM/YYYY", true).isValid()){
+                    toastr.error('Sai định dạng ngày, tháng, năm');
+                    return false;
+                }
+
+                if (getDayToStringYYYYMMDD(bithday) > getToday2YYYYMMDD()){
+                    toastr.error('Ngày sinh phải nhỏ hơn ngày hiện tại.');
+                    return false;
+                }
+            }
+
+            if (bithday.trim().length == 7){
+                if (!moment(bithday, "MM/YYYY", true).isValid()){
+                    toastr.error('Sai định dạng tháng, năm');
+                    return false;
+                }
+
+                if (getDayToStringYYYYMMDD(bithday) > getTodayYYYYMM()){
+                    toastr.error('Ngày sinh phải nhỏ hơn ngày hiện tại.');
+                    return false;
+                }
+            }
+
+            if (bithday.trim().length == 4){
+                if (!moment(bithday, "YYYY", true).isValid()){
+                    toastr.error('Sai định dạng năm');
+                    return false;
+                }
+
+                if (getDayToStringYYYYMMDD(bithday) > getTodayYYYY()){
+                    toastr.error('Ngày sinh phải nhỏ hơn ngày hiện tại.');
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    function operateFormatterGender(value, row, index) {
+        let gen_id = genArr.find(o => o.CODE == value);
+        let _viewGender = '<div class="viewGender">' + gen_id.NAME + '</div>';
+        return [_viewGender].join('');
+    }
+
+    function operateFormatterAddress(value, row, index) {
+        let _viewAddress = '';
+        if (row.COUNTRY == "VN") {
+            _viewAddress = '<div class="viewAddress">' + row.FULL_RDADDRESS + '</div>';
+        } else {
+            let count_name = countryArr.find(o => o.COUNTRY_CODE == row.COUNTRY).COUNTRY_NAME;
+            _viewAddress = '<div class="viewAddress">' + row.FULL_RDADDRESS + ',' + count_name + '</div>';
+        }
+        return [_viewAddress].join('');
+    }
+
+    function operateFormatterInfoPaper(value, row, index) {
+        var _viewInfo;
+        if (row.IDENTIFIER_NUMBER != '') {
+            _viewInfo = '<div class="viewInfo" rel="tooltip" title="CMND/CCCD/Số định danh">' + row.IDENTIFIER_NUMBER;
+        } else if (row.IDCARD_NUMBER != '') {
+            _viewInfo = '<div class="viewInfo" rel="tooltip" title="CMND/CCCD/Số định danh">' + row.IDCARD_NUMBER;
+        } else {
+            _viewInfo = '<div class="viewInfo" rel="tooltip">';
+        }
+        if (row.PASSPORT_NO != '') {
+            _viewInfo += '/<div rel="tooltip" title="Số hộ chiếu">' + row.PASSPORT_NO + '</div>';
+        }
+        if (row.OTHER_PAPERS != '') {
+            _viewInfo += '/<div rel="tooltip" title="Giấy tờ khác">' + row.OTHER_PAPERS + '</div>';
+        }
+        _viewInfo += '</div>';
+        return [_viewInfo].join('');
+    }
+
+    function operateFormatterPlaceWork(value, row, index) {
+        let occup = '';
+        if (row.OCCUPATION) {
+            occup = occupArr.find(o => o.OCCUPATION_CODE == row.OCCUPATION).OCCUPATION_NAME;
+        }
+        let _viewInfo = '<div class="viewInfo">';
+        if (occup) {
+            _viewInfo += occup;
+            if (row.PLACE_OF_WORK)
+                _viewInfo += ', ' + row.PLACE_OF_WORK;
+        }
+        if (!occup && row.PLACE_OF_WORK) {
+            _viewInfo += row.PLACE_OF_WORK;
+        }
+        _viewInfo += '</div>';
+        return [_viewInfo].join('');
+    }
+
+    function operateFormatterTime(value, row, index) {
+        var time_luutru = '<div class="center">' + row.START_DATE;
+        if (row.END_DATE != '') {
+            time_luutru += ' - ' + row.END_DATE;
+        }
+        time_luutru += '</div>';
+        return [time_luutru].join('');
+    }
+
+    function operateFormatterQT(value, row, index) {
+        let _viewInfo = '<div class="viewInfo">';
+        if (value) {
+            let qt = nationArr.find(o => o.NATIONALITY_CODE == value);
+            _viewInfo += qt.NATIONALITY_NAME + '</div>';
+        } else {
+            _viewInfo += '</div>';
+        }
+        return [_viewInfo].join('');
+    }
+
+    function operateFormatterDT(value, row, index) {
+        let _viewInfo = '<div class="viewInfo">';
+        if (value) {
+            let dt = ethnicArr.find(o => o.ETHNIC_CODE == value)
+            _viewInfo += dt.ETHNIC_NAME + '</div>';
+        } else {
+            _viewInfo += '</div>';
+        }
+        return [_viewInfo].join('');
+    }
+
+    var _columnsCitizensExcel = [
+        {field: 'STT', title: 'STT', sortable: false, align: 'center', width: '30', formatter: stt},
+        {field: 'CITIZENNAME', title: 'Họ và tên', sortable: false, align: 'center', width: '100'},
+        {field: 'DOB', title: 'Ngày, tháng, năm sinh', sortable: false, align: 'center', width: '70'},
+        {
+            field: 'GENDER_ID',
+            title: 'Giới tính',
+            sortable: false,
+            align: 'center',
+            width: '70',
+            formatter: operateFormatterGender
+        },
+        {
+            field: 'ETHNIC_ID',
+            title: 'Dân tộc',
+            sortable: false,
+            align: 'center',
+            width: '100',
+            formatter: operateFormatterDT
+        },
+        {
+            field: 'NATIONALITY',
+            title: 'Quốc tịch',
+            sortable: false,
+            align: 'center',
+            width: '100',
+            formatter: operateFormatterQT
+        },
+        {
+            field: 'IDENTIFIER_NUMBER',
+            title: 'Thông tin giấy tờ',
+            sortable: false,
+            align: 'center',
+            width: '120',
+            formatter: operateFormatterInfoPaper
+        },
+        {field: 'PHONE_NUMBER', title: 'Số điện thoại', sortable: false, align: 'center', width: '70'},
+        {
+            field: 'PLACE_OF_WORK',
+            title: 'Nghề nghiệp/Nơi làm việc',
+            sortable: false,
+            align: 'center',
+            width: '70',
+            formatter: operateFormatterPlaceWork
+        },
+        {
+            field: 'FULL_RDADDRESS',
+            title: 'Nơi thường trú/ tạm trú',
+            sortable: false,
+            align: 'center',
+            width: '100',
+            clickToSelect: false,
+            formatter: operateFormatterAddress
+        },
+        {
+            field: 'START_DATE',
+            title: 'Thời gian lưu trú (Đến ngày... đi ngày...)',
+            sortable: false,
+            align: 'center',
+            width: '70',
+            formatter: operateFormatterTime
+        },
+        {field: 'REASON', title: 'Lý do lưu trú', sortable: false, align: 'center', width: '100'}
+    ]
+
+    function reloadGridExcel(databody) {
+
+        if (!Array.isArray(databody) && databody.length == 0) {
+            toastr.error("Vui lòng thực hiện tải lên file danh sách!");
+            $("#importExcel #loading_excel").hide();
+            return false;
+        }
+
+        $('#listExcel').bootstrapTable('destroy').bootstrapTable({
+            // height: 500,
+            idField: "STT",
+            columns: _columnsCitizensExcel,
+            data: databody,
+            pagination: true,
+            pageSize: 10,
+            pageList: [10, 20, 50],
+            pagination: true,
+            sidePagination: 'client'
+        }).on('check.bs.table uncheck.bs.table ' + 'check-all.bs.table uncheck-all.bs.table',
+            function () {
+                obj = new Object();
+                obj.SELECTED = $('#listExcel').bootstrapTable('getSelections');
+
+
+            });
+        $('#listExcel').on('click', '.clickable-row', function (event) {
+            $(this).addClass('active').siblings().removeClass('active');
+        });
+        // $('#btnSaveExcelNLT').prop('disabled',false);
+        $("#importExcel #loading_excel").hide();
+    };
+
+    $('#FileUpload').change(function (e) {
+        e.stopImmediatePropagation();
+        var file_name = $('#FileUpload').val().split('\\').splice(-1);
+        $('#txtFilePath').val(file_name);
+        var oFile = e.target.files;
+        file = oFile;
+        return oFile;
+    });
+
+    function checkEmptyFile(value) {
+        if (typeof value == 'undefined' || value == null || value == '') {
+            return false;
+        }
+        return true;
+    }
+
+    function checkEmpty(val) {
+        return (val === undefined || val == null || val.length <= 0) ? '' : val;
+    }
+
+    function checkHasValue4(obj, fields) {
+        if (undefined !== obj && null != obj) {
+            fields.forEach(elem => {
+                let fieldKey = Object.keys(elem)[0];
+                if (undefined !== obj[fieldKey] && obj[fieldKey] != null) {
+                    console.log(obj[fieldKey]);
+                    if (elem[fieldKey].startsWith('txt')) {
+                        $('#' + elem[fieldKey]).val(obj[fieldKey]);
+                    } else if (elem[fieldKey].startsWith('cbo')) {
+                        $('#' + elem[fieldKey]).val(obj[fieldKey]).trigger('change');
+                    }
+
+                }
+            });
+        }
+    }
+
+    function get_address_cslt(user_id) {
+        var obj = new Object();
+        obj.type = "ref";
+        obj.provider = "default";
+        obj.service = "get_full_address_cslt_by_userid";
+        obj.user_id = user_id;
+        obj.user_ip = "";
+        var result = apiservice.AjaxJson.executeQuery(obj);
+        return result;
+    }
+
+    function removeAscent(str) {
+        if (str === null || str === undefined) return str;
+        str = str.toLowerCase();
+        str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, "a");
+        str = str.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, "e");
+        str = str.replace(/ì|í|ị|ỉ|ĩ/g, "i");
+        str = str.replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g, "o");
+        str = str.replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g, "u");
+        str = str.replace(/ỳ|ý|ỵ|ỷ|ỹ/g, "y");
+        str = str.replace(/đ/g, "d");
+        return str;
+    }
+
+    function load_file_upload() {
+        let file_id = get_fileID_upload();
+        let href_file = "/portal/upload/UploadServletLuuTru?getfile=thongbaoluutru.xlsm&fileid=" + file_id;
+        let download_file = "/portal/upload/UploadServletLuuTru?getfile=thongbaoluutru.xlsm&type=wcm_file_dvc";
+        let downloadLink = document.getElementById('link_file');
+        downloadLink.download = download_file;
+        downloadLink.href = href_file;
+
+    }
+
+    function get_fileID_upload() {
+        var obj = new Object();
+        obj.type = "json";
+        obj.provider = "dancuportal";
+        obj.service = "get_file_stay";
+        obj.p_file_code = "RlJPTUxVVVRSVVdJVEhMT1ZF";
+        var result = apiservice.AjaxJson.executeQuery(obj);
+
+        if (result) {
+            return result.MEDIA[0].LINK.split("?path=")[1];
+        }
+        return '';
+    }
+
+    function get_accommodation_list(p_code_area, p_code, p_accom_type) {
+        var obj = new Object();
+        obj.type = "ref";
+        obj.provider = "default";
+        obj.service = "get_accommodation_list";
+        obj.p_code_area = p_code_area;
+        obj.p_code = p_code;
+        obj.p_accom_type = p_accom_type;
+        var result = apiservice.AjaxJson.executeQuery(obj);
+
+        if (!p_code) {
+            ComboUtil.select2Load('accomStay_cboNAME', result, 'CODE,ICON,NAME');
+            return;
+        } else {
+            if(cslt_info != null && fullAddressCslt.length != 0){
+                ComboUtil.select2Load('accomStay_cboNAME', result, 'CODE,ICON,NAME');
+                $('#accomStay_cboNAME').val(fullAddressCslt[0].ACCOM_CODE).trigger('change');
+            }
+            return result;
+        }
+    }
+
+    $("#result_mulNOTIFICATION_TYPE").on('change', function () {
+        let notiArr = $('#result_mulNOTIFICATION_TYPE').val();
+        $('.hidden_noti_sms').hide();
+        $('.hidden_noti_email').hide();
+        $('#result_txtNOTIFICATION_PHONE').val('');
+        $('#result_txtNOTIFICATION_EMAIL').val('');
+        if (notiArr.indexOf("5") == -1) {
+            toastr.warning("Hình thức nhận thông báo trạng thái hồ sơ bắt buộc phải có Qua Cổng thông tin");
+        }
+        if (notiArr.indexOf("3") != -1) {
+            $('.hidden_noti_sms').show();
+            if(cslt_info != null && fullAddressCslt.length != 0){
+                $('#result_txtNOTIFICATION_PHONE').val(fullAddressCslt[0].MOBILE);
+            }else{
+                $('#result_txtNOTIFICATION_PHONE').val(userInfo.SoDienThoai);
+            }
+        }
+        if (notiArr.indexOf("4") != -1) {
+            $('.hidden_noti_email').show();
+            if(cslt_info != null && fullAddressCslt.length != 0){
+                $('#result_txtNOTIFICATION_EMAIL').val(fullAddressCslt[0].EMAIL);
+            }else{
+                $('#result_txtNOTIFICATION_EMAIL').val(userInfo.ThuDienTu);
+            }
+        }
+    });
+
+    function getTextMulCbo(idSelect) {
+        let arrMul = [];
+        $('#' + idSelect + ' option:selected').each(function () {
+            arrMul.push($(this).text());
+        });
+        return arrMul.toString()
+    }
+	
+	function validateDateExcel(inputText, isAcceptMultipleFormat) { 
+		if(inputText){
+			inputText = inputText.trim();
+			let dateformat = /^(0?[1-9]|[12][0-9]|3[01])[\/\-](0?[1-9]|1[012])[\/\-]\d{4}$/;
+			let monthformat = /^(0?[1-9]|1[012])[\/\-]\d{4}$/;
+			let yearFormat = /^\d{4}$/;
+		 // Match the date format through regular expression
+			if(!isAcceptMultipleFormat){
+				if(inputText.split("/").length != 3){
+					return false;
+				}
+			}
+			if(inputText.split("/").length == 3){
+				if(inputText.match(dateformat)){
+					let opera1 = inputText.split("/");
+					let opera2 = inputText.split("-");
+					lopera1 = opera1.length;
+					lopera2 = opera2.length;
+					// Extract the string into month, date and year
+					if (lopera1>1){
+						var pdate = inputText.split("/");
+					}else if (lopera2>1){
+						var pdate = inputText.split("-");
+					}
+					let dd = parseInt(pdate[0]);
+					let mm = parseInt(pdate[1]);
+					let yy = parseInt(pdate[2]);
+					 // Create list of days of a month [assume there is no leap year by default]
+					let ListofDays = [31,28,31,30,31,30,31,31,30,31,30,31];
+					if (mm==1 || mm>2){
+						if (dd>ListofDays[mm-1]){
+							return false;
+						}
+					}
+					if (mm==2){
+						let lyear = false;
+						if ( (!(yy % 4) && yy % 100) || !(yy % 400)){
+							lyear = true;
+						}
+						if ((lyear==false) && (dd>=29)){
+							return false;
+						}
+						if ((lyear==true) && (dd>29)){
+							return false;
+						}
+					}
+					return true;
+				}else{
+					return false;
+				}
+			}else if(inputText.split("/").length == 2){
+				if(inputText.match(monthformat)){
+					return true;
+				}
+				return false;
+			}else if(inputText.split("/").length == 1){
+				if(inputText.match(yearFormat)){
+					return true;
+				}
+				return false;
+			}else{
+				return false;
+			}
+		}
+		return true;
+	}
+
+    async function getMATTHC(matthc,url_info,index) {
+        return;
+        matthc = matthc.toString();
+        var data = await doLoadTTHC(matthc);
+        if (data.error_code == '0' && data.result.length > 0){
+            $('#frm_View_Huongdan').modal('show');
+            //$("#btnSubmiss").attr("onclick", " window.open('"+url_info+"','_blank')");
+            document.getElementById('txtTENDVC').innerHTML = data.result[0].TENTTHC;
+            console.log('CACHTHUCTHUCHIEN: ', data.result[0].CACHTHUCTHUCHIEN[0].THOIGIAN[0].PHILEPHI.length);
+            var cachThucThucHien = data.result[0].CACHTHUCTHUCHIEN[0].THOIGIAN;
+            cachThucThucHien[0].KENH = data.result[0].CACHTHUCTHUCHIEN[0].KENH;
+            $('#cachthucthuchien').bootstrapTable('destroy').bootstrapTable({
+                idField: "STT",
+                columns: _columnsCTTH,
+                data: cachThucThucHien
+            }).on('check.bs.table uncheck.bs.table ' + 'check-all.bs.table uncheck-all.bs.table');
+            $('#cachthucthuchien').on('click', '.clickable-row', function (event) {
+                $(this).addClass('active').siblings().removeClass('active');
+            });
+            // load table Thanh phan ho so
+            var thanhPhanHoSo = data.result[0].THANHPHANHOSO[0].GIAYTO;
+            console.log('thanhPhanHoSo', thanhPhanHoSo);
+            $('#thanhphanhoso').bootstrapTable('destroy').bootstrapTable({
+                idField: "STT",
+                columns: _columnsTPHS,
+                data: thanhPhanHoSo
+            }).on('check.bs.table uncheck.bs.table ' + 'check-all.bs.table uncheck-all.bs.table');
+            $('#thanhphanhoso').on('click', '.clickable-row', function (event) {
+                $(this).addClass('active').siblings().removeClass('active');
+            });
+            // load trinh tu thuc hien
+            $("#txtTRINHTUTHUCHIEN").empty();
+            var n = data.result[0].TRINHTUTHUCHIEN[0].TRINHTU.length;
+            var trinhTuThucHien = data.result[0].TRINHTUTHUCHIEN[0];
+            console.log('nnnnnnnnnn:',n,'trinhTuThucHien',trinhTuThucHien);
+            var res = document.getElementById('txtTRINHTUTHUCHIEN');
+            for (var i = 0; i < n; i++) {
+                res.innerHTML += trinhTuThucHien.TRINHTU[i].TENTRINHTU;
+            }
+            // load co quan thuc hien
+            var coquanThucHien = data.result[0].COQUANTHUCHIEN[0].TENDONVI;
+            document.getElementById('txtCOQUANTHUCHIEN').innerHTML = coquanThucHien;
+            // load yeu cau dieu kien
+            var yeuCauDieuKien = data.result[0].YEUCAU;
+            if (yeuCauDieuKien == "") {
+                document.getElementById('txtYCDK').innerHTML = "Không";
+            } else {
+                document.getElementById('txtYCDK').innerHTML = yeuCauDieuKien;
+            }
+        } else if(data.error_code == '0' && data.result.length == 0) {
+            show_ttdvc(matthc,url_info,index);
+        } else if(data.error_code == '-900') {
+            toastr.warning("Bạn cần reload lại trang để sử dụng chức năng này !");
+        } else if(data.err_code == '1'){
+            show_ttdvc(matthc,url_info,index);
+        } else{
+            toastr.warning("Không tìm thấy thông tin của thủ tục hành chính này !");
+        }
+        
+    }
+
+    function show_ttdvc(matthc,url_info,index){
+        var data_procdure = newArr_Data[index].DATA_PROC;
+        if (!data_procdure){
+            toastr.warning("Không tìm thấy thông tin của thủ tục hành chính này !");
+            return;
+        }
+        var temp_tthc = JSON.parse(data_procdure);
+        $('#frm_View_Huongdan').modal('show');
+        //$("#btnSubmiss").attr("onclick", " window.open('"+url_info+"','_blank')");
+        document.getElementById('txtTENDVC').innerHTML = temp_tthc.TENTTHC;
+        console.log('CACHTHUCTHUCHIEN: ', temp_tthc.CACHTHUCTHUCHIEN[0].THOIGIAN[0].PHILEPHI.length);
+        var cachThucThucHien = temp_tthc.CACHTHUCTHUCHIEN[0].THOIGIAN;
+        cachThucThucHien[0].KENH = temp_tthc.CACHTHUCTHUCHIEN[0].KENH;
+        $('#cachthucthuchien').bootstrapTable('destroy').bootstrapTable({
+            idField: "STT",
+            columns: _columnsCTTH,
+            data: cachThucThucHien
+        }).on('check.bs.table uncheck.bs.table ' + 'check-all.bs.table uncheck-all.bs.table');
+        $('#cachthucthuchien').on('click', '.clickable-row', function (event) {
+            $(this).addClass('active').siblings().removeClass('active');
+        });
+        // load table Thanh phan ho so
+        var thanhPhanHoSo = temp_tthc.THANHPHANHOSO[0].GIAYTO;
+        console.log('thanhPhanHoSo', thanhPhanHoSo);
+        $('#thanhphanhoso').bootstrapTable('destroy').bootstrapTable({
+            idField: "STT",
+            columns: _columnsTPHS,
+            data: thanhPhanHoSo
+        }).on('check.bs.table uncheck.bs.table ' + 'check-all.bs.table uncheck-all.bs.table');
+        $('#thanhphanhoso').on('click', '.clickable-row', function (event) {
+            $(this).addClass('active').siblings().removeClass('active');
+        });
+        // load trinh tu thuc hien
+        $("#txtTRINHTUTHUCHIEN").empty();
+        var n = temp_tthc.TRINHTUTHUCHIEN[0].TRINHTU.length;
+        var trinhTuThucHien = temp_tthc.TRINHTUTHUCHIEN[0];
+        console.log('nnnnnnnnnn:',n,'trinhTuThucHien',trinhTuThucHien);
+        var res = document.getElementById('txtTRINHTUTHUCHIEN');
+        for (var i = 0; i < n; i++) {
+            res.innerHTML += trinhTuThucHien.TRINHTU[i].TENTRINHTU;
+        }
+        // load co quan thuc hien
+        var coquanThucHien = temp_tthc.COQUANTHUCHIEN[0].TENDONVI;
+        document.getElementById('txtCOQUANTHUCHIEN').innerHTML = coquanThucHien;
+        // load yeu cau dieu kien
+        var yeuCauDieuKien = temp_tthc.YEUCAU;
+        if (yeuCauDieuKien == "") {
+            document.getElementById('txtYCDK').innerHTML = "Không";
+        } else {
+            document.getElementById('txtYCDK').innerHTML = yeuCauDieuKien;
+        }
+    }
+
+    async function doLoadTTHC(maTTHC) {
+        var _method = "POST";
+        var _url = "sync_cong_dvc";
+        var obj = new Object();
+        obj.session = data.session;
+        obj.service = "LayThuTuc";
+        obj.madonvi = "000.00.00.G01";
+        obj.maTTHC = maTTHC;
+        obj.page = "1";
+        obj.pagesize = "10";
+        var _params = new Object();
+        _params.FORWARD_URL = _url;
+        _params.FORWARD_METHOD = _method;
+        _params.PARAMS = obj;
+        _params.HEADER = {};
+        _params.PARAM_NAME_DATA = '';
+        var _data = new Object();
+        _data.param = JSON.stringify(_params);
+        returnDataTTHC = await $.post("/portal/util/ForwardSvc", _data);
+        console.log('returnDataTTHC: ', returnDataTTHC);
+        return returnDataTTHC;
+    }
+    var data;
+    async function getSession() {
+        //e.preventDefault();
+        var _url = "get_session";
+        var _method = "POST";
+        // var obj = new Object();
+        // obj.username = u_ss;
+        // obj.password = pwd_ss;
+        var _params = new Object();
+        _params.FORWARD_URL = _url;
+        _params.FORWARD_METHOD = _method;
+        _params.PARAMS = {};
+        _params.HEADER = {};
+        _params.PARAM_NAME_DATA = '';
+        // console.log("-----------------params: ", _params);
+        var _data = new Object();
+        _data.param = JSON.stringify(_params);
+        $.ajax({
+            url: "/portal/util/ForwardSvc",
+            type: 'POST',
+            async: false,
+            dataType:'json',
+            data: _data,
+	        success: function (res){
+                data = res;
+	        },
+            error: function(err){
+                
+            }
+        });
+        return  data;
+    };
+
+    function operateFormatterKENH(value, row, index) {
+        console.log('row: ', row);
+        if (row.KENH == "1") {
+            row.KENH = "Trực tiếp";
+        } else if (row.KENH == "2") {
+            row.KENH = "Nộp trực tuyến";
+        } else {
+            row.KENH = "Nộp qua bưu chính công ích";
+        }
+        var _view = '<div>' + row.KENH + '</div>';
+        return _view;
+    }
+
+    function operateFormatterTGGQ(value, row, index) {
+        var _view = '<div>' + row.THOIGIANGIAIQUYET + ' ' + row.DONVITINH + '</div>';
+        return _view;
+    }
+    var _columnsCTTH = [
+        {field: 'KENH', title: 'Hình thức nộp', sortable: false, align: 'center',
+            width: '30px', formatter: operateFormatterKENH },
+        {field: 'THOIGIANGIAIQUYET', title: 'Thời gian giải quyết', sortable: false,
+            align: 'center', width: '30', formatter: operateFormatterTGGQ },
+        {field: 'PHILEPHI', title: 'Phí, Lệ phí', sortable: false, align: 'center',
+            width: '30' },
+        {field: 'MOTA', title: 'Mô tả', sortable: false, halign:'center',align: 'left', width: '400'}
+    ];
+
+    function operateFormatterTENMAUDON(value, row, index) {
+        var _view = '<a href=' + row.URL + '>' + row.TENMAUDON + '</a>';
+        return _view;
+    }
+
+    function operateFormatterTPHS(value, row, index) {
+        var _view = '<div>' + 'Bản chính:' + row.SOBANCHINH + '-' + 'Bản sao:' + row.SOBANSAO + '</div>';
+        return _view;
+    }
+    function sttTPHS(value, row, index) {
+        return index + 1;
+    };
+    var _columnsTPHS = [
+        {field: 'STT', title: 'STT', sortable: false, align: 'center', width: '5', formatter: sttTPHS},
+        {field: 'TENGIAYTO', title: 'Tên giấy tờ', sortable: false, halign: 'center', align: 'left', width: '50'},
+        {field: 'TENMAUDON', title: 'Mẫu đơn, Tờ khai', ortable: false, halign:'center',align: 'left',
+            width: '30', formatter: operateFormatterTENMAUDON },
+        {field: 'operate', title: 'Số lượng', sortable: false, halign:'center',align: 'left',
+            width: '30', formatter: operateFormatterTPHS }
+    ];
+
+    function padTo2Digits(num) {
+        return num.toString().padStart(2, '0');
+    }
+
+    function formatDateDDMMYYYYHHMM(date) {
+        return (
+            [
+                padTo2Digits(date.getDate()),
+                padTo2Digits(date.getMonth() + 1),
+                date.getFullYear(),
+            ].join('/') +
+            ' ' +
+            [
+                padTo2Digits(date.getHours()),
+                padTo2Digits(date.getMinutes())
+            ].join(':')
+        );
+    }
+	
+    //update unicode NFC for all string values in a object
+function normalizeJsonValues(inputObj) {
+  function normalizeValues(data) {
+    if (typeof data === 'string') {
+      return data.normalize('NFC');
+    } else if (Array.isArray(data)) {
+      return data.map(item => normalizeValues(item));
+    } else if (typeof data === 'object' && data !== null) {
+      const result = {};
+      for (const key in data) {
+        if (data.hasOwnProperty(key)) {
+          result[key] = normalizeValues(data[key]);
         }
       }
-    } catch (e) {
-      // ignore detect errors
+      return result;
     }
-
-    rafId = requestAnimationFrame(loop);
+    return data;
   }
 
-  function stop(){
-    if (rafId) cancelAnimationFrame(rafId);
-    rafId = null;
-    lastText = "";
-    if (stream) {
-      stream.getTracks().forEach(t => t.stop());
-      stream = null;
-    }
-    video.srcObject = null;
-    $("btnStart").disabled = false;
-    $("btnStop").disabled = true;
-    setScanStatus("<b>Đã dừng</b>");
-  }
+  return normalizeValues(inputObj); 
+}
+	
 
-  // ===== Events
-  $("btnStart").addEventListener("click", start);
-  $("btnStop").addEventListener("click", stop);
-
-  $("btnParse").addEventListener("click", () => {
-    try {
-      const d = parseQR($("rawInput").value);
-      currentData = d;
-      fillInfo(d);
-      setConvertStatus(`<span class="oktxt">Parse OK.</span> Bấm <b>Chuyển đổi</b> để lấy địa chỉ mới.`);
-    } catch (e) {
-      setConvertStatus(`<span class="error">Lỗi:</span> ${e.message}`);
-    }
-  });
-
-  $("btnClear").addEventListener("click", () => {
-    $("rawInput").value = "";
-    $("newAddr").value = "";
-    $("log").value = "";
-    currentData = null;
-    fillInfo({});
-    setScanStatus("<b>Chưa quét</b>");
-    setConvertStatus("—");
-  });
-
-  $("mode").addEventListener("change", (e) => {
-    $("manualCodes").style.display = (e.target.value === "manual") ? "block" : "none";
-  });
-
-  $("btnGuess").addEventListener("click", async () => {
-    try {
-      $("log").value = "";
-      const addr = currentData?.address || $("oldAddr").textContent;
-      const codes = await guessCodesFromAddress(addr);
-      logLine("✅ Codes: " + JSON.stringify(codes));
-      setConvertStatus(`<span class="oktxt">Dò mã OK.</span> province=<b>${codes.provinceCode}</b>, district=<b>${codes.districtCode}</b>, ward=<b>${codes.wardCode}</b>`);
-    } catch (e) {
-      setConvertStatus(`<span class="error">Dò mã lỗi:</span> ${e.message}`);
-    }
-  });
-
-  $("btnConvert").addEventListener("click", async () => {
-    try {
-      $("newAddr").value = "";
-      $("log").value = "";
-
-      const apiKey = ($("apiKey").value || "").trim();
-      if (!apiKey) throw new Error("Bạn chưa nhập API key.");
-      if (!currentData?.address) throw new Error("Chưa có địa chỉ cũ. Hãy quét QR hoặc dán chuỗi.");
-
-      let payload;
-      if ($("mode").value === "manual") {
-        const provinceCode = ($("provinceCode").value||"").trim();
-        const districtCode = ($("districtCode").value||"").trim();
-        const wardCode = ($("wardCode").value||"").trim();
-        const streetAddress = ($("streetAddress").value||"").trim();
-        if (!provinceCode || !districtCode || !wardCode) throw new Error("Thiếu mã province/district/ward.");
-        payload = { provinceCode, districtCode, wardCode, streetAddress };
-      } else {
-        payload = await guessCodesFromAddress(currentData.address);
-      }
-
-      setConvertStatus("<b>Đang gọi API chuyển đổi...</b>");
-      const res = await apiPOST("/convert/address", payload, apiKey);
-
-      const newFull = res?.data?.new?.fullAddress || "";
-      const notes = res?.data?.mergeInfo?.notes || "";
-      if (!newFull) {
-        $("newAddr").value = JSON.stringify(res, null, 2);
-        setConvertStatus(`<span class="warn">Không thấy new.fullAddress.</span> Đã đổ JSON vào ô kết quả.`);
-        return;
-      }
-      $("newAddr").value = notes ? `${newFull}\n\nGhi chú: ${notes}` : newFull;
-      setConvertStatus(`<span class="oktxt">Thành công!</span> Địa chỉ mới đã cập nhật.`);
-    } catch (e) {
-      setConvertStatus(`<span class="error">Lỗi:</span> ${e.message}`);
-    }
-  });
-
-  // ===== Support badge
-  (function(){
-    const ok = ("BarcodeDetector" in window);
-    $("support").innerHTML = ok
-      ? `<span class="oktxt">✅ Trình duyệt hỗ trợ BarcodeDetector</span>`
-      : `<span class="warn">⚠️ Không hỗ trợ BarcodeDetector (Safari/iOS hay gặp)</span>`;
-  })();
-</script>
-</body>
-</html>

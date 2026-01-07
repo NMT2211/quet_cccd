@@ -1,0 +1,1195 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>CT01 – Tờ khai thay đổi thông tin cư trú (Nhập liệu + Preview + In/PDF)</title>
+
+  <!-- Nếu bạn có style.css riêng thì giữ, không có thì xóa -->
+  <link rel="stylesheet" href="./style.css">
+
+  <style>
+    :root{
+      /* ✅ LIGHT THEME */
+      --bg:#ffffff;
+      --card:#ffffff;
+      --card2:#f7f8fb;
+      --text:#0f172a;
+      --muted:#475569;
+      --line:#e5e7eb;
+
+      --accent:#2563eb;
+      --ok:#16a34a;
+      --danger:#dc2626;
+      --warn:#d97706;
+
+      --radius:16px;
+
+      /* A4 tokens */
+      --a4w:210mm;
+      --a4h:297mm;
+      --pad:12mm;
+      --printText:#111;
+      --printLine:#000;
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .wrap{
+      margin: 24px auto;
+      max-width: 1700px;
+      padding: 0 16px 28px;
+    }
+
+    .topbar{
+      display:flex;
+      gap:12px;
+      align-items:flex-start;
+      justify-content:space-between;
+      margin: 14px 0;
+      flex-wrap: wrap;
+    }
+    .title{ display:flex; flex-direction:column; gap:6px; }
+    .title h1{ margin:0; font-size:20px; letter-spacing:.2px; }
+    .title p{ margin:0; color:var(--muted); font-size:13px; line-height:1.4; }
+
+    .actions{
+      display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end;
+    }
+    .btn{
+      border:1px solid var(--line);
+      background:#fff;
+      color:var(--text);
+      padding:10px 12px;
+      border-radius:12px;
+      cursor:pointer;
+      font-weight:700;
+      font-size:13px;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      user-select:none;
+      transition:.15s ease;
+    }
+    .btn:hover{ transform: translateY(-1px); background: #f8fafc; }
+    .btn.primary{ background:rgba(37,99,235,.10); border-color:rgba(37,99,235,.35); }
+    .btn.primary:hover{ background:rgba(37,99,235,.16); }
+    .btn.ok{ background:rgba(22,163,74,.10); border-color:rgba(22,163,74,.30); }
+    .btn.warn{ background:rgba(217,119,6,.10); border-color:rgba(217,119,6,.30); }
+    .btn.danger{ background:rgba(220,38,38,.08); border-color:rgba(220,38,38,.25); }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:12px;
+      align-items:start;
+    }
+    @media (max-width: 980px){
+      .grid{ grid-template-columns: 1fr; }
+    }
+
+    .card{
+      background: var(--card);
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: 0 14px 38px rgba(15,23,42,.08);
+      overflow:hidden;
+    }
+    .card h2{
+      margin:0;
+      padding:12px 14px;
+      font-size:14px;
+      letter-spacing:.2px;
+      border-bottom:1px solid var(--line);
+      background: var(--card2);
+    }
+    .card .body{ padding:14px; }
+
+    .row{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
+    .row3{ display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; }
+    .row1{ display:grid; grid-template-columns: 1fr; gap:10px; }
+    @media (max-width: 680px){
+      .row, .row3{ grid-template-columns: 1fr; }
+    }
+
+    label{
+      display:block;
+      font-size:12px;
+      color:var(--muted);
+      margin:0 0 6px;
+      font-weight:700;
+    }
+    input, select, textarea{
+      width:100%;
+      padding:10px 10px;
+      border-radius:12px;
+      border:1px solid var(--line);
+      background:#fff;
+      color:var(--text);
+      outline:none;
+      font-size:14px;
+    }
+    textarea{ min-height: 92px; resize:vertical; }
+    input:focus, select:focus, textarea:focus{
+      border-color: rgba(37,99,235,.55);
+      box-shadow: 0 0 0 3px rgba(37,99,235,.15);
+    }
+    .hint{
+      margin-top:6px;
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.4;
+    }
+
+    .table{
+      width:100%;
+      border-collapse: collapse;
+      margin-top:8px;
+      overflow:hidden;
+      border-radius:12px;
+      border:1px solid var(--line);
+    }
+    .table th, .table td{
+      border-bottom:1px solid var(--line);
+      padding:8px;
+      font-size:13px;
+      vertical-align:top;
+    }
+    .table th{
+      background: var(--card2);
+      text-align:left;
+      font-weight:800;
+    }
+    .table td input{
+      padding:8px;
+      border-radius:10px;
+      font-size:13px;
+      background:#fff;
+    }
+    .table tr:last-child td{ border-bottom:none; }
+
+    .subactions{ display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+
+    /* Preview A4 */
+    .previewShell{ padding:14px; background: #fafafa; }
+    .a4{
+      width: var(--a4w);
+      min-height: var(--a4h);
+      margin: 0 auto;
+      background:#fff;
+      color: var(--printText);
+      border-radius: 8px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.12);
+      padding: var(--pad);
+      font-family: "Times New Roman", Times, serif;
+      border: 1px solid #e5e7eb;
+    }
+
+    .center{ text-align:center; }
+    .small{ font-size:10.5pt; }
+    .muted{ color:#333; }
+
+    /* dotted line placeholder; hide when filled */
+    .line{
+      display:inline-block;
+      border-bottom: 1px dotted #111;
+      min-width: 90mm;
+      transform: translateY(-2px);
+    }
+    .line.filled{ border-bottom: none !important; }
+
+    .fill{ font-weight:700; }
+    .rowPrint{
+      display:flex;
+      gap:10mm;
+      align-items:flex-end;
+      margin-top:4px;
+      font-size:13pt;
+      line-height:1.35;
+      flex-wrap:wrap;
+    }
+    .rowPrint .col{ flex: 1 1 auto; min-width: 70mm; }
+    .rowPrint .col.sm{ min-width: 50mm; }
+    .rowPrint .col.xs{ min-width: 35mm; }
+    .nowrap{ white-space:nowrap; }
+
+    .boxes{
+      display:inline-flex;
+      margin-left:2mm;
+      transform: translateY(2px);
+
+    }
+    .box{
+      width:7mm;
+      height:8mm;
+      border:1px solid #111;
+      border-left:0 ;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:13pt;
+      font-weight:700;
+    }
+    .box1{
+        border:1px solid #111;
+    }
+
+    .cccd{
+        height: auto;
+        align-items: center;
+    }
+
+    .hr{
+      margin:6mm 0 4mm;
+      border-top:1px solid #111;
+      opacity:.10;
+    }
+
+    .printTable{
+      width:100%;
+      border-collapse:collapse;
+      margin-top:3mm;
+      font-size:11pt;
+    }
+    .printTable th, .printTable td{
+      border:1px solid #111;
+      padding:3mm 2mm;
+      vertical-align:top;
+    }
+    .printTable th{ text-align:center; font-weight:700; }
+
+    .sigRow{
+
+      display:grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      gap:5mm;
+      margin-top:6mm;
+      font-size:10.5pt;
+      margin-left: -15px;
+      
+    }
+    .sig{
+      text-align:center;
+      min-height: 35mm;
+      width: 170px;
+    }
+    .sig .cap{
+      font-weight:700;
+      text-transform:uppercase;
+      font-size:10pt;
+      margin-bottom:2mm;
+      
+    }
+    .sig .note{ font-size:9.5pt; }
+    .sig .fillName{ margin-top:18mm; font-weight:700; }
+
+    /* Print only */
+    @media print{
+      body{ background:#fff; }
+      #nav-host{ display:none !important; }
+      .wrap, .topbar, .grid{ display:none !important; }
+      .printOnly{ display:block !important; padding:0 !important; margin:0 !important; }
+      .a4{
+        box-shadow:none !important;
+        border-radius:0 !important;
+        width:210mm !important;
+        min-height:297mm !important;
+        padding:12mm !important;
+        border:none !important;
+      }
+    }
+    .printOnly{ display:none; }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      font-size:12px;
+      color:var(--muted);
+      background: var(--card2);
+      border:1px solid var(--line);
+      padding:8px 10px;
+      border-radius:999px;
+      margin-top:10px;
+      font-weight:700;
+    }
+    .kbd{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      background:#fff;
+      border:1px solid var(--line);
+      padding:2px 6px;
+      border-radius:8px;
+      color:#0f172a;
+      font-size:12px;
+      font-weight:800;
+    }
+    /* ===== Print line system (stable) ===== */
+.printLine{
+  display:flex;
+  gap:2mm;
+  margin-top:5mm;
+  font-size:13pt;
+  line-height:1.35;
+}
+
+.printLine .lbl{ white-space:nowrap; }
+
+.printLine .line{
+  flex:1;
+  min-width:0 !important;   /* ✅ cho phép co theo khổ A4 */
+  display:block;            /* ✅ để flex ăn vào line */
+  transform:none;
+  vertical-align:baseline;
+}
+
+.printGrid2{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:10mm;
+  align-items:end;
+  margin-top:5mm;
+}
+
+/* boxes cũng bỏ transform cho khỏi lệch baseline */
+
+/* ✅ mục 10 dài: cho phép xuống dòng đẹp */
+.printLineLong{
+  align-items:flex-start;
+}
+
+.printLineLong .val{
+  flex:1;
+  min-width:0;            /* cực quan trọng để wrap trong flex */
+}
+
+/* ép lineFill chiếm full phần còn lại để text tự xuống dòng */
+.printLineLong .val .line{
+  width:100%;
+  display:block;
+  min-width:0 !important;
+  border-bottom:1px dotted #111;
+}
+
+.printLineLong .val .fill{
+  white-space:normal;
+  word-break:break-word;
+}
+
+  </style>
+</head>
+
+<body>
+  <!-- NAV (load from nav.html) -->
+  <div id="nav-host"></div>
+
+  <div class="wrap">
+    <div class="topbar">
+      <div class="title">
+        <h1>CT01 – Nhập liệu → Preview → In/Lưu PDF (A4)</h1>
+        <p>
+          Công cụ hỗ trợ điền CT01 để in/lưu. Bạn vẫn nên đối chiếu lại với mẫu CT01 bạn đang dùng trên Cổng DVC/VNeID trước khi nộp.
+        </p>
+        <div class="badge">
+          💡 Gợi ý: Nhấn <span class="kbd">Ctrl</span> + <span class="kbd">P</span> → “Save as PDF” để tải file PDF
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn primary" id="btnPreview" type="button">👀 Cập nhật Preview</button>
+        <button class="btn ok" id="btnPrint" type="button">🖨️ In / Lưu PDF</button>
+        <button class="btn warn" id="btnDownloadJson" type="button">⬇️ Tải JSON</button>
+        <button class="btn" id="btnLoadJson" type="button">⬆️ Nạp JSON</button>
+        <button class="btn danger" id="btnReset" type="button">🧹 Xóa dữ liệu</button>
+      </div>
+    </div>
+
+    <div class="grid">
+      <!-- INPUT -->
+      <div class="card">
+        <h2>1) Nhập thông tin</h2>
+        <div class="body">
+          <div class="row1">
+            <div>
+              <label>Kính gửi (1)</label>
+              <input id="agency" placeholder="VD: Công an phường ..., TP. Hồ Chí Minh" value="Công an phường Bình Cơ, TP. Hồ Chí Minh"/>
+              <div class="hint">Ghi đúng cơ quan tiếp nhận hồ sơ (Công an cấp xã/phường… hoặc nơi có thẩm quyền).</div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div>
+              <label>1. Họ, chữ đệm và tên khai sinh</label>
+              <input id="fullName" placeholder="VD: NGUYỄN VĂN A" />
+            </div>
+            <div>
+              <label>3. Giới tính</label>
+              <select id="gender">
+                <option value="">-- Chọn --</option>
+                <option>Nam</option>
+                <option>Nữ</option>
+                <option>Khác</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row">
+            <div>
+              <label>2. Ngày, tháng, năm sinh</label>
+              <input id="dob" placeholder="dd/mm/yyyy" />
+              <div class="hint">VD: 01/01/2000</div>
+            </div>
+            <div>
+              <label>4. Số định danh cá nhân (12 số)</label>
+              <input id="idNumber" maxlength="12" inputmode="numeric" placeholder="VD: 012345678901" />
+            </div>
+          </div>
+
+          <div class="row">
+            <div>
+              <label>5. Số điện thoại liên hệ</label>
+              <input id="phone" placeholder="VD: 09xxxxxxxx" />
+            </div>
+            <div>
+              <label>6. Email</label>
+              <input id="email" placeholder="VD: abc@gmail.com" />
+            </div>
+          </div>
+
+          <div class="hr"></div>
+
+          <div class="row">
+            <div>
+              <label>7. Họ, chữ đệm và tên chủ hộ</label>
+              <input id="householdHeadName" placeholder="VD: TRẦN VĂN B" />
+            </div>
+            <div>
+              <label>8. Mối quan hệ với chủ hộ</label>
+              <input id="relationToHead" placeholder="VD: Con / Vợ / Chồng / Thuê trọ..." />
+            </div>
+          </div>
+
+          <div class="row">
+            <div>
+              <label>9. Số định danh cá nhân của chủ hộ (12 số)</label>
+              <input id="headIdNumber" maxlength="12" inputmode="numeric" placeholder="VD: 012345678901" />
+            </div>
+            <div>
+              <label>Tuỳ chọn: Loại yêu cầu</label>
+              <select id="requestType">
+                <option value="tamtru">Đăng ký tạm trú</option>
+                <option value="dieuchinh">Điều chỉnh thông tin cư trú</option>
+                <option value="xacnhan">Xác nhận thông tin cư trú</option>
+                <option value="khac">Khác (tự nhập nội dung)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Builder for temporary residence -->
+          <div class="card" style="margin-top:12px; background: var(--card2); border-color: var(--line); box-shadow:none">
+            <h2 style="border-bottom:1px solid var(--line); background: transparent;">2) Dựng “Nội dung đề nghị” (10) nhanh (đặc biệt cho đăng ký tạm trú)</h2>
+            <div class="body">
+              <div class="row1">
+                <div>
+                  <label>Địa chỉ nơi đề nghị đăng ký tạm trú</label>
+                  <input id="tempAddress" placeholder="VD: 12/3 Đường ABC, P. ..., Q. ..., TP. ..." />
+                </div>
+              </div>
+              <div class="row3">
+                <div>
+                  <label>Từ ngày</label>
+                  <input id="fromDate" placeholder="dd/mm/yyyy" />
+                </div>
+                <div>
+                  <label>Đến ngày (có thể để trống)</label>
+                  <input id="toDate" placeholder="dd/mm/yyyy" />
+                </div>
+                <div>
+                  <label>Lý do / ghi chú</label>
+                  <input id="reason" placeholder="VD: Thuê trọ để làm việc/học tập..." />
+                </div>
+              </div>
+              <div class="hint">Nếu bạn chọn “Khác”, bạn có thể nhập nội dung đề nghị tự do ở ô (10) bên dưới.</div>
+            </div>
+          </div>
+
+          <div class="row1" style="margin-top:12px">
+            <div>
+              <label>10. Nội dung đề nghị (2)</label>
+              <textarea id="requestContent" placeholder="Nội dung sẽ tự gợi ý theo loại yêu cầu, bạn có thể sửa lại cho đúng thực tế..."></textarea>
+            </div>
+          </div>
+
+          <div class="hr"></div>
+
+          <div class="row1">
+            <div>
+              <label>11. Những thành viên trong hộ gia đình cùng thay đổi (nếu có)</label>
+              <table class="table" id="membersTable">
+                <thead>
+                  <tr>
+                    <th style="width:48px">TT</th>
+                    <th>Họ, chữ đệm và tên</th>
+                    <th style="width:140px">Ngày sinh</th>
+                    <th style="width:90px">Giới tính</th>
+                    <th style="width:170px">Số định danh</th>
+                    <th style="width:160px">Quan hệ với chủ hộ</th>
+                    <th style="width:56px"></th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+
+              <div class="subactions">
+                <button class="btn" id="btnAddMember" type="button">➕ Thêm thành viên</button>
+              </div>
+              <div class="hint">Nếu không có ai cùng thay đổi, cứ để trống bảng này.</div>
+            </div>
+          </div>
+
+          <div class="hr"></div>
+
+          <div class="row">
+            <div>
+              <label>Ngày lập tờ khai</label>
+              <input id="declareDate" placeholder="dd/mm/yyyy" />
+            </div>
+            <div>
+              <label>Địa danh (vd: TP. Hồ Chí Minh)</label>
+              <input id="place" placeholder="VD: TP. Hồ Chí Minh" />
+            </div>
+          </div>
+
+          <div class="row3">
+            <div>
+              <label>Chủ hộ (tên để hiện ở phần chữ ký)</label>
+              <input id="sigHead" placeholder="(Ký, ghi rõ họ tên) – nếu có" />
+            </div>
+            <div>
+              <label>Chủ sở hữu chỗ ở hợp pháp (tên)</label>
+              <input id="sigOwner" placeholder="(Ký, ghi rõ họ tên) – nếu có" />
+            </div>
+            <div>
+              <label>Cha/Mẹ/Người giám hộ (tên)</label>
+              <input id="sigGuardian" placeholder="(Ký, ghi rõ họ tên) – nếu có" />
+            </div>
+          </div>
+
+          <div class="row">
+            <div>
+              <label>Người kê khai (tên)</label>
+              <input id="sigDeclarer" placeholder="(Ký, ghi rõ họ tên)" />
+            </div>
+            <div>
+              <label>Ghi chú thêm (tuỳ chọn)</label>
+              <input id="extraNote" placeholder="VD: Nộp online qua DVC/VNeID..." />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PREVIEW -->
+      <div class="card">
+        <h2>2) Preview CT01 (A4)</h2>
+        <div class="previewShell">
+          <div class="a4" id="a4"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRINT VERSION -->
+  <div class="printOnly">
+    <div class="a4" id="a4Print"></div>
+  </div>
+
+  <input type="file" id="jsonFile" accept="application/json" style="display:none" />
+
+  <script>
+    // ===== NAV LOADER (optional) =====
+    async function mountNav(){
+      const host = document.getElementById("nav-host");
+      if(!host) return;
+      try{
+        const res = await fetch("./nav.html", { cache:"no-store" });
+        host.innerHTML = await res.text();
+
+        // active link
+        const cur = (location.pathname.split("/").pop() || "index.html").toLowerCase();
+        host.querySelectorAll(".nav-link").forEach(a => {
+          const m = (a.dataset.match || "").toLowerCase();
+          if(m === cur) a.classList.add("active");
+        });
+
+        // mobile toggle
+        const nav = host.querySelector(".site-nav");
+        const toggle = host.querySelector(".nav-toggle");
+        if(toggle && nav){
+          toggle.addEventListener("click", () => {
+            const isOpen = nav.classList.toggle("open");
+            toggle.setAttribute("aria-expanded", String(isOpen));
+          });
+        }
+      }catch(e){
+        // nếu không có nav.html thì bỏ qua
+      }
+    }
+    mountNav();
+
+    // ===== CT01 APP =====
+    const $ = (id) => document.getElementById(id);
+
+    const state = {
+      agency: "",
+      fullName: "",
+      dob: "",
+      gender: "",
+      idNumber: "",
+      phone: "",
+      email: "",
+      householdHeadName: "",
+      relationToHead: "",
+      headIdNumber: "",
+      requestType: "tamtru",
+
+      tempAddress: "",
+      fromDate: "",
+      toDate: "",
+      reason: "",
+
+      requestContent: "",
+      members: [],
+      declareDate: "",
+      place: "",
+
+      sigHead: "",
+      sigOwner: "",
+      sigGuardian: "",
+      sigDeclarer: "",
+      extraNote: ""
+    };
+
+    function sanitize(s){ return (s ?? "").toString().replace(/[<>]/g, ""); }
+    function digitsOnly(s){ return (s ?? "").toString().replace(/\D/g, "").slice(0, 12); }
+
+function lineFill(value, minWidthMm = 90){
+  const v = sanitize(value).trim();
+  const style = (minWidthMm && Number(minWidthMm) > 0) ? `style="min-width:${minWidthMm}mm"` : "";
+  return `
+    <span class="line ${v ? "filled" : ""}" ${style}>
+      ${v ? `<span class="fill">${v}</span>` : "&nbsp;"}
+    </span>
+  `;
+}
+
+
+    function fmtLine(label, value, minWidthMm=90){
+      return `<span class="nowrap">${label}</span> ${lineFill(value, minWidthMm)}`;
+    }
+
+    function renderBoxes(idStr){
+      const d = digitsOnly(idStr);
+      const arr = d.split("");
+      let html = `<span class="boxes">`;
+    for(let i=0;i<1;i++){
+        html += `<span class="box box1">${arr[i] ? sanitize(arr[i]) : ""}</span>`;
+      }
+      for(let i=1;i<12;i++){
+        html += `<span class="box">${arr[i] ? sanitize(arr[i]) : ""}</span>`;
+      }
+      html += `</span>`;
+      return html;
+    }
+
+   function buildSuggestedContent() {
+  const type = state.requestType;
+  if (type === "khac") return;
+
+  if (type === "tamtru") {
+    const headName2 = sanitize(state.householdHeadName).trim();
+    const addr = sanitize(state.tempAddress).trim();
+
+    // ✅ luôn có biến để dùng phía dưới
+    let addrFull = "";
+    if (addr) {
+      addrFull = headName2
+        ? `Nhà trọ ${headName2} ${addr}`
+        : ` ${addr}`;
+    }
+
+    const from = sanitize(state.fromDate).trim();
+    const to = sanitize(state.toDate).trim();
+    const reason = sanitize(state.reason).trim();
+
+    let s = "Đề nghị đăng ký tạm trú";
+    if (addrFull) s += ` tại: ${addrFull}.`;
+    if (from) s += ` Thời gian tạm trú: từ ngày ${from}`;
+    if (to) s += ` đến ngày ${to}.`;
+    else if (from) s += ".";
+    if (reason) s += ` Lý do: ${reason}.`;
+
+    return s;
+  }
+
+  if (type === "dieuchinh") {
+    return "Đề nghị điều chỉnh/cập nhật thông tin cư trú trong Cơ sở dữ liệu về cư trú (nêu rõ nội dung cần điều chỉnh).";
+  }
+
+  if (type === "xacnhan") {
+    return "Đề nghị xác nhận thông tin về cư trú (nêu rõ nội dung cần xác nhận).";
+  }
+}
+
+    function syncFromInputs(){
+      state.agency = $("agency").value;
+
+      state.fullName = $("fullName").value;
+      state.dob = $("dob").value;
+      state.gender = $("gender").value;
+
+      state.idNumber = digitsOnly($("idNumber").value);
+      $("idNumber").value = state.idNumber;
+
+      state.phone = $("phone").value;
+      state.email = $("email").value;
+
+      state.householdHeadName = $("householdHeadName").value;
+      state.relationToHead = $("relationToHead").value;
+
+      state.headIdNumber = digitsOnly($("headIdNumber").value);
+      $("headIdNumber").value = state.headIdNumber;
+
+      state.requestType = $("requestType").value;
+
+      state.tempAddress = $("tempAddress").value;
+      state.fromDate = $("fromDate").value;
+      state.toDate = $("toDate").value;
+      state.reason = $("reason").value;
+
+      const suggested = buildSuggestedContent();
+      if(state.requestType !== "khac"){
+        if(!$("requestContent").dataset.manual || $("requestContent").value.trim() === "" ){
+          $("requestContent").value = suggested || $("requestContent").value;
+          $("requestContent").dataset.manual = "";
+        }
+      }
+      state.requestContent = $("requestContent").value;
+
+      state.declareDate = $("declareDate").value;
+      state.place = $("place").value;
+
+      state.sigHead = $("sigHead").value;
+      state.sigOwner = $("sigOwner").value;
+      state.sigGuardian = $("sigGuardian").value;
+      state.sigDeclarer = $("sigDeclarer").value;
+      state.extraNote = $("extraNote").value;
+
+      const rows = [...document.querySelectorAll("#membersTable tbody tr")];
+      state.members = rows.map((tr) => {
+        const get = (sel) => tr.querySelector(sel).value;
+        return {
+          name: get(".m-name"),
+          dob: get(".m-dob"),
+          gender: get(".m-gender"),
+          id: digitsOnly(get(".m-id")),
+          relation: get(".m-rel")
+        };
+      });
+      rows.forEach((tr, idx) => tr.querySelector(".m-id").value = state.members[idx].id);
+    }
+
+    function renderMembersPrint(){
+      if(!state.members.length){
+        const blanks = Array.from({length:6}, ()=>({}));
+        return blanks.map((m, i) => `
+          <tr>
+            <td style="text-align:center; width:10mm">${i+1}</td>
+            <td style="width:60mm"></td>
+            <td style="width:30mm"></td>
+            <td style="width:20mm"></td>
+            <td style="width:45mm"></td>
+            <td></td>
+          </tr>
+        `).join("");
+      }
+
+      const maxRows = 8;
+      const rows = state.members.slice(0, maxRows);
+
+      const htmlRows = rows.map((m, i) => `
+        <tr>
+          <td style="text-align:center">${i+1}</td>
+          <td>${sanitize(m.name||"")}</td>
+          <td style="text-align:center">${sanitize(m.dob||"")}</td>
+          <td style="text-align:center">${sanitize(m.gender||"")}</td>
+          <td style="text-align:center">${sanitize(m.id||"")}</td>
+          <td>${sanitize(m.relation||"")}</td>
+        </tr>
+      `).join("");
+
+      const blanksCount = Math.max(0, maxRows - rows.length);
+      const blankRows = Array.from({length:blanksCount}, (_,k)=> `
+        <tr>
+          <td style="text-align:center">${rows.length + k + 1}</td>
+          <td></td><td></td><td></td><td></td><td></td>
+        </tr>
+      `).join("");
+
+      return htmlRows + blankRows;
+    }
+
+function buildCT01Html(){
+  const agency = sanitize(state.agency).trim();
+  const fullName = sanitize(state.fullName).trim();
+  const dob = sanitize(state.dob).trim();
+  const gender = sanitize(state.gender).trim();
+  const phone = sanitize(state.phone).trim();
+  const email = sanitize(state.email).trim();
+  const headName = sanitize(state.householdHeadName).trim();
+  const rel = sanitize(state.relationToHead).trim();
+  const content = sanitize(state.requestContent).trim();
+  const place = sanitize(state.place).trim();
+  const date = sanitize(state.declareDate).trim();
+  const sigHead = sanitize(state.sigHead).trim();
+  const sigOwner = sanitize(state.sigOwner).trim();
+  const sigGuardian = sanitize(state.sigGuardian).trim();
+  const sigDeclarer = sanitize(state.sigDeclarer).trim();
+
+  return `
+    <div class="center">
+      <div style="font-size:14pt; font-weight:700">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</div>
+      <div style="margin-top:2mm;font-size:14pt; font-weight:700">Độc lập – Tự do – Hạnh phúc
+        <hr style="width: 180px; line:2px;">
+        </div>
+      <div style="margin-top:2mm; font-weight:700; font-size:13pt">TỜ KHAI THAY ĐỔI THÔNG TIN CƯ TRÚ</div>
+    </div>
+
+    <div style="margin-top:5mm; font-size:13pt">
+      <!-- Kính gửi -->
+      <div class="printLine" style="justify-content:center;">
+        <span class="lbl">Kính gửi (1):</span>
+        ${lineFill(agency, 0)}
+      </div>
+
+      <!-- 1 -->
+      <div class="printLine">
+        <span class="lbl">1. Họ, chữ đệm và tên khai sinh:</span>
+        ${lineFill(fullName, 0)}
+      </div>
+
+      <!-- 2 + 3 -->
+      <div class="printGrid2">
+        <div class="printLine" style="margin-top:0">
+          <span class="lbl">2. Ngày, tháng, năm sinh:</span>
+          ${lineFill(dob, 0)}
+        </div>
+        <div class="printLine" style="margin-top:0">
+          <span class="lbl">3. Giới tính:</span>
+          ${lineFill(gender, 0)}
+        </div>
+      </div>
+
+      <!-- 4 -->
+      <div class="printLine cccd">
+        <span class="lbl">4. Số định danh cá nhân:</span>
+        <span>${renderBoxes(state.idNumber)}</span>
+      </div>
+
+      <!-- 5 + 6 -->
+      <div class="printGrid2">
+        <div class="printLine" style="margin-top:0">
+          <span class="lbl">5. Số điện thoại liên hệ:</span>
+          ${lineFill(phone, 0)}
+        </div>
+        <div class="printLine" style="margin-top:0">
+          <span class="lbl">6. Email:</span>
+          ${lineFill(email, 0)}
+        </div>
+      </div>
+
+      <!-- 7 + 8 -->
+      <div class="printGrid2">
+        <div class="printLine" style="margin-top:0">
+          <span class="lbl">7. Họ, chữ đệm và tên chủ hộ:</span>
+          ${lineFill(headName, 0)}
+        </div>
+        <div class="printLine" style="margin-top:0">
+          <span class="lbl">8. Mối quan hệ với chủ hộ:</span>
+          ${lineFill(rel, 0)}
+        </div>
+      </div>
+
+      <!-- 9 -->
+      <div class="printLine cccd">
+        <span class="lbl">9. Số định danh cá nhân của chủ hộ:</span>
+        <span>${renderBoxes(state.headIdNumber)}</span>
+      </div>
+
+      <!-- 10 (dài) -->
+<div class="printLine printLineLong">
+  <span class="lbl">10. Nội dung đề nghị (2):</span>
+  <span class="val">${lineFill(content, 0)}</span>
+</div>
+
+
+      <!-- 11 -->
+      <div style="margin-top:3mm">
+        11. Những thành viên trong hộ gia đình cùng thay đổi:
+      </div>
+
+      <table class="printTable">
+        <thead>
+          <tr>
+            <th style="width:10mm">TT</th>
+            <th style="width:50mm">Họ, chữ đệm và tên</th>
+            <th style="width:20mm">Ngày, tháng, năm sinh</th>
+            <th style="width:20mm">Giới tính</th>
+            <th style="width:45mm">Số định danh cá nhân</th>
+            <th style="width:35mm">Mối quan hệ với chủ hộ</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${renderMembersPrint()}
+        </tbody>
+      </table>
+
+      <!-- Địa danh + ngày tháng năm -->
+      
+
+      <!-- Chữ ký -->
+      <div class="sigRow">
+        <div class="sig">
+            .....,ngày.......tháng....năm.......
+          <div class="cap">Ý KIẾN CỦA CHỦ HỘ (3)</div>
+          <div class="note">(Ký, ghi rõ họ tên)</div>
+          <div class="fillName">${sigHead || ""}</div>
+        </div>
+        <div class="sig">
+            .....,ngày.......tháng....năm.......
+          <div class="cap">Ý KIẾN CỦA CHỦ SỞ HỮU<br/>CHỖ Ở HỢP PHÁP (4)</div>
+          <div class="note">(Ký, ghi rõ họ tên)</div>
+          <div class="fillName">${sigOwner || ""}</div>
+        </div>
+        <div class="sig">
+            .....,ngày.......tháng....năm.......
+          <div class="cap">Ý KIẾN CỦA CHA, MẸ<br/>NGƯỜI GIÁM HỘ (5)</div>
+          <div class="note">(Ký, ghi rõ họ tên)</div>
+          <div class="fillName">${sigGuardian || ""}</div>
+        </div>
+        <div class="sig">
+            .....,ngày.......tháng....năm.......
+          <div class="cap">NGƯỜI KÊ KHAI (6)</div>
+          <div class="note">(Ký, ghi rõ họ tên)</div>
+          <div class="fillName">${sigDeclarer || ""}</div>
+        </div>
+      </div>
+    </div>
+
+    Chú thích:
+
+(1) Cơ quan đăng ký cư trú.
+
+(2) Ghi rõ ràng, cụ thể nội dung đề nghị. Ví dụ: đăng ký thường trú; đăng ký tạm trú; tách hộ; xác nhận thông tin về cư trú...
+
+(3) Áp dụng đối với các trường hợp quy định tại khoản 2, khoản 3, khoản 5, khoản 6 Điều 20; khoản 1 Điều 25; điểm a khoản 1 Điều 26 Luật Cư trú. Việc lấy ý kiến của chủ hộ được thực hiện theo các phương thức sau:
+
+a) Chủ hộ ghi rõ nội dung đồng ý và ký, ghi rõ họ tên vào Tờ khai.
+
+b) Chủ hộ xác nhận nội dung đồng ý thông qua ứng dụng VNeID hoặc các dịch vụ công trực tuyến khác.
+
+c) Chủ hộ có văn bản riêng ghi rõ nội dung đồng ý (văn bản này không phải công chứng, chứng thực).
+
+ (4) Áp dụng đối với các trường hợp quy định tại khoản 2, khoản 3, khoản 4, khoản 5, khoản 6 Điều 20; khoản 1 Điều 25 Luật Cư trú; điểm a khoản 1 Điều 26 Luật Cư trú. Việc lấy ý kiến của chủ sở hữu chỗ ở hợp pháp được thực hiện theo các phương thức sau:
+
+a) Chủ sở hữu chỗ ở hợp pháp ghi rõ nội dung đồng ý và ký, ghi rõ họ tên vào Tờ khai.
+
+b) Chủ sở hữu chỗ ở hợp pháp xác nhận nội dung đồng ý thông qua ứng dụng VNeID hoặc các dịch vụ công trực tuyến khác.
+
+c) Chủ sở hữu chỗ ở hợp pháp có văn bản riêng ghi rõ nội dung đồng ý (văn bản này không phải công chứng, chứng thực).
+
+Ghi chú: Trường hợp chủ sở hữu hợp chỗ ở hợp pháp gồm nhiều cá nhân, tổ chức thì phải có ý kiến đồng ý của tất cả các đồng sở hữu trừ trường hợp đã có thỏa thuận về việc cử đại diện có ý kiến đồng ý; Trường hợp chủ sở hữu chỗ ở hợp pháp xác nhận nội dung đồng ý thông qua ứng dụng VNeID thì công dân phải kê khai thông tin về họ, chữ đệm, tên và số ĐDCN của chủ sở hữu chỗ ở hợp pháp.
+
+(5) Áp dụng đối với trường hợp người chưa thành niên, người hạn chế hành vi dân sự, người không đủ năng lực hành vi dân sự có thay đổi thông tin về cư trú. Việc lấy ý kiến của cha, mẹ hoặc người giám hộ được thực hiện theo các phương thức sau:
+
+a) Cha, mẹ hoặc người giám hộ ghi rõ nội dung đồng ý và ký, ghi rõ họ tên vào Tờ khai.
+
+b) Cha, mẹ hoặc người giám hộ xác nhận nội dung đồng ý thông qua ứng dụng VNeID hoặc các dịch vụ công trực tuyến khác.
+
+c) Cha, mẹ hoặc người giám hộ có văn bản riêng ghi rõ nội dung đồng ý (văn bản này không phải công chứng, chứng thực).
+
+(6) Trường hợp nộp trực tiếp người kê khai ký, ghi rõ họ, chữ đệm và tên vào Tờ khai. Trường hợp nộp qua cổng dịch vụ công hoặc ứng dụng VNeID thì người kê khai không phải ký vào mục này.
+
+(7) Chỉ kê khai thông tin khi công dân đề nghị xác nhận nội dung đồng ý thông qua ứng dụng VNeID.
+  `;
+}
+
+// ✅ nhận dữ liệu từ trang quét QR
+(function hydrateFromPrefill(){
+  const key = "ct01_prefill_v1";
+  const raw = sessionStorage.getItem(key);
+  if (!raw) return;
+  try{
+    const obj = JSON.parse(raw);
+    Object.assign(state, obj || {});
+    sessionStorage.removeItem(key);
+    applyStateToInputs();
+  }catch(e){}
+})();
+
+    function renderPreview(){
+      syncFromInputs();
+      const html = buildCT01Html();
+      $("a4").innerHTML = html;
+      $("a4Print").innerHTML = html;
+    }
+
+    function addMemberRow(data={}){
+      const tbody = document.querySelector("#membersTable tbody");
+      const idx = tbody.querySelectorAll("tr").length + 1;
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td style="text-align:center; font-weight:800">${idx}</td>
+        <td><input class="m-name" placeholder="Họ tên" value="${sanitize(data.name||"")}" /></td>
+        <td><input class="m-dob" placeholder="dd/mm/yyyy" value="${sanitize(data.dob||"")}" /></td>
+        <td><input class="m-gender" placeholder="Nam/Nữ" value="${sanitize(data.gender||"")}" /></td>
+        <td><input class="m-id" maxlength="12" inputmode="numeric" placeholder="12 số" value="${sanitize(data.id||"")}" /></td>
+        <td><input class="m-rel" placeholder="Quan hệ với chủ hộ" value="${sanitize(data.relation||"")}" /></td>
+        <td style="text-align:center">
+          <button class="btn danger" type="button" style="padding:8px 10px; border-radius:10px">✖</button>
+        </td>
+      `;
+      tr.querySelector("button").addEventListener("click", () => {
+        tr.remove();
+        reindexMembers();
+        renderPreview();
+      });
+
+      tr.querySelectorAll("input").forEach(inp => {
+        inp.addEventListener("input", () => {
+          if(inp.classList.contains("m-id")) inp.value = digitsOnly(inp.value);
+        });
+        inp.addEventListener("change", renderPreview);
+      });
+
+      tbody.appendChild(tr);
+    }
+
+    function reindexMembers(){
+      const rows = [...document.querySelectorAll("#membersTable tbody tr")];
+      rows.forEach((tr, i) => tr.children[0].textContent = (i+1));
+    }
+
+    function downloadJson(){
+      syncFromInputs();
+      const blob = new Blob([JSON.stringify(state, null, 2)], {type:"application/json"});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "ct01_data.json";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function loadJsonFile(file){
+      const reader = new FileReader();
+      reader.onload = () => {
+        try{
+          const obj = JSON.parse(reader.result);
+          Object.assign(state, obj || {});
+          applyStateToInputs();
+          renderPreview();
+        }catch(e){
+          alert("File JSON không hợp lệ.");
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function applyStateToInputs(){
+      $("agency").value = state.agency || "";
+      $("fullName").value = state.fullName || "";
+      $("dob").value = state.dob || "";
+      $("gender").value = state.gender || "";
+      $("idNumber").value = state.idNumber || "";
+      $("phone").value = state.phone || "";
+      $("email").value = state.email || "";
+
+      $("householdHeadName").value = state.householdHeadName || "";
+      $("relationToHead").value = state.relationToHead || "";
+      $("headIdNumber").value = state.headIdNumber || "";
+      $("requestType").value = state.requestType || "tamtru";
+
+      $("tempAddress").value = state.tempAddress || "";
+      $("fromDate").value = state.fromDate || "";
+      $("toDate").value = state.toDate || "";
+      $("reason").value = state.reason || "";
+
+      $("requestContent").value = state.requestContent || "";
+      $("requestContent").dataset.manual = "1";
+
+      $("declareDate").value = state.declareDate || "";
+      $("place").value = state.place || "";
+
+      $("sigHead").value = state.sigHead || "";
+      $("sigOwner").value = state.sigOwner || "";
+      $("sigGuardian").value = state.sigGuardian || "";
+      $("sigDeclarer").value = state.sigDeclarer || "";
+      $("extraNote").value = state.extraNote || "";
+
+      const tbody = document.querySelector("#membersTable tbody");
+      tbody.innerHTML = "";
+      (state.members || []).forEach(m => addMemberRow(m));
+    }
+
+    function resetAll(){
+      document.querySelectorAll("input, textarea, select").forEach(el => {
+        if(el.id === "requestType") el.value = "tamtru";
+        else el.value = "";
+      });
+      $("requestContent").dataset.manual = "";
+      document.querySelector("#membersTable tbody").innerHTML = "";
+      renderPreview();
+    }
+
+    $("requestContent").addEventListener("input", () => $("requestContent").dataset.manual = "1");
+    document.querySelectorAll("input, select, textarea").forEach(el => el.addEventListener("change", renderPreview));
+
+    $("btnAddMember").addEventListener("click", () => { addMemberRow({}); renderPreview(); });
+    $("btnPreview").addEventListener("click", renderPreview);
+    $("btnPrint").addEventListener("click", () => { renderPreview(); window.print(); });
+    $("btnDownloadJson").addEventListener("click", downloadJson);
+
+    $("btnLoadJson").addEventListener("click", () => $("jsonFile").click());
+    $("jsonFile").addEventListener("change", (e) => {
+      const f = e.target.files?.[0];
+      if(f) loadJsonFile(f);
+      e.target.value = "";
+    });
+
+    $("btnReset").addEventListener("click", () => {
+      if(confirm("Xóa toàn bộ dữ liệu đang nhập?")) resetAll();
+    });
+
+    // init defaults
+    const today = new Date();
+    const dd = String(today.getDate()).padStart(2,"0");
+    const mm = String(today.getMonth()+1).padStart(2,"0");
+    const yyyy = today.getFullYear();
+    $("declareDate").value = `${dd}/${mm}/${yyyy}`;
+    $("place").value = "TP. Hồ Chí Minh";
+
+    renderPreview();
+  </script>
+
+  <!-- ✅ Nếu bạn có script.js riêng khác, hãy để nó ở đây (1 lần thôi) -->
+  <!-- <script src="./script.js"></script> -->
+</body>
+</html>
