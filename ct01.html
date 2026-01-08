@@ -5,9 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>CT01 – Tờ khai thay đổi thông tin cư trú (Nhập liệu + Preview + In/PDF)</title>
 
-  <!-- Nếu bạn có style.css riêng thì giữ, không có thì xóa -->
   <link rel="stylesheet" href="./style.css">
-  
 
   <style>
     :root{
@@ -165,7 +163,7 @@
     .table th{
       background: var(--card2);
       text-align:left;
-      font-weight:800;
+      
     }
     .table td input{
       padding:8px;
@@ -208,7 +206,6 @@
 
     .center{ text-align:center; }
 
-    /* dotted line placeholder; hide when filled */
     .line{
       display:inline-block;
       border-bottom: 1px dotted #111;
@@ -216,7 +213,6 @@
       transform: translateY(-2px);
     }
     .line.filled{ border-bottom: none !important; }
-
     .fill{ font-weight:700; }
 
     .boxes{
@@ -274,7 +270,7 @@
     .ddmmyy{
       display: flex;
       width: 108%;
-       font-size:10pt;
+      font-size:10pt;
     }
     .sig .cap{
       margin-top: 1.5mm;
@@ -328,7 +324,6 @@
       font-weight:800;
     }
 
-    /* ===== Print line system (stable) ===== */
     .printLine{
       display:flex;
       gap:2mm;
@@ -352,7 +347,6 @@
       margin-top:5mm;
     }
 
-    /* ✅ mục 10 dài: cho phép xuống dòng đẹp */
     .printLineLong{ align-items:flex-start; }
     .printLineLong .val{ flex:1; min-width:0; }
     .printLineLong .val .line{
@@ -366,7 +360,6 @@
       word-break:break-word;
     }
 
-    /* ===== Validation UI ===== */
     .invalid{
       border-color: rgba(220,38,38,.70) !important;
       box-shadow: 0 0 0 3px rgba(220,38,38,.12) !important;
@@ -379,16 +372,38 @@
       line-height:1.35;
     }
 
-    /* ✅ khóa sigDeclarer (vì luôn = fullName) */
     #sigDeclarer[readonly]{
       background:#f8fafc;
       cursor:not-allowed;
     }
+    /* ✅ Field 10: wrap về lề trái (dòng 2 thẳng cột với "10. Nội...") */
+    .printPara10{
+      margin-top: 5mm;
+      font-size: 13pt;
+      line-height: 1.35;
+      padding-left: 7mm;  
+      text-indent: -7mm;
+    }
+    .printPara10 .lbl{
+      font-weight: normal;
+      
+    }
+    .printPara10 .txt{
+      font-weight: 700;
+      
+    }
+    .printPara10 .txt.empty{
+      font-weight: normal;
+      border-bottom: 1px dotted #111;
+      display: inline-block;
+      min-width: 120mm;
+     
+    }
+
   </style>
 </head>
 
 <body>
-  <!-- NAV (load from nav.html) -->
   <div id="nav-host"></div>
 
   <div class="wrap">
@@ -494,7 +509,6 @@
             </div>
           </div>
 
-          <!-- Builder for temporary residence -->
           <div class="card" style="margin-top:12px; background: var(--card2); border-color: var(--line); box-shadow:none">
             <h2 style="border-bottom:1px solid var(--line); background: transparent;">2) Dựng “Nội dung đề nghị” (10) nhanh (đặc biệt cho đăng ký tạm trú)</h2>
             <div class="body">
@@ -515,7 +529,7 @@
                 </div>
                 <div>
                   <label>Lý do / ghi chú</label>
-                  <input id="reason" placeholder="VD: Thuê trọ để làm việc/học tập..." />
+                  <input id="reason" placeholder="VD: Thuê trọ để làm việc/học tập..." value="Thuê trọ"/>
                 </div>
               </div>
               <div class="hint">Nếu bạn chọn “Khác”, bạn có thể nhập nội dung đề nghị tự do ở ô (10) bên dưới.</div>
@@ -526,6 +540,7 @@
             <div>
               <label>10. Nội dung đề nghị (2)</label>
               <textarea id="requestContent" placeholder="Nội dung sẽ tự gợi ý theo loại yêu cầu, bạn có thể sửa lại cho đúng thực tế..."></textarea>
+              <div class="hint">✅ Tự gợi ý sẽ cập nhật theo “Chủ hộ/Địa chỉ/Từ ngày…”. Nếu bạn tự gõ vào ô này thì hệ thống sẽ không tự ghi đè nữa.</div>
             </div>
           </div>
 
@@ -542,7 +557,7 @@
                     <th style="width:140px">Ngày sinh</th>
                     <th style="width:90px">Giới tính</th>
                     <th style="width:170px">Số định danh</th>
-                    <th style="width:160px">Quan hệ với chủ hộ</th>
+                    <th style="width:150px">Quan hệ với chủ hộ</th>
                     <th style="width:56px"></th>
                   </tr>
                 </thead>
@@ -833,13 +848,14 @@
       if(errors.length){
         if(showAlert){
           alert("Vui lòng kiểm tra lại các trường đang bị lỗi (bôi đỏ) trước khi in/lưu PDF.");
-        }
-        if(first.el){
-          first.el.scrollIntoView({ behavior:"smooth", block:"center" });
-          first.el.focus();
+          if(first.el){
+            first.el.scrollIntoView({ behavior:"smooth", block:"center" });
+            first.el.focus();
+          }
         }
         return false;
       }
+
       return true;
     }
 
@@ -884,7 +900,7 @@
 
     function buildSuggestedContent() {
       const type = state.requestType;
-      if (type === "khac") return;
+      if (type === "khac") return "";
 
       if (type === "tamtru") {
         const headName2 = sanitize(state.householdHeadName).trim();
@@ -892,9 +908,7 @@
 
         let addrFull = "";
         if (addr) {
-          addrFull = headName2
-            ? `Nhà trọ ${headName2} ${addr}`
-            : `${addr}`;
+          addrFull = headName2 ? `Nhà trọ ${headName2}, ${addr}` : `${addr}`;
         }
 
         const from = sanitize(state.fromDate).trim();
@@ -918,6 +932,8 @@
       if (type === "xacnhan") {
         return "Đề nghị xác nhận thông tin về cư trú (nêu rõ nội dung cần xác nhận).";
       }
+
+      return "";
     }
 
     function syncFromInputs(){
@@ -946,14 +962,17 @@
       state.toDate = $("toDate").value;
       state.reason = $("reason").value;
 
+      // ✅ AUTO SUGGEST (ONLY if user hasn't manually edited requestContent)
+      const rc = $("requestContent");
       const suggested = buildSuggestedContent();
       if(state.requestType !== "khac"){
-        if(!$("requestContent").dataset.manual || $("requestContent").value.trim() === "" ){
-          $("requestContent").value = suggested || $("requestContent").value;
-          $("requestContent").dataset.manual = "";
+        const isManual = rc.dataset.manual === "1";
+        if(!isManual || rc.value.trim() === ""){
+          rc.value = suggested || rc.value;
+          rc.dataset.manual = ""; // keep auto mode
         }
       }
-      state.requestContent = $("requestContent").value;
+      state.requestContent = rc.value;
 
       state.declareDate = $("declareDate").value;
       state.place = $("place").value;
@@ -982,44 +1001,57 @@
       rows.forEach((tr, idx) => tr.querySelector(".m-id").value = state.members[idx].id);
     }
 
-    function renderMembersPrint(){
-      if(!state.members.length){
-        const blanks = Array.from({length:6}, ()=>({}));
-        return blanks.map((m, i) => `
-          <tr>
-            <td style="text-align:center; width:10mm">${i+1}</td>
-            <td style="width:60mm"></td>
-            <td style="width:30mm"></td>
-            <td style="width:20mm"></td>
-            <td style="width:45mm"></td>
-            <td></td>
-          </tr>
-        `).join("");
-      }
+function renderMembersPrint(){
+  const BASE_ROWS = 6; // mặc định 6 dòng
+  const MAX_ROWS  = 8; // tối đa 8 dòng
 
-      const maxRows = 8;
-      const rows = state.members.slice(0, maxRows);
+  // ✅ chỉ lấy những dòng có nhập dữ liệu (bỏ dòng trống)
+  const filled = (state.members || []).filter(m => {
+    const name = (m?.name || "").trim();
+    const dob = (m?.dob || "").trim();
+    const gender = (m?.gender || "").trim();
+    const id = (m?.id || "").trim();
+    const relation = (m?.relation || "").trim();
+    return !!(name || dob || gender || id || relation);
+  });
 
-      const htmlRows = rows.map((m, i) => `
-        <tr>
-          <td style="text-align:center">${i+1}</td>
-          <td>${sanitize(m.name||"")}</td>
-          <td style="text-align:center">${sanitize(m.dob||"")}</td>
-          <td style="text-align:center">${sanitize(m.gender||"")}</td>
-          <td style="text-align:center">${sanitize(m.id||"")}</td>
-          <td>${sanitize(m.relation||"")}</td>
-        </tr>
-      `).join("");
+  // ✅ số dòng cần in: ít nhất 6, tăng theo số người, nhưng không vượt 8
+  const totalRows = Math.min(MAX_ROWS, Math.max(BASE_ROWS, filled.length));
 
-      const blanksCount = Math.max(0, maxRows - rows.length);
-      const blankRows = Array.from({length:blanksCount}, (_,k)=> `
-        <tr>
-          <td style="text-align:center">${rows.length + k + 1}</td>
-          <td></td><td></td><td></td><td></td><td></td>
-        </tr>
-      `).join("");
+  // ✅ chỉ in tối đa 8 người
+  const rowsToPrint = filled.slice(0, totalRows);
 
-      return htmlRows + blankRows;
+  const htmlRows = rowsToPrint.map((m, i) => `
+    <tr>
+      <td style="text-align:center">${i+1}</td>
+      <td>${sanitize(m.name||"")}</td>
+      <td style="text-align:center">${sanitize(m.dob||"")}</td>
+      <td style="text-align:center">${sanitize(m.gender||"")}</td>
+      <td style="text-align:center">${sanitize(m.id||"")}</td>
+      <td>${sanitize(m.relation||"")}</td>
+    </tr>
+  `).join("");
+
+  const blanksCount = totalRows - rowsToPrint.length;
+
+  const blankRows = Array.from({length: blanksCount}, (_, k) => `
+    <tr>
+      <td style="text-align:center">${rowsToPrint.length + k + 1}</td>
+      <td></td><td></td><td></td><td></td><td></td>
+    </tr>
+  `).join("");
+
+  return htmlRows + blankRows;
+}
+
+
+    function renderDeclareDMY(dateStr){
+      const v = (dateStr || "").trim();
+      const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(v);
+      const dd = m ? m[1] : ".....";
+      const mm = m ? m[2] : ".....";
+      const yyyy = m ? m[3] : ".......";
+      return `<span class="ddmmyy">....., ngày ${dd} tháng ${mm} năm ${yyyy}</span>`;
     }
 
     function buildCT01Html(){
@@ -1085,15 +1117,14 @@
             </div>
           </div>
 
-          <div class="printGrid2">
-            <div class="printLine" style="margin-top:0">
-              <span class="lbl">7. Họ, chữ đệm và tên chủ hộ:</span>
-              ${lineFill(headName, 0)}
-            </div><br>
-            <div class="printLine" style="margin-top:-15px">
-              <span class="lbl">8. Mối quan hệ với chủ hộ:</span>
-              ${lineFill(rel, 0)}
-            </div>
+          <div class="printLine">
+            <span class="lbl">7. Họ, chữ đệm và tên chủ hộ:</span>
+            ${lineFill(headName, 0)}
+          </div>
+
+          <div class="printLine">
+            <span class="lbl">8. Mối quan hệ với chủ hộ:</span>
+            ${lineFill(rel, 0)}
           </div>
 
           <div class="printLine cccd">
@@ -1101,10 +1132,15 @@
             <span>${renderBoxes(state.headIdNumber)}</span>
           </div>
 
-          <div class="printLine printLineLong">
-            <span class="lbl">10. Nội dung đề nghị (2):</span>
-            <span class="val">${lineFill(content, 0)}</span>
+          <div class="printPara10">
+            <span class="lbl">10. Nội dung đề nghị (2): </span>
+            ${
+              content
+                ? `<span class="txt">${sanitize(content)}</span>`
+                : `<span class="txt empty">&nbsp;</span>`
+            }
           </div>
+
 
           <div style="margin-top:3mm">
             11. Những thành viên trong hộ gia đình cùng thay đổi:
@@ -1115,7 +1151,7 @@
               <tr>
                 <th style="width:10mm">TT</th>
                 <th style="width:50mm">Họ, chữ đệm và tên</th>
-                <th style="width:20mm">Ngày, tháng, năm sinh</th>
+                <th style="width:30mm">Ngày, tháng, năm sinh</th>
                 <th style="width:20mm">Giới tính</th>
                 <th style="width:45mm">Số định danh cá nhân</th>
                 <th style="width:35mm">Mối quan hệ với chủ hộ</th>
@@ -1156,7 +1192,7 @@
       `;
     }
 
-    // ✅ nhận dữ liệu từ trang quét QR
+    // ✅ nhận dữ liệu từ trang quét QR (index)
     (function hydrateFromPrefill(){
       const key = "ct01_prefill_v1";
       const raw = sessionStorage.getItem(key);
@@ -1165,7 +1201,7 @@
         const obj = JSON.parse(raw);
         Object.assign(state, obj || {});
         sessionStorage.removeItem(key);
-        applyStateToInputs();
+        applyStateToInputs(true); // ✅ fromPrefill=true => không khóa manual
       }catch(e){}
     })();
 
@@ -1237,8 +1273,8 @@
         try{
           const obj = JSON.parse(reader.result);
           Object.assign(state, obj || {});
-          applyStateToInputs();
-          ensureDefaults();          // ✅ nếu thiếu ngày => fill hôm nay
+          applyStateToInputs(false); // JSON load => giữ manual theo requestType
+          ensureDefaults();
           validateAll(false);
           renderPreview();
         }catch(e){
@@ -1249,25 +1285,21 @@
     }
 
     function ensureDefaults(){
-  // ✅ tự fill ngày hiện tại nếu đang trống
-  if(!$("declareDate").value.trim()){
-    $("declareDate").value = todayDDMMYYYY();
-  }
-  if(!$("place").value.trim()){
-    $("place").value = "TP. Hồ Chí Minh";
-  }
+      if(!$("declareDate").value.trim()){
+        $("declareDate").value = todayDDMMYYYY();
+      }
+      if(!$("place").value.trim()){
+        $("place").value = "TP. Hồ Chí Minh";
+      }
+      $("sigDeclarer").value = $("fullName").value || "";
 
-  // ✅ sigDeclarer luôn = fullName
-  $("sigDeclarer").value = $("fullName").value || "";
+      if($("requestType").value === "tamtru" && !$("fromDate").value.trim()){
+        $("fromDate").value = todayDDMMYYYY();
+      }
+    }
 
-  // ✅ fill "Từ ngày" khi đăng ký tạm trú
-  if($("requestType").value === "tamtru" && !$("fromDate").value.trim()){
-    $("fromDate").value = todayDDMMYYYY();
-  }
-}
-
-
-    function applyStateToInputs(){
+    // ✅ fromPrefill: nếu true => không khóa manual để auto-suggest hoạt động
+    function applyStateToInputs(fromPrefill=false){
       $("agency").value = state.agency || "";
       $("fullName").value = state.fullName || "";
       $("dob").value = state.dob || "";
@@ -1286,8 +1318,13 @@
       $("toDate").value = state.toDate || "";
       $("reason").value = state.reason || "";
 
+      // requestContent: nếu prefill => cho auto mode (manual = "")
       $("requestContent").value = state.requestContent || "";
-      $("requestContent").dataset.manual = "1";
+      if(fromPrefill){
+        $("requestContent").dataset.manual = "";
+      }else{
+        $("requestContent").dataset.manual = (state.requestType === "khac") ? "1" : "";
+      }
 
       $("declareDate").value = state.declareDate || "";
       $("place").value = state.place || "";
@@ -1296,9 +1333,7 @@
       $("sigOwner").value = state.sigOwner || "";
       $("sigGuardian").value = state.sigGuardian || "";
 
-      // ✅ ignore state.sigDeclarer: luôn = fullName
       $("sigDeclarer").value = state.fullName || "";
-
       $("extraNote").value = state.extraNote || "";
 
       const tbody = document.querySelector("#membersTable tbody");
@@ -1313,44 +1348,46 @@
         else if(el.id === "agency") el.value = "Công an phường Bình Cơ, TP. Hồ Chí Minh";
         else el.value = "";
       });
-      $("requestContent").dataset.manual = "";
+
+      $("requestContent").dataset.manual = ""; // ✅ reset về auto
       document.querySelector("#membersTable tbody").innerHTML = "";
 
-      // ✅ reset thì fill lại ngày hôm nay + place
       $("declareDate").value = todayDDMMYYYY();
       $("place").value = "TP. Hồ Chí Minh";
-      $("fromDate").value = todayDDMMYYYY(); 
+      $("fromDate").value = todayDDMMYYYY();
       $("sigDeclarer").value = $("fullName").value || "";
 
       renderPreview();
     }
-    function todayDDMMYYYY(){
-  const d = new Date();
-  const dd = String(d.getDate()).padStart(2,"0");
-  const mm = String(d.getMonth()+1).padStart(2,"0");
-  const yyyy = d.getFullYear();
-  return `${dd}/${mm}/${yyyy}`;
-}
 
-function renderDeclareDMY(dateStr){
-  const v = (dateStr || "").trim();
-  const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(v);
-  const dd = m ? m[1] : ".....";
-  const mm = m ? m[2] : ".....";
-  const yyyy = m ? m[3] : ".......";
-  return `<span class="ddmmyy">....., ngày ${dd} tháng ${mm} năm ${yyyy}</span>`;
-}
+    // ===== Events =====
 
-
-    $("requestContent").addEventListener("input", () => $("requestContent").dataset.manual = "1");
-
-    // ✅ fullName đổi -> sigDeclarer đổi ngay (và preview)
+    // ✅ fullName đổi -> sigDeclarer đổi ngay
     $("fullName").addEventListener("input", () => {
       $("sigDeclarer").value = $("fullName").value || "";
       renderPreview();
     });
 
-    // Live update + live validate (nhẹ)
+    // ✅ user gõ trực tiếp ô (10) => khóa auto-suggest
+    $("requestContent").addEventListener("input", () => {
+      $("requestContent").dataset.manual = "1";
+    });
+
+    // ✅ các field builder: gõ là update nội dung đề nghị ngay (nếu chưa manual)
+    ["householdHeadName","tempAddress","fromDate","toDate","reason","requestType"].forEach(id => {
+      $(id).addEventListener("input", () => {
+        ensureDefaults();
+        validateAll(false);
+        renderPreview();
+      });
+      $(id).addEventListener("change", () => {
+        ensureDefaults();
+        validateAll(false);
+        renderPreview();
+      });
+    });
+
+    // Các field khác: change để validate + render
     document.querySelectorAll("input, select, textarea").forEach(el => {
       el.addEventListener("change", () => {
         ensureDefaults();
@@ -1389,10 +1426,8 @@ function renderDeclareDMY(dateStr){
 
     window.addEventListener("resize", () => requestAnimationFrame(fitA4Preview));
 
-    // ✅ init defaults (lần đầu)
+    // ✅ init defaults + first render
     ensureDefaults();
-
-    // first render
     renderPreview();
     validateAll(false);
   </script>
