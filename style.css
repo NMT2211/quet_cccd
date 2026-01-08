@@ -239,6 +239,18 @@ body{
 .nav-toggle span:nth-child(2){ top: 19px; }
 .nav-toggle span:nth-child(3){ top: 26px; }
 
+html, body{
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* ép riêng khu preview A4 để không bị Safari tự phóng chữ */
+#a4, #a4 *{
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+
 /* Mobile dropdown */
 @media (max-width: 860px){
   .nav-inner{
