@@ -7,6 +7,7 @@
 
   <!-- Nếu bạn có style.css riêng thì giữ, không có thì xóa -->
   <link rel="stylesheet" href="./style.css">
+  
 
   <style>
     :root{
@@ -178,6 +179,20 @@
 
     /* Preview A4 */
     .previewShell{ padding:14px; background: #fafafa; }
+
+    /* ✅ Viewport để A4 co giãn theo giao diện (in vẫn A4) */
+    .a4Viewport{
+      display:flex;
+      justify-content:center;
+      align-items:flex-start;
+      overflow:auto;
+      padding:10px;
+    }
+    #a4{
+      transform-origin: top center;
+      will-change: transform;
+    }
+
     .a4{
       width: var(--a4w);
       min-height: var(--a4h);
@@ -192,8 +207,6 @@
     }
 
     .center{ text-align:center; }
-    .small{ font-size:10.5pt; }
-    .muted{ color:#333; }
 
     /* dotted line placeholder; hide when filled */
     .line{
@@ -205,25 +218,11 @@
     .line.filled{ border-bottom: none !important; }
 
     .fill{ font-weight:700; }
-    .rowPrint{
-      display:flex;
-      gap:10mm;
-      align-items:flex-end;
-      margin-top:4px;
-      font-size:13pt;
-      line-height:1.35;
-      flex-wrap:wrap;
-    }
-    .rowPrint .col{ flex: 1 1 auto; min-width: 70mm; }
-    .rowPrint .col.sm{ min-width: 50mm; }
-    .rowPrint .col.xs{ min-width: 35mm; }
-    .nowrap{ white-space:nowrap; }
 
     .boxes{
       display:inline-flex;
       margin-left:2mm;
       transform: translateY(2px);
-
     }
     .box{
       width:7mm;
@@ -236,14 +235,9 @@
       font-size:13pt;
       font-weight:700;
     }
-    .box1{
-        border:1px solid #111;
-    }
+    .box1{ border:1px solid #111; }
 
-    .cccd{
-        height: auto;
-        align-items: center;
-    }
+    .cccd{ height:auto; align-items:center; }
 
     .hr{
       margin:6mm 0 4mm;
@@ -265,28 +259,32 @@
     .printTable th{ text-align:center; font-weight:700; }
 
     .sigRow{
-
       display:grid;
       grid-template-columns: 1fr 1fr 1fr 1fr;
       gap:5mm;
       margin-top:6mm;
       font-size:10.5pt;
-      margin-left: -15px;
-      
+      margin-left: -30px;
     }
     .sig{
       text-align:center;
       min-height: 35mm;
-      width: 170px;
+      width: 180px;
+    }
+    .ddmmyy{
+      display: flex;
+      width: 108%;
+       font-size:10pt;
     }
     .sig .cap{
+      margin-top: 1.5mm;
+      width: 102%;
       font-weight:700;
       text-transform:uppercase;
-      font-size:10pt;
+      font-size:11pt;
       margin-bottom:2mm;
-      
     }
-    .sig .note{ font-size:9.5pt; }
+    .sig .note{ font-size:9pt; }
     .sig .fillName{ margin-top:18mm; font-weight:700; }
 
     /* Print only */
@@ -329,58 +327,63 @@
       font-size:12px;
       font-weight:800;
     }
+
     /* ===== Print line system (stable) ===== */
-.printLine{
-  display:flex;
-  gap:2mm;
-  margin-top:5mm;
-  font-size:13pt;
-  line-height:1.35;
-}
+    .printLine{
+      display:flex;
+      gap:2mm;
+      margin-top:5mm;
+      font-size:13pt;
+    }
+    .printLine .lbl{ white-space:nowrap; }
+    .printLine .line{
+      flex:1;
+      min-width:0 !important;
+      display:block;
+      transform:none;
+      vertical-align:baseline;
+    }
 
-.printLine .lbl{ white-space:nowrap; }
+    .printGrid2{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10mm;
+      align-items:end;
+      margin-top:5mm;
+    }
 
-.printLine .line{
-  flex:1;
-  min-width:0 !important;   /* ✅ cho phép co theo khổ A4 */
-  display:block;            /* ✅ để flex ăn vào line */
-  transform:none;
-  vertical-align:baseline;
-}
+    /* ✅ mục 10 dài: cho phép xuống dòng đẹp */
+    .printLineLong{ align-items:flex-start; }
+    .printLineLong .val{ flex:1; min-width:0; }
+    .printLineLong .val .line{
+      width:100%;
+      display:block;
+      min-width:0 !important;
+      border-bottom:1px dotted #111;
+    }
+    .printLineLong .val .fill{
+      white-space:normal;
+      word-break:break-word;
+    }
 
-.printGrid2{
-  display:grid;
-  grid-template-columns: 1fr 1fr;
-  gap:10mm;
-  align-items:end;
-  margin-top:5mm;
-}
+    /* ===== Validation UI ===== */
+    .invalid{
+      border-color: rgba(220,38,38,.70) !important;
+      box-shadow: 0 0 0 3px rgba(220,38,38,.12) !important;
+    }
+    .fieldError{
+      margin-top:6px;
+      font-size:12px;
+      color: var(--danger);
+      font-weight:700;
+      line-height:1.35;
+    }
 
-/* boxes cũng bỏ transform cho khỏi lệch baseline */
-
-/* ✅ mục 10 dài: cho phép xuống dòng đẹp */
-.printLineLong{
-  align-items:flex-start;
-}
-
-.printLineLong .val{
-  flex:1;
-  min-width:0;            /* cực quan trọng để wrap trong flex */
-}
-
-/* ép lineFill chiếm full phần còn lại để text tự xuống dòng */
-.printLineLong .val .line{
-  width:100%;
-  display:block;
-  min-width:0 !important;
-  border-bottom:1px dotted #111;
-}
-
-.printLineLong .val .fill{
-  white-space:normal;
-  word-break:break-word;
-}
-
+    /* ✅ khóa sigDeclarer (vì luôn = fullName) */
+    #sigDeclarer[readonly]{
+      background:#f8fafc;
+      cursor:not-allowed;
+    }
   </style>
 </head>
 
@@ -468,9 +471,10 @@
               <label>7. Họ, chữ đệm và tên chủ hộ</label>
               <input id="householdHeadName" placeholder="VD: TRẦN VĂN B" />
             </div>
+
             <div>
               <label>8. Mối quan hệ với chủ hộ</label>
-              <input id="relationToHead" placeholder="VD: Con / Vợ / Chồng / Thuê trọ..." />
+              <input id="relationToHead" placeholder="VD: Con / Vợ / Chồng / Thuê trọ..." value="Người Thuê Trọ"/>
             </div>
           </div>
 
@@ -582,8 +586,9 @@
 
           <div class="row">
             <div>
-              <label>Người kê khai (tên)</label>
-              <input id="sigDeclarer" placeholder="(Ký, ghi rõ họ tên)" />
+              <label>Người kê khai (tên) — tự động = Họ tên khai sinh</label>
+              <input id="sigDeclarer" placeholder="(Ký, ghi rõ họ tên)" readonly>
+              <div class="hint">Trường này tự động lấy theo “Họ, chữ đệm và tên khai sinh”.</div>
             </div>
             <div>
               <label>Ghi chú thêm (tuỳ chọn)</label>
@@ -597,7 +602,9 @@
       <div class="card">
         <h2>2) Preview CT01 (A4)</h2>
         <div class="previewShell">
-          <div class="a4" id="a4"></div>
+          <div class="a4Viewport" id="a4Viewport">
+            <div class="a4" id="a4"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -619,14 +626,12 @@
         const res = await fetch("./nav.html", { cache:"no-store" });
         host.innerHTML = await res.text();
 
-        // active link
         const cur = (location.pathname.split("/").pop() || "index.html").toLowerCase();
         host.querySelectorAll(".nav-link").forEach(a => {
           const m = (a.dataset.match || "").toLowerCase();
           if(m === cur) a.classList.add("active");
         });
 
-        // mobile toggle
         const nav = host.querySelector(".site-nav");
         const toggle = host.querySelector(".nav-toggle");
         if(toggle && nav){
@@ -635,9 +640,7 @@
             toggle.setAttribute("aria-expanded", String(isOpen));
           });
         }
-      }catch(e){
-        // nếu không có nav.html thì bỏ qua
-      }
+      }catch(e){}
     }
     mountNav();
 
@@ -677,26 +680,199 @@
     function sanitize(s){ return (s ?? "").toString().replace(/[<>]/g, ""); }
     function digitsOnly(s){ return (s ?? "").toString().replace(/\D/g, "").slice(0, 12); }
 
-function lineFill(value, minWidthMm = 90){
-  const v = sanitize(value).trim();
-  const style = (minWidthMm && Number(minWidthMm) > 0) ? `style="min-width:${minWidthMm}mm"` : "";
-  return `
-    <span class="line ${v ? "filled" : ""}" ${style}>
-      ${v ? `<span class="fill">${v}</span>` : "&nbsp;"}
-    </span>
-  `;
-}
+    function todayDDMMYYYY(){
+      const d = new Date();
+      const dd = String(d.getDate()).padStart(2,"0");
+      const mm = String(d.getMonth()+1).padStart(2,"0");
+      const yyyy = d.getFullYear();
+      return `${dd}/${mm}/${yyyy}`;
+    }
 
+    // ===== Validation helpers =====
+    function clearFieldError(el){
+      if(!el) return;
+      el.classList.remove("invalid");
+      const next = el.nextElementSibling;
+      if(next && next.classList.contains("fieldError")) next.remove();
+    }
 
-    function fmtLine(label, value, minWidthMm=90){
-      return `<span class="nowrap">${label}</span> ${lineFill(value, minWidthMm)}`;
+    function setFieldError(el, msg){
+      if(!el) return;
+      el.classList.add("invalid");
+      const next = el.nextElementSibling;
+      if(next && next.classList.contains("fieldError")) next.remove();
+
+      const div = document.createElement("div");
+      div.className = "fieldError";
+      div.textContent = msg;
+      el.insertAdjacentElement("afterend", div);
+    }
+
+    function isValidEmail(s){
+      const v = (s || "").trim();
+      if(!v) return true;
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+    }
+
+    function parseDDMMYYYY(s){
+      const v = (s || "").trim();
+      if(!v) return null;
+      const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(v);
+      if(!m) return null;
+      const dd = Number(m[1]), mm = Number(m[2]), yyyy = Number(m[3]);
+      if(mm < 1 || mm > 12) return null;
+      const maxDay = new Date(yyyy, mm, 0).getDate();
+      if(dd < 1 || dd > maxDay) return null;
+      return new Date(yyyy, mm - 1, dd);
+    }
+
+    function isValidPhone(s){
+      const raw = (s ?? "").toString().trim();
+      if(raw === "") return true;
+      const v = digitsOnly(raw);
+      return v.length >= 9 && v.length <= 11;
+    }
+
+    function validateAll(showAlert = true){
+      syncFromInputs();
+
+      const errors = [];
+      const first = { el: null };
+
+      const req = (id, msg, testFn) => {
+        const el = $(id);
+        clearFieldError(el);
+        const val = (el?.value || "").trim();
+
+        let ok = true;
+        if(testFn) ok = testFn(val);
+        else ok = !!val;
+
+        if(!ok){
+          setFieldError(el, msg);
+          errors.push(msg);
+          if(!first.el) first.el = el;
+        }
+      };
+
+      req("agency", "Kính gửi (1) không được để trống.");
+      req("fullName", "Họ tên khai sinh (1) không được để trống.");
+      req("dob", "Ngày sinh (dd/mm/yyyy) không hợp lệ.", (v) => !!parseDDMMYYYY(v));
+      req("gender", "Vui lòng chọn giới tính.");
+      req("idNumber", "Số định danh cá nhân phải đủ 12 số.", (v) => digitsOnly(v).length === 12);
+      req("phone", "Số điện thoại không hợp lệ (9–11 số).", (v) => isValidPhone(v));
+
+      const emailEl = $("email");
+      clearFieldError(emailEl);
+      if(emailEl && !isValidEmail(emailEl.value)){
+        setFieldError(emailEl, "Email không hợp lệ.");
+        errors.push("Email không hợp lệ.");
+        if(!first.el) first.el = emailEl;
+      }
+
+      req("requestContent", "Nội dung đề nghị (10) không được để trống.");
+      req("declareDate", "Ngày lập tờ khai không hợp lệ (dd/mm/yyyy).", (v)=> !!parseDDMMYYYY(v));
+      req("place", "Địa danh không được để trống.");
+      req("sigDeclarer", "Người kê khai (tên) không được để trống.");
+
+      if(state.requestType === "tamtru"){
+        req("tempAddress", "Địa chỉ tạm trú không được để trống.");
+        req("fromDate", "Từ ngày không hợp lệ (dd/mm/yyyy).", (v)=> !!parseDDMMYYYY(v));
+
+        const toEl = $("toDate");
+        clearFieldError(toEl);
+        const fromD = parseDDMMYYYY($("fromDate").value);
+        const toD = parseDDMMYYYY(toEl.value);
+
+        if(toEl.value.trim()){
+          if(!toD){
+            setFieldError(toEl, "Đến ngày không hợp lệ (dd/mm/yyyy).");
+            errors.push("Đến ngày không hợp lệ.");
+            if(!first.el) first.el = toEl;
+          }else if(fromD && toD < fromD){
+            setFieldError(toEl, "Đến ngày phải lớn hơn hoặc bằng Từ ngày.");
+            errors.push("Đến ngày phải >= Từ ngày.");
+            if(!first.el) first.el = toEl;
+          }
+        }
+      }
+
+      const rows = [...document.querySelectorAll("#membersTable tbody tr")];
+      rows.forEach((tr) => {
+        const nameEl = tr.querySelector(".m-name");
+        const dobEl  = tr.querySelector(".m-dob");
+        const idEl   = tr.querySelector(".m-id");
+
+        [nameEl, dobEl, idEl].forEach(clearFieldError);
+
+        const name = (nameEl?.value || "").trim();
+        const dob  = (dobEl?.value || "").trim();
+        const id   = digitsOnly(idEl?.value || "");
+
+        const any = !!(name || dob || id);
+        if(any){
+          if(!name){
+            setFieldError(nameEl, "Thiếu họ tên thành viên.");
+            errors.push("Thiếu họ tên thành viên.");
+            if(!first.el) first.el = nameEl;
+          }
+          if(dob && !parseDDMMYYYY(dob)){
+            setFieldError(dobEl, "Ngày sinh thành viên không hợp lệ.");
+            errors.push("Ngày sinh thành viên không hợp lệ.");
+            if(!first.el) first.el = dobEl;
+          }
+          if(id && id.length !== 12){
+            setFieldError(idEl, "Số định danh thành viên phải đủ 12 số.");
+            errors.push("Số định danh thành viên phải đủ 12 số.");
+            if(!first.el) first.el = idEl;
+          }
+          if(idEl) idEl.value = id;
+        }
+      });
+
+      if(errors.length){
+        if(showAlert){
+          alert("Vui lòng kiểm tra lại các trường đang bị lỗi (bôi đỏ) trước khi in/lưu PDF.");
+        }
+        if(first.el){
+          first.el.scrollIntoView({ behavior:"smooth", block:"center" });
+          first.el.focus();
+        }
+        return false;
+      }
+      return true;
+    }
+
+    // ===== Preview scale (responsive) =====
+    function fitA4Preview(){
+      const vp = $("a4Viewport");
+      const a4 = $("a4");
+      if(!vp || !a4) return;
+
+      a4.style.transform = "none";
+
+      const vpW = Math.max(1, vp.clientWidth - 20);
+      const a4W = Math.max(1, a4.getBoundingClientRect().width);
+
+      const scale = Math.min(1, vpW / a4W);
+      a4.style.transform = `scale(${scale})`;
+    }
+
+    function lineFill(value, minWidthMm = 90){
+      const v = sanitize(value).trim();
+      const style = (minWidthMm && Number(minWidthMm) > 0) ? `style="min-width:${minWidthMm}mm"` : "";
+      return `
+        <span class="line ${v ? "filled" : ""}" ${style}>
+          ${v ? `<span class="fill">${v}</span>` : "&nbsp;"}
+        </span>
+      `;
     }
 
     function renderBoxes(idStr){
       const d = digitsOnly(idStr);
       const arr = d.split("");
       let html = `<span class="boxes">`;
-    for(let i=0;i<1;i++){
+      for(let i=0;i<1;i++){
         html += `<span class="box box1">${arr[i] ? sanitize(arr[i]) : ""}</span>`;
       }
       for(let i=1;i<12;i++){
@@ -706,44 +882,43 @@ function lineFill(value, minWidthMm = 90){
       return html;
     }
 
-   function buildSuggestedContent() {
-  const type = state.requestType;
-  if (type === "khac") return;
+    function buildSuggestedContent() {
+      const type = state.requestType;
+      if (type === "khac") return;
 
-  if (type === "tamtru") {
-    const headName2 = sanitize(state.householdHeadName).trim();
-    const addr = sanitize(state.tempAddress).trim();
+      if (type === "tamtru") {
+        const headName2 = sanitize(state.householdHeadName).trim();
+        const addr = sanitize(state.tempAddress).trim();
 
-    // ✅ luôn có biến để dùng phía dưới
-    let addrFull = "";
-    if (addr) {
-      addrFull = headName2
-        ? `Nhà trọ ${headName2} ${addr}`
-        : ` ${addr}`;
+        let addrFull = "";
+        if (addr) {
+          addrFull = headName2
+            ? `Nhà trọ ${headName2} ${addr}`
+            : `${addr}`;
+        }
+
+        const from = sanitize(state.fromDate).trim();
+        const to = sanitize(state.toDate).trim();
+        const reason = sanitize(state.reason).trim();
+
+        let s = "Đề nghị đăng ký tạm trú";
+        if (addrFull) s += ` tại: ${addrFull}.`;
+        if (from) s += ` Thời gian tạm trú: từ ngày ${from}`;
+        if (to) s += ` đến ngày ${to}.`;
+        else if (from) s += ".";
+        if (reason) s += ` Lý do: ${reason}.`;
+
+        return s;
+      }
+
+      if (type === "dieuchinh") {
+        return "Đề nghị điều chỉnh/cập nhật thông tin cư trú trong Cơ sở dữ liệu về cư trú (nêu rõ nội dung cần điều chỉnh).";
+      }
+
+      if (type === "xacnhan") {
+        return "Đề nghị xác nhận thông tin về cư trú (nêu rõ nội dung cần xác nhận).";
+      }
     }
-
-    const from = sanitize(state.fromDate).trim();
-    const to = sanitize(state.toDate).trim();
-    const reason = sanitize(state.reason).trim();
-
-    let s = "Đề nghị đăng ký tạm trú";
-    if (addrFull) s += ` tại: ${addrFull}.`;
-    if (from) s += ` Thời gian tạm trú: từ ngày ${from}`;
-    if (to) s += ` đến ngày ${to}.`;
-    else if (from) s += ".";
-    if (reason) s += ` Lý do: ${reason}.`;
-
-    return s;
-  }
-
-  if (type === "dieuchinh") {
-    return "Đề nghị điều chỉnh/cập nhật thông tin cư trú trong Cơ sở dữ liệu về cư trú (nêu rõ nội dung cần điều chỉnh).";
-  }
-
-  if (type === "xacnhan") {
-    return "Đề nghị xác nhận thông tin về cư trú (nêu rõ nội dung cần xác nhận).";
-  }
-}
 
     function syncFromInputs(){
       state.agency = $("agency").value;
@@ -786,7 +961,11 @@ function lineFill(value, minWidthMm = 90){
       state.sigHead = $("sigHead").value;
       state.sigOwner = $("sigOwner").value;
       state.sigGuardian = $("sigGuardian").value;
+
+      // ✅ sigDeclarer luôn = fullName
+      $("sigDeclarer").value = state.fullName || "";
       state.sigDeclarer = $("sigDeclarer").value;
+
       state.extraNote = $("extraNote").value;
 
       const rows = [...document.querySelectorAll("#membersTable tbody tr")];
@@ -843,175 +1022,159 @@ function lineFill(value, minWidthMm = 90){
       return htmlRows + blankRows;
     }
 
-function buildCT01Html(){
-  const agency = sanitize(state.agency).trim();
-  const fullName = sanitize(state.fullName).trim();
-  const dob = sanitize(state.dob).trim();
-  const gender = sanitize(state.gender).trim();
-  const phone = sanitize(state.phone).trim();
-  const email = sanitize(state.email).trim();
-  const headName = sanitize(state.householdHeadName).trim();
-  const rel = sanitize(state.relationToHead).trim();
-  const content = sanitize(state.requestContent).trim();
-  const place = sanitize(state.place).trim();
-  const date = sanitize(state.declareDate).trim();
-  const sigHead = sanitize(state.sigHead).trim();
-  const sigOwner = sanitize(state.sigOwner).trim();
-  const sigGuardian = sanitize(state.sigGuardian).trim();
-  const sigDeclarer = sanitize(state.sigDeclarer).trim();
+    function buildCT01Html(){
+      const agency = sanitize(state.agency).trim();
+      const fullName = sanitize(state.fullName).trim();
+      const dob = sanitize(state.dob).trim();
+      const gender = sanitize(state.gender).trim();
+      const phone = sanitize(state.phone).trim();
+      const email = sanitize(state.email).trim();
+      const headName = sanitize(state.householdHeadName).trim();
+      const rel = sanitize(state.relationToHead).trim();
+      const content = sanitize(state.requestContent).trim();
+      const sigHead = sanitize(state.sigHead).trim();
+      const sigOwner = sanitize(state.sigOwner).trim();
+      const sigGuardian = sanitize(state.sigGuardian).trim();
+      const sigDeclarer = sanitize(state.sigDeclarer).trim();
+      const declareDMY = renderDeclareDMY(state.declareDate);
 
-  return `
-    <div class="center">
-      <div style="font-size:14pt; font-weight:700">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</div>
-      <div style="margin-top:2mm;font-size:14pt; font-weight:700">Độc lập – Tự do – Hạnh phúc
-        <hr style="width: 180px; line:2px;">
+      return `
+        <div class="center">
+          <div style="font-size:14pt; font-weight:700">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</div>
+          <div style="margin-top:2mm;font-size:14pt; font-weight:700">Độc lập – Tự do – Hạnh phúc
+            <hr style="width: 180px; line:2px;">
+          </div>
+          <div style="margin-top:2mm; font-weight:700; font-size:13pt">TỜ KHAI THAY ĐỔI THÔNG TIN CƯ TRÚ</div>
         </div>
-      <div style="margin-top:2mm; font-weight:700; font-size:13pt">TỜ KHAI THAY ĐỔI THÔNG TIN CƯ TRÚ</div>
-    </div>
 
-    <div style="margin-top:5mm; font-size:13pt">
-      <!-- Kính gửi -->
-      <div class="printLine" style="justify-content:center;">
-        <span class="lbl">Kính gửi (1):</span>
-        ${lineFill(agency, 0)}
-      </div>
+        <div style="margin-top:5mm; font-size:13pt">
+          <div class="printLine" style="justify-content:center;">
+            <span class="lbl">Kính gửi (1):</span>
+            ${lineFill(agency, 0)}
+          </div>
 
-      <!-- 1 -->
-      <div class="printLine">
-        <span class="lbl">1. Họ, chữ đệm và tên khai sinh:</span>
-        ${lineFill(fullName, 0)}
-      </div>
+          <div class="printLine">
+            <span class="lbl">1. Họ, chữ đệm và tên khai sinh:</span>
+            ${lineFill(fullName, 0)}
+          </div>
 
-      <!-- 2 + 3 -->
-      <div class="printGrid2">
-        <div class="printLine" style="margin-top:0">
-          <span class="lbl">2. Ngày, tháng, năm sinh:</span>
-          ${lineFill(dob, 0)}
+          <div class="printGrid2">
+            <div class="printLine" style="margin-top:0">
+              <span class="lbl">2. Ngày, tháng, năm sinh:</span>
+              ${lineFill(dob, 0)}
+            </div>
+            <div class="printLine" style="margin-top:0">
+              <span class="lbl">3. Giới tính:</span>
+              ${lineFill(gender, 0)}
+            </div>
+          </div>
+
+          <div class="printLine cccd">
+            <span class="lbl">4. Số định danh cá nhân:</span>
+            <span>${renderBoxes(state.idNumber)}</span>
+          </div>
+
+          <div class="printGrid2">
+            <div class="printLine" style="margin-top:0">
+              <span class="lbl">5. Số điện thoại liên hệ:</span>
+              ${lineFill(phone, 0)}
+            </div>
+            <div class="printLine" style="margin-top:0">
+              <span class="lbl">6. Email:</span>
+              ${lineFill(email, 0)}
+            </div>
+          </div>
+
+          <div class="printGrid2">
+            <div class="printLine" style="margin-top:0">
+              <span class="lbl">7. Họ, chữ đệm và tên chủ hộ:</span>
+              ${lineFill(headName, 0)}
+            </div><br>
+            <div class="printLine" style="margin-top:-15px">
+              <span class="lbl">8. Mối quan hệ với chủ hộ:</span>
+              ${lineFill(rel, 0)}
+            </div>
+          </div>
+
+          <div class="printLine cccd">
+            <span class="lbl">9. Số định danh cá nhân của chủ hộ:</span>
+            <span>${renderBoxes(state.headIdNumber)}</span>
+          </div>
+
+          <div class="printLine printLineLong">
+            <span class="lbl">10. Nội dung đề nghị (2):</span>
+            <span class="val">${lineFill(content, 0)}</span>
+          </div>
+
+          <div style="margin-top:3mm">
+            11. Những thành viên trong hộ gia đình cùng thay đổi:
+          </div>
+
+          <table class="printTable">
+            <thead>
+              <tr>
+                <th style="width:10mm">TT</th>
+                <th style="width:50mm">Họ, chữ đệm và tên</th>
+                <th style="width:20mm">Ngày, tháng, năm sinh</th>
+                <th style="width:20mm">Giới tính</th>
+                <th style="width:45mm">Số định danh cá nhân</th>
+                <th style="width:35mm">Mối quan hệ với chủ hộ</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${renderMembersPrint()}
+            </tbody>
+          </table>
+
+          <div class="sigRow">
+            <div class="sig">
+              ${declareDMY}
+              <div class="cap">Ý KIẾN CỦA CHỦ HỘ (3)</div>
+              <div class="note">(Ký, ghi rõ họ tên)</div>
+              <div class="fillName">${sigHead || ""}</div>
+            </div>
+            <div class="sig">
+              ${declareDMY}
+              <div class="cap">Ý KIẾN CỦA CHỦ SỞ HỮU<br/>CHỖ Ở HỢP PHÁP (4)</div>
+              <div class="note">(Ký, ghi rõ họ tên)</div>
+              <div class="fillName">${sigOwner || ""}</div>
+            </div>
+            <div class="sig">
+              ${declareDMY}
+              <div class="cap">Ý KIẾN CỦA CHA, MẸ<br/>NGƯỜI GIÁM HỘ (5)</div>
+              <div class="note">(Ký, ghi rõ họ tên)</div>
+              <div class="fillName">${sigGuardian || ""}</div>
+            </div>
+            <div class="sig">
+              ${declareDMY}
+              <div class="cap">NGƯỜI KÊ KHAI (6)</div>
+              <div class="note">(Ký, ghi rõ họ tên)</div>
+              <div class="fillName">${sigDeclarer || ""}</div>
+            </div>
+          </div>
         </div>
-        <div class="printLine" style="margin-top:0">
-          <span class="lbl">3. Giới tính:</span>
-          ${lineFill(gender, 0)}
-        </div>
-      </div>
+      `;
+    }
 
-      <!-- 4 -->
-      <div class="printLine cccd">
-        <span class="lbl">4. Số định danh cá nhân:</span>
-        <span>${renderBoxes(state.idNumber)}</span>
-      </div>
-
-      <!-- 5 + 6 -->
-      <div class="printGrid2">
-        <div class="printLine" style="margin-top:0">
-          <span class="lbl">5. Số điện thoại liên hệ:</span>
-          ${lineFill(phone, 0)}
-        </div>
-        <div class="printLine" style="margin-top:0">
-          <span class="lbl">6. Email:</span>
-          ${lineFill(email, 0)}
-        </div>
-      </div>
-
-      <!-- 7 + 8 -->
-      <div class="printGrid2">
-        <div class="printLine" style="margin-top:0">
-          <span class="lbl">7. Họ, chữ đệm và tên chủ hộ:</span>
-          ${lineFill(headName, 0)}
-        </div>
-        <div class="printLine" style="margin-top:0">
-          <span class="lbl">8. Mối quan hệ với chủ hộ:</span>
-          ${lineFill(rel, 0)}
-        </div>
-      </div>
-
-      <!-- 9 -->
-      <div class="printLine cccd">
-        <span class="lbl">9. Số định danh cá nhân của chủ hộ:</span>
-        <span>${renderBoxes(state.headIdNumber)}</span>
-      </div>
-
-      <!-- 10 (dài) -->
-<div class="printLine printLineLong">
-  <span class="lbl">10. Nội dung đề nghị (2):</span>
-  <span class="val">${lineFill(content, 0)}</span>
-</div>
-
-
-      <!-- 11 -->
-      <div style="margin-top:3mm">
-        11. Những thành viên trong hộ gia đình cùng thay đổi:
-      </div>
-
-      <table class="printTable">
-        <thead>
-          <tr>
-            <th style="width:10mm">TT</th>
-            <th style="width:50mm">Họ, chữ đệm và tên</th>
-            <th style="width:20mm">Ngày, tháng, năm sinh</th>
-            <th style="width:20mm">Giới tính</th>
-            <th style="width:45mm">Số định danh cá nhân</th>
-            <th style="width:35mm">Mối quan hệ với chủ hộ</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${renderMembersPrint()}
-        </tbody>
-      </table>
-
-      <!-- Địa danh + ngày tháng năm -->
-      
-
-      <!-- Chữ ký -->
-      <div class="sigRow">
-        <div class="sig">
-            .....,ngày.......tháng....năm.......
-          <div class="cap">Ý KIẾN CỦA CHỦ HỘ (3)</div>
-          <div class="note">(Ký, ghi rõ họ tên)</div>
-          <div class="fillName">${sigHead || ""}</div>
-        </div>
-        <div class="sig">
-            .....,ngày.......tháng....năm.......
-          <div class="cap">Ý KIẾN CỦA CHỦ SỞ HỮU<br/>CHỖ Ở HỢP PHÁP (4)</div>
-          <div class="note">(Ký, ghi rõ họ tên)</div>
-          <div class="fillName">${sigOwner || ""}</div>
-        </div>
-        <div class="sig">
-            .....,ngày.......tháng....năm.......
-          <div class="cap">Ý KIẾN CỦA CHA, MẸ<br/>NGƯỜI GIÁM HỘ (5)</div>
-          <div class="note">(Ký, ghi rõ họ tên)</div>
-          <div class="fillName">${sigGuardian || ""}</div>
-        </div>
-        <div class="sig">
-            .....,ngày.......tháng....năm.......
-          <div class="cap">NGƯỜI KÊ KHAI (6)</div>
-          <div class="note">(Ký, ghi rõ họ tên)</div>
-          <div class="fillName">${sigDeclarer || ""}</div>
-        </div>
-      </div>
-    </div>
-
-   
-  `;
-}
-
-// ✅ nhận dữ liệu từ trang quét QR
-(function hydrateFromPrefill(){
-  const key = "ct01_prefill_v1";
-  const raw = sessionStorage.getItem(key);
-  if (!raw) return;
-  try{
-    const obj = JSON.parse(raw);
-    Object.assign(state, obj || {});
-    sessionStorage.removeItem(key);
-    applyStateToInputs();
-  }catch(e){}
-})();
+    // ✅ nhận dữ liệu từ trang quét QR
+    (function hydrateFromPrefill(){
+      const key = "ct01_prefill_v1";
+      const raw = sessionStorage.getItem(key);
+      if (!raw) return;
+      try{
+        const obj = JSON.parse(raw);
+        Object.assign(state, obj || {});
+        sessionStorage.removeItem(key);
+        applyStateToInputs();
+      }catch(e){}
+    })();
 
     function renderPreview(){
       syncFromInputs();
       const html = buildCT01Html();
       $("a4").innerHTML = html;
       $("a4Print").innerHTML = html;
+      requestAnimationFrame(fitA4Preview);
     }
 
     function addMemberRow(data={}){
@@ -1033,6 +1196,7 @@ function buildCT01Html(){
       tr.querySelector("button").addEventListener("click", () => {
         tr.remove();
         reindexMembers();
+        validateAll(false);
         renderPreview();
       });
 
@@ -1040,7 +1204,10 @@ function buildCT01Html(){
         inp.addEventListener("input", () => {
           if(inp.classList.contains("m-id")) inp.value = digitsOnly(inp.value);
         });
-        inp.addEventListener("change", renderPreview);
+        inp.addEventListener("change", () => {
+          validateAll(false);
+          renderPreview();
+        });
       });
 
       tbody.appendChild(tr);
@@ -1071,6 +1238,8 @@ function buildCT01Html(){
           const obj = JSON.parse(reader.result);
           Object.assign(state, obj || {});
           applyStateToInputs();
+          ensureDefaults();          // ✅ nếu thiếu ngày => fill hôm nay
+          validateAll(false);
           renderPreview();
         }catch(e){
           alert("File JSON không hợp lệ.");
@@ -1078,6 +1247,25 @@ function buildCT01Html(){
       };
       reader.readAsText(file);
     }
+
+    function ensureDefaults(){
+  // ✅ tự fill ngày hiện tại nếu đang trống
+  if(!$("declareDate").value.trim()){
+    $("declareDate").value = todayDDMMYYYY();
+  }
+  if(!$("place").value.trim()){
+    $("place").value = "TP. Hồ Chí Minh";
+  }
+
+  // ✅ sigDeclarer luôn = fullName
+  $("sigDeclarer").value = $("fullName").value || "";
+
+  // ✅ fill "Từ ngày" khi đăng ký tạm trú
+  if($("requestType").value === "tamtru" && !$("fromDate").value.trim()){
+    $("fromDate").value = todayDDMMYYYY();
+  }
+}
+
 
     function applyStateToInputs(){
       $("agency").value = state.agency || "";
@@ -1107,7 +1295,10 @@ function buildCT01Html(){
       $("sigHead").value = state.sigHead || "";
       $("sigOwner").value = state.sigOwner || "";
       $("sigGuardian").value = state.sigGuardian || "";
-      $("sigDeclarer").value = state.sigDeclarer || "";
+
+      // ✅ ignore state.sigDeclarer: luôn = fullName
+      $("sigDeclarer").value = state.fullName || "";
+
       $("extraNote").value = state.extraNote || "";
 
       const tbody = document.querySelector("#membersTable tbody");
@@ -1117,20 +1308,72 @@ function buildCT01Html(){
 
     function resetAll(){
       document.querySelectorAll("input, textarea, select").forEach(el => {
+        clearFieldError(el);
         if(el.id === "requestType") el.value = "tamtru";
+        else if(el.id === "agency") el.value = "Công an phường Bình Cơ, TP. Hồ Chí Minh";
         else el.value = "";
       });
       $("requestContent").dataset.manual = "";
       document.querySelector("#membersTable tbody").innerHTML = "";
+
+      // ✅ reset thì fill lại ngày hôm nay + place
+      $("declareDate").value = todayDDMMYYYY();
+      $("place").value = "TP. Hồ Chí Minh";
+      $("fromDate").value = todayDDMMYYYY(); 
+      $("sigDeclarer").value = $("fullName").value || "";
+
       renderPreview();
     }
+    function todayDDMMYYYY(){
+  const d = new Date();
+  const dd = String(d.getDate()).padStart(2,"0");
+  const mm = String(d.getMonth()+1).padStart(2,"0");
+  const yyyy = d.getFullYear();
+  return `${dd}/${mm}/${yyyy}`;
+}
+
+function renderDeclareDMY(dateStr){
+  const v = (dateStr || "").trim();
+  const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(v);
+  const dd = m ? m[1] : ".....";
+  const mm = m ? m[2] : ".....";
+  const yyyy = m ? m[3] : ".......";
+  return `<span class="ddmmyy">....., ngày ${dd} tháng ${mm} năm ${yyyy}</span>`;
+}
+
 
     $("requestContent").addEventListener("input", () => $("requestContent").dataset.manual = "1");
-    document.querySelectorAll("input, select, textarea").forEach(el => el.addEventListener("change", renderPreview));
 
-    $("btnAddMember").addEventListener("click", () => { addMemberRow({}); renderPreview(); });
-    $("btnPreview").addEventListener("click", renderPreview);
-    $("btnPrint").addEventListener("click", () => { renderPreview(); window.print(); });
+    // ✅ fullName đổi -> sigDeclarer đổi ngay (và preview)
+    $("fullName").addEventListener("input", () => {
+      $("sigDeclarer").value = $("fullName").value || "";
+      renderPreview();
+    });
+
+    // Live update + live validate (nhẹ)
+    document.querySelectorAll("input, select, textarea").forEach(el => {
+      el.addEventListener("change", () => {
+        ensureDefaults();
+        validateAll(false);
+        renderPreview();
+      });
+    });
+
+    $("btnAddMember").addEventListener("click", () => { addMemberRow({}); validateAll(false); renderPreview(); });
+
+    $("btnPreview").addEventListener("click", () => {
+      ensureDefaults();
+      validateAll(false);
+      renderPreview();
+    });
+
+    $("btnPrint").addEventListener("click", () => {
+      ensureDefaults();
+      if(!validateAll(true)) return;
+      renderPreview();
+      window.print();
+    });
+
     $("btnDownloadJson").addEventListener("click", downloadJson);
 
     $("btnLoadJson").addEventListener("click", () => $("jsonFile").click());
@@ -1144,18 +1387,14 @@ function buildCT01Html(){
       if(confirm("Xóa toàn bộ dữ liệu đang nhập?")) resetAll();
     });
 
-    // init defaults
-    const today = new Date();
-    const dd = String(today.getDate()).padStart(2,"0");
-    const mm = String(today.getMonth()+1).padStart(2,"0");
-    const yyyy = today.getFullYear();
-    $("declareDate").value = `${dd}/${mm}/${yyyy}`;
-    $("place").value = "TP. Hồ Chí Minh";
+    window.addEventListener("resize", () => requestAnimationFrame(fitA4Preview));
 
+    // ✅ init defaults (lần đầu)
+    ensureDefaults();
+
+    // first render
     renderPreview();
+    validateAll(false);
   </script>
-
-  <!-- ✅ Nếu bạn có script.js riêng khác, hãy để nó ở đây (1 lần thôi) -->
-  <!-- <script src="./script.js"></script> -->
 </body>
 </html>

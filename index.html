@@ -62,9 +62,16 @@
       line-height: 1.55;
       -webkit-font-smoothing: antialiased;
       text-rendering: optimizeLegibility;
+      width: 100;
     }
 
-    .wrap{max-width: 1700px;margin:24px auto;display:grid;gap:14px; padding: 15px;}
+    .wrap{
+    max-width: 1700px;
+    margin:24px auto;
+    display:grid;
+    gap:14px; 
+    padding: 15px;
+  }
 
     /* Header */
     .top{
@@ -104,7 +111,7 @@
     }
 
     @media (max-width: 980px){
-      body{padding:12px}
+      /* body{padding:12px} */
       .grid{grid-template-columns:1fr}
       .top{align-items:flex-start}
     }
@@ -473,7 +480,6 @@
     .noticeBox b{color:#6b3b00}
   </style>
 </head>
-
 <body>
   <div id="nav-host"></div>
 
@@ -1649,6 +1655,8 @@ function buildCT01Prefill(){
   const newFull = ($("addrFull")?.textContent || "").trim();
   const oldAddr = ($("oldAddr")?.textContent || "").trim();
 
+
+
   const tempAddress = (newFull && newFull !== "—") ? newFull : ((oldAddr && oldAddr !== "—") ? oldAddr : "");
 
   // Nếu không có đủ dữ liệu cơ bản thì báo
@@ -1678,6 +1686,8 @@ function buildCT01Prefill(){
     headIdNumber: "",
 
     requestType: "tamtru",
+
+    relationToHead: "Người Thuê Trọ",
 
     tempAddress: tempAddress || "",
     fromDate: todayDDMMYYYY(),
