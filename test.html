@@ -1,4 +1,1368 @@
 
+<!DOCTYPE html>
+<html>
+ <head> 
+  <meta charset="UTF-8" /> 
+  <title>Cổng Dịch vụ c&ocirc;ng Bộ C&ocirc;ng An</title> 
+  <meta content="width=device-width, initial-scale=1" name="viewport" id="viewport" /> 
+  <meta content="IE=edge" http-equiv="X-UA-Compatible" /> 
+  <meta content="width=device-width, initial-scale=1" name="viewport" id="viewport" /> 
+  <meta content="index, follow" name="ROBOTS" /> 
+  <!--<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>--> 
+  <script type="text/javascript">
+//<![CDATA[
+window["_csrf_"] = "08875e0093843001c703c8379349b3dc957846785ad964d4c9aec4caabfa0f63673e4c3f63583b3dfbb821c9392484947209b128f14ecfeec555a1b77370c0aff8bd05b39f932472beb7f905fe07bb39bc018608393d69f5a7eb1b6424af3a037ade06efc47caeb6c70c9f179e79a1dd31cc33e05a06aaef7be36f0862c4c3dc9b7493fe9f490313fb2577f70498e0a72da68c248a0bcf4524060928c17eff38d37c57fd1d4ad647454d8b5141f51ea7b4f3aecf473112e9d97e1c6a383d57f4a9ed9875e918119bae1e3f26ed41e7037c33c8b93d73494efd30741de142a5b6bc8f8c58a45bdeac514a23027c9ff84f3e49c376cc92ad75cd1520a810905d66efa8630ed27c6a21a938578e931e5fa8a948a0be47b50e57f4cac448ea5d73a982b2e90705c52fc5b6b9fb1784ba19aff6a4232facf6b73e";
+//]]>
+</script><script type="text/javascript" src="/TSbd/087245965dab20006578cbbc134bf6200ebf1e94477df492bf7a419f2f347ee3f3e8eb75355ebc25?type=2"></script><script type="text/javascript" src="/portal/assets/vendor/bootstrap-datepicker/js/moment.min.js"></script> 
+  <link rel="stylesheet" href="/portal/assets/theme/vendor/typeahead/style.css" /> 
+  <link rel="stylesheet" href="/portal/assets/vendor/toastr/toastr.min.css" /> 
+  <!--ngoc--> 
+  <link href="/portal/assets/js/upload/css/image-picker.css" rel="stylesheet" /> 
+  <link rel="stylesheet" href="/portal/assets/js/upload/css/style.css" /> 
+  <!--    <link rel="stylesheet" href="/portal/assets/js/upload/css/bootstrap-responsive.min.css">--> 
+  <!--    <link rel="stylesheet" href="http://blueimp.github.com/cdn/css/bootstrap-ie6.min.css">--> 
+  <!--    <link rel="stylesheet" href="/portal/assets/js/upload/css/jquery.fileupload-ui.css">--> 
+  <!-- <link rel="stylesheet" href="/portal/assets/js/upload/css/jquery.fileupload-ui.css" /> --> 
+  <link rel="stylesheet" href="/portal/assets/vendor/bootstrap/css/bootstrapValidator.min.css" /> 
+  <script type="text/javascript" src="/portal/assets/theme/vendor/jquery/jquery-3.4.1.min.js"></script> 
+  <script type="text/javascript" src="/portal/assets/vendor/bootstrap/js/bootstrapValidator.js"></script> 
+  <script type="text/javascript" src="/portal/assets/vendor/toastr/toastr.min.js"></script> 
+  <script type="text/javascript" src="/portal/assets/vendor/jq-paginator.js"></script> 
+  <script type="text/javascript" src="/portal/assets/vendor/bootbox.all.min.js"></script> 
+  <script type="text/javascript" src="/portal/assets/vendor/mime.js"></script> 
+  <script type="text/javascript" src="/portal/assets/vendor/jquery/jquery-iframe-auto-height.min.js"></script> 
+  <script type="text/javascript" src="/portal/assets/vendor/jquery/jquery.browser.js"></script> 
+  <!-- <script src="/portal/assets/js/ApiService.js"></script> --> 
+  <!-- 
+	<script src="js/ApiService.js"></script>
+	<script src="js/browser-image-compression.js"></script>
+	 --> 
+  <script src="/portal/assets/js/ApiService.js?v=1.0"></script> 
+  <script src="/portal/assets/js/browser-image-compression.js?v=1.0"></script> 
+  <script src="/portal/assets/js/CommonUtil.js?version=15"></script> 
+  <script type="text/javascript" src="/portal/assets/vendor/typeahead/index.js"></script> 
+  <script type="text/javascript" src="/portal/assets/vendor/typeahead/handlebars.js"></script> 
+  <link rel="stylesheet" href="/portal/assets/vendor/bootstrap-datepicker/css/bootstrap-datepicker.min.css" /> 
+  <script type="text/javascript" src="/portal/assets/vendor/bootstrap-datepicker/js/bootstrap-datepicker.min.js"></script> 
+  <script type="text/javascript" src="/portal/assets/vendor/bootstrap-timepicker/js/bootstrap-timepicker.js"></script> 
+  <script src="/portal/assets/js/base64.js"></script> 
+  <!--    ngocadd--> 
+  <!--<script type="text/javascript" src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>--> 
+  <script type="text/javascript" src="/portal/assets/vendor/alertify/alertify.js"></script> 
+  <link rel="stylesheet" type="text/css" href="/portal/assets/vendor/alertify/themes/alertify.core.css" /> 
+  <link rel="stylesheet" type="text/css" href="/portal/assets/vendor/alertify/themes/alertify.default.css" /> 
+  <!--    end_ngocadd--> 
+  <link rel="stylesheet" href="/portal/assets/vendor/bootstrap-table-v16/dist/bootstrap-table.css" /> 
+  <script type="text/javascript" src="/portal/assets/vendor/bootstrap-table-v16/dist/bootstrap-table.js"></script> 
+  <!--<script src="https://unpkg.com/tableexport.jquery.plugin@1.10.1/tableExport.min.js"></script>--> 
+  <script type="text/javascript" src="/portal/assets/vendor/bootstrap-table-v16/dist/extensions/export/bootstrap-table-export.js"></script> 
+  <script type="text/javascript" src="/portal/assets/vendor/bootstrap-table/locale/bootstrap-table-vi-VN.min.js"></script> 
+  <script type="text/javascript" src="/portal/assets/vendor/bootstrap-table/locale/bootstrap-table-en-US.min.js"></script> 
+  <script type="text/javascript" src="/portal/assets/vendor/validator/js/jquery.inputmask.js"></script> 
+  <!--    end ngoc fix header--> 
+  <script type="text/javascript" src="/portal/assets/vendor/UIUtil.js"></script> 
+  <!-- <script type="text/javascript" src="/portal/assets/vendor/FormUtil.js"></script> --> 
+  <script type="text/javascript" src="/portal/p/home/vendor/FormUtil.js"></script> 
+  <script type="text/javascript" src="/portal/assets/vendor/FormatUtil.js"></script> 
+  <script type="text/javascript" src="/portal/assets/vendor/base64.js"></script> 
+  <script type="text/javascript" src="/portal/assets/vendor/DataValidator.js"></script> 
+  <script src="/portal/assets/vendor/bootbox/bootbox.min.js"></script> 
+  <script src="/portal/assets/vendor/bootbox/bootbox.locales.min.js"></script> 
+  <script type="text/javascript" src="/portal/assets/vendor/jquery.i18n/jquery.i18n.js"></script> 
+  <script type="text/javascript" src="/portal/assets/vendor/jquery.i18n/jquery.i18n.messagestore.js"></script> 
+  <!--Jbox--> 
+  <!--ckeditor--> 
+  <script type="text/javascript" src="/portal/assets/vendor/ckeditor/ckeditor.js"></script> 
+  <!--<script src="https://ckeditor.com/apps/ckfinder/3.4.5/ckfinder.js"></script>--> 
+  <!--new_css--> 
+  <link rel="stylesheet" href="/portal/assets/vendor/font-awesome/css/font-awesome.min.css" /> 
+  <link rel="stylesheet" type="text/css" href="/portal/assets/vendor/ap8/css/style.css" /> 
+  <link rel="stylesheet" type="text/css" href="/portal/assets/vendor/nucleo/glyph/css/style.css" /> 
+  <link rel="stylesheet" type="text/css" href="/portal/assets/vendor/nucleo/outline/css/style.css" /> 
+  <link rel="stylesheet" type="text/css" href="/portal/assets/vendor/line-awesome/css/line-awesome.css" /> 
+  <link rel="stylesheet" type="text/css" href="/portal/assets/vendor/slick/slick.css" /> 
+  <!-- <link rel="icon" href="/portal/assets/img/header/quoc_huy.png"> --> 
+  <link rel="icon" href="/portal/p/home/img/logo.png" /> 
+  <link rel="stylesheet" href="/portal/assets/vendor/bootstrap/css/bootstrap.min.css" /> 
+  <link rel="stylesheet" type="text/css" href="/portal/assets/vendor/select2/css/select2.min.css" /> 
+  <link rel="stylesheet" href="/portal/assets/css/style.css" /> 
+  <link rel="stylesheet" type="text/css" href="/portal/assets/css/custom.css" /> 
+  <link rel="stylesheet" href="/portal/assets/vendor/bc/style.css" /> 
+  <link rel="stylesheet" href="/portal/assets/vendor/fancybox/jquery.fancybox.css" /> 
+  <script src="vendor/fancybox/jquery.fancybox.min.js"></script> 
+  <script type="text/javascript" src="/portal/assets/vendor/select2/js/select2.min.js"></script> 
+  <script type="text/javascript" src="/portal/assets/vendor/bootstrap/js/bootstrap.min.js"></script> 
+  <script type="text/javascript" src="/portal/assets/vendor/slick/slick.min.js"></script> 
+  <script type="text/javascript" src="/portal/assets/vendor/slimscroll/jquery.nicescroll.min.js"></script> 
+  <!--<script type="text/javascript" src="js/UtilApiDvc/ApiDvcProcess.js"></script>
+	<script type="text/javascript" src="js/custom.js"></script>
+	--> 
+  <script type="text/javascript" src="/portal/assets/js/UtilApiDvc/ApiDvcProcess.js?v=1.0"></script> 
+  <script type="text/javascript" src="/portal/assets/js/custom.js?v=1.0"></script> 
+  <!--    new_css--> 
+  <!-- new_css--> 
+  <script>
+        var _context_path = "/portal/util/rest_exec";
+        var _context_root = "/portal";
+        //var _context_path_upload = "/portal/portal/upload/UploadServlet";
+        var _PORTAL_CONTEXT_PATH = 'portal';
+        initApiService(_context_path);
+        if("VN" == "VN"){
+            $.extend(BootstrapTable.DEFAULTS, BootstrapTable.LOCALES['vi-VN']);
+        }else {
+            $.extend(BootstrapTable.DEFAULTS, BootstrapTable.LOCALES['en-US']);
+        }
+    </script> 
+  <style>
+        .modal {
+        overflow-y: auto;
+    }
+    </style> 
+ </head> 
+ <body class="style-green"> 
+  <!--DEFINE CONSTANT --> 
+  <div class="overlay-common"></div> 
+  <!-- <div class="hero-banner" style="background-image: url(img/bg-banner.png);">
+    <div class="container">
+            <div class="item dropdown user-act right">
+				<div class="inner" data-toggle="dropdown">
+	                <div class="avatar" style="background-image: url(uploads/user.jpg);">
+	                </div>
+	                <a style="color: #fff"><span class="name" id="userLogin"></span><span class="icon fa fa-angle-down" ></span></a>
+				</div>
+                <ul class="dropdown-menu">
+                    <li><a href="dvc-my-profile.html">Thông tin tài khoản</a></li>
+		    <li><a href="javascript:doLogout();">Thoát</a></li>
+                </ul>
+            </div>
+        <div class="top-menu">
+            <a class="logo">
+                <span class="img" href="dvc-gioi-thieu.html">
+                    <img src="img/logo.png">
+                </span>
+                <span class="title">CỔNG DỊCH VỤ CÔNG QUẢN LÝ CƯ TRÚ</span>
+            </a>
+            <div class="links" id="btnLogin">
+                <a class="link" href="/portal/choose_login.jsp">Đăng nhập</a>
+            </div>
+        </div>
+        <ul class="menus">
+            <li class="active">
+                <a href="dvc-gioi-thieu.html">
+                    <span class="icon bc-home"></span>
+                </a>
+            </li>
+            <li>
+                <a href="dvc-gioi-thieu.html">Giới thiệu</a>
+            </li>
+            <li>
+                <a href="fn-tin-tuc-su-kien.html">Tin tức, sự kiện</a>
+            </li>
+            <li>
+                <a href="#">Tra cứu</a>
+                <ul class="dropdown-menu">
+                    <li class="itemDvc"><a href="dvc-tim-kiem-tt-cong-dan.html">Tìm kiếm thông tin công dân</a></li>
+                    <li><a href="dvc-tim-kiem-thong-tin-khac.html">Tìm kiếm nội dung khác</a></li>
+                    <li><a href="dvc-tra-cuu-dich-vu-cong.html">Tra cứu dịch vụ công trực tuyến</a></li>
+                    <li><a href="dvc-huong-dan-dich-vu-cong-truc-tuyen.html">Hướng dẫn thực hiện dịch vụ công trực tuyến</a></li>
+                </ul>
+            </li>
+            <li>
+                <a href="#">Quản lý hồ sơ dịch vụ công</a>
+                <ul class="dropdown-menu">
+                    <li><a href="ho-so.html?type=edit">Sửa hồ sơ</a></li>
+                    <li><a href="ho-so.html?type=del">Xóa hồ sơ</a></li>
+                    <li><a href="xem-ho-so.html?type=1">Hồ sơ chưa gửi</a></li>
+                    <li><a href="xem-ho-so.html?type=2">Hồ sơ mới đăng ký</a></li>
+                    <li><a href="xem-ho-so.html?type=3">Hồ sơ bị trả lại</a></li>
+                    <li class="itemDvc"><a href="xem-ho-so.html?type=5">Hồ sơ đang xử lý</a></li>
+                    <li><a href="xem-ho-so.html?type=4">Hồ sơ đã xử lý</a></li>
+                </ul>
+            </li>
+            <li>
+                <a href="#">Đa phương tiện</a>
+                <ul class="dropdown-menu">
+                    <li><a href="dancu-da-phuong-tien.html">Thư viện đa phương tiện</a></li>
+                </ul>
+            </li>
+            <li>
+                <a href="#">Báo cáo thống kê</a>
+                <ul class="dropdown-menu">
+                    <li><a href="khai-thac-bao-cao-thong-ke.html">Khai thác báo cáo thống kê</a></li>
+                </ul>
+            </li>
+            <li><a href="dvc-cms-cau-hoi.html">Hỏi đáp</a></li>
+            <li><a href="dvc-cms-feedback.html">Đóng góp ý kiến</a></li>
+            <li><a href="dancu-xem-lich-lam-viec.html">Xem Lịch làm việc</a></li>
+            <li><a href="pt-dg-co-quan.html">Đánh giá cơ quan</a></li>
+        </ul>
+        <div class="box-search">
+            <div class="input-search" >
+                <input type="text" id="txtSearch" class="form-control" >
+                <div class="adv-search" style="width: 25%;" >
+                    <select id="cboSearch" style="margin: auto;border: none">
+                        <option value="dvc-tim-kiem-tt-cong-dan.html" class="itemDvc">Tìm kiếm thông tin công dân <span class="-ap icon icon-chevron-thin-down"></span></option>
+                        <option selected value="dvc-tim-kiem-thong-tin-khac.html">Tìm kiếm nội dung khác <span class="-ap icon icon-chevron-thin-down"></span></option>
+                        <option value="dvc-tra-cuu-dich-vu-cong.html">Tra cứu dịch vụ công trực tuyến <span class="-ap icon icon-chevron-thin-down"></span></option>
+                    </select>
+                </div>
+                <button class="btn btn-search" onclick="goLinkSearch()">
+                    <span class="-ap icon icon-uniF162"></span>
+                </button>
+            </div>
+            <div class="tags">
+                <div class="item itemDvc">
+                    <a href="dvc-tim-kiem-tt-cong-dan.html">Thông tin công dân</a>
+                </div>
+                <div class="item">
+                    <a href="pt-tim-kiem-vbpl.html">Văn bản pháp luật</a>
+                </div>
+                <div class="item dropdown">
+                    <a data-toggle="dropdown">Hồ sơ</a>
+                    <ul class="dropdown-menu">
+                        <li><a href="ho-so.html?type=edit">Sửa hồ sơ</a></li>
+                        <li><a href="ho-so.html?type=del">Xóa hồ sơ</a></li>
+                        <li><a href="xem-ho-so.html?type=1">Hồ sơ chưa gửi</a></li>
+                        <li><a href="xem-ho-so.html?type=2">Hồ sơ mới đăng ký</a></li>
+                        <li><a href="xem-ho-so.html?type=3">Hồ sơ bị trả lại</a></li>
+                        <li class="itemDvc"><a href="xem-ho-so.html?type=5">Hồ sơ đang xử lý</a></li>
+                        <li><a href="xem-ho-so.html?type=4">Hồ sơ đã xử lý</a></li>
+                    </ul>
+                </div>
+                <div class="item dropdown">
+                    <a data-toggle="dropdown"> Dịch vụ công</a>
+                    <ul class="dropdown-menu">
+                        <li class="itemDvc"><a href="dang-ky-thuong-tru.html">Đăng ký thường trú</a></li>
+                        <li class="itemDvc"><a href="dang-ky-tam-tru.html">Đăng ký tạm trú</a></li>
+                        <li class="itemLuutru"><a href="thong-bao-luu-tru.html">Thông báo lưu trú</a></li>
+                        <li class="itemDvc"><a href="khai-bao-tam-vang.html">Khai báo tạm vắng</a></li>
+ 						<li class="itemDvc"><a href="dvc-CCCD.html">Căn cước công dân</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> --> 
+  <div class="top-menu" style="background-image: url(/portal/assets/img/header/bg-header.png);"> 
+   <div class="container"> 
+    <div class="box-content"> 
+     <a class="logo" href="dvc-gioi-thieu.html"> <span class="img"> <img src="img/logo.png" /> </span> <span class="title">CỔNG DỊCH VỤ C&Ocirc;NG <br /> BỘ C&Ocirc;NG AN</span> </a> 
+     <div class="actions"> 
+      <div class="item flag-box"> 
+       <div class="select-custom"> 
+        <select name="" id="" class="form-control"> <option value="">Tiếng Việt</option> </select> 
+       </div> 
+      </div> 
+      <a id="btnLogin" href="/portal/choose_login.jsp" class="btn btn-second upper" style="min-width:120px;">Đăng nhập</a> 
+      <!--<a href="#" class="btn btn-main upper">Đăng ký</a>--> 
+      <div class="item dropdown"> 
+       <!--<div class="inner" data-toggle="dropdown">
+                        <div class="avatar" style="background-image: url(uploads/user.jpg);">
+                        </div>
+                        <a style="color: black"> <span class = "fa fa-user" ></span> <span class="name" id="userLogin"></span><span class="caret" ></span></a>
+                    </div>
+                    <ul class="dropdown-menu">
+                        <li><a href="dvc-my-profile.html">Thông tin cá nhân</a></li>
+                        <li><a href="javascript:doLogout();"><i class="fa fa-sign-out"></i> Đăng xuất</a></li>
+                    </ul>--> 
+       <div class="user" data-toggle="dropdown"> 
+        <span class="fa fa-user icon"></span> 
+        <span class="name" id="userLogin"></span> 
+        <span class="fa fa-angle-down"></span> 
+       </div> 
+       <ul class="dropdown-menu dropdown-menu-right"> 
+        <li><a href="dvc-my-profile.html">Th&ocirc;ng tin c&aacute; nh&acirc;n</a></li> 
+        <li><a href="dvc-tim-kiem-tt-cong-dan.html" class="itemDvc">Tra cứu th&ocirc;ng tin c&ocirc;ng d&acirc;n</a></li> 
+        <li><a href="ho-so.html">Quản l&yacute; hồ sơ đ&atilde; nộp</a></li> 
+        <li class="divider"></li> 
+        <li><a href="javascript:doLogout();"><span class="fa fa-sign-out"></span> Đăng xuất</a></li> 
+       </ul> 
+      </div> 
+     </div> 
+    </div> 
+    <div class="box-menu"> 
+     <ul class="menus"> 
+      <li class="active"> <a href="dvc-gioi-thieu.html"> <span class="icon bc-home"></span> </a> </li> 
+      <!--<li>
+					<a href="#">Giới thiệu</a>
+				</li> 
+				<li><a href="#">Hướng dẫn sử dụng DVC trực tuyến</a></li>--> 
+      <!--<li><a href="https://dichvucong.bocongan.gov.vn/bocongan/bothutuc/listThuTuc">Thủ tục hành chính</a></li>--> 
+      <li><a href="dvc-cac-thu-tuc.html?SOURCE_APP=DVCQLCT">Thủ tục h&agrave;nh ch&iacute;nh</a></li> 
+      <li><a href="ho-so.html">Tra cứu hồ sơ</a></li> 
+      <li><a href="https://dichvucong.bocongan.gov.vn/bocongan/bothutuc?muc_do=MUC_DO_3,MUC_DO_4">Nộp hồ sơ trực tuyến</a></li> 
+      <li> <a href="#">Quản l&yacute; hồ sơ DVC</a> 
+       <ul class="dropdown-menu"> 
+        <li><a href="ho-so.html?type=edit">Sửa hồ sơ</a></li> 
+        <li><a href="ho-so.html?type=del">X&oacute;a hồ sơ</a></li> 
+        <li><a href="xem-ho-so.html?type=1">Hồ sơ chưa gửi</a></li> 
+        <li><a href="xem-ho-so.html?type=2">Hồ sơ mới đăng k&yacute;</a></li> 
+        <li><a href="xem-ho-so.html?type=3">Hồ sơ bị trả lại</a></li> 
+        <li class="itemDvc"><a href="xem-ho-so.html?type=5">Hồ sơ đang xử l&yacute;</a></li> 
+        <li><a href="xem-ho-so.html?type=4">Hồ sơ đ&atilde; xử l&yacute;</a></li> 
+       </ul> </li> 
+      <!--<li><a href="ho-so.html">Tra cứu hồ sơ</a></li>--> 
+      <!--<li><a href="khai-thac-bao-cao-thong-ke.html">Báo cáo thống kê</a></li>--> 
+      <li><a href="https://dichvucong.bocongan.gov.vn/bocongan/tintuc/chitiet?matin=21">Phản &aacute;nh-Kiến nghị</a></li> 
+      <li><a href="https://dichvucong.bocongan.gov.vn/bocongan/danhgia">Đ&aacute;nh gi&aacute;</a></li> 
+      <li><a href="https://dichvucong.bocongan.gov.vn/dichvucong/vanbanphapluat">Văn bản</a></li> 
+      <li><a href="https://dichvucong.bocongan.gov.vn/bocongan/hoidap">Hỏi đ&aacute;p</a></li> 
+      <li><a href="https://dichvucong.bocongan.gov.vn/dichvucong/congdan/huongdancongdan">Hỗ trợ</a></li> 
+     </ul> 
+     <!-- <div class="actions">
+                <a href="#" class="btn btn-main upper" style="min-width:120px;">Đăng nhập</a>
+                <div class="item flag-box">
+                    <div class="flag">
+                        <span class="icon" style="background-image:url(/portal/assets/img/flags/vn.svg);"></span>
+                        <span class="-ap icon-chevron-thin-down"></span>
+                    </div>
+                </div>
+            </div> --> 
+    </div> 
+   </div> 
+  </div> 
+  <div class="nav-toggle"> 
+   <span class="icon -ap icon-menu"></span> 
+  </div> 
+  <div id="modal_notify_payment" data-backdrop="static" class="modal fade in"> 
+   <div class="modal-dialog" style="max-width: 1000px;width: 100%;"> 
+    <div id="ReqChangePass"> 
+     <div class="modal-content"> 
+      <div class="modal-body pad20"> 
+       <button type="button" id="btn_close_2" class="close -ap icon-close" data-dismiss="modal"></button> 
+       <div class="title-main center">
+         Th&ocirc;ng b&aacute;o 
+       </div> 
+       <div class="row"> 
+        <div class="form-group col-sm-12 col-xs-12"> 
+         <div class="label-text"> 
+          <p type="text" id="txtNOTIFY"></p>
+         </div> 
+        </div> 
+       </div> 
+      </div> 
+     </div> 
+    </div> 
+   </div> 
+  </div> 
+  <style>
+.input-search-box {
+    display: flex;
+    margin-bottom: 20px;
+}
+</style> 
+  <script>
+    var listLogin = ['pt-dg-co-quan.html', 'dancu-thong-bao-luu-tru.html',  'pt-quan-ly-ho-so-dvc.html','dvc-cms-feedback.html', 'dvc-cms-cau-hoi.html'];
+    var _userNameAbc = '';
+    var paramInfo = null;
+    var paramInfo_new = null;
+    var cslt_info = null;
+    var portalID='3';
+    let headerLT= '{"x-sync-application-id":"11234","x-forward-Authorization":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJjb25ndGhvbmd0aW4iLCJpc3MiOiJPQXV0aCJ9.PHsElndmeSNZzcVM5Fqp5RiKvfE-xCMtwKpi-rEx_sF69PZanlMOvDv3e7c2Ue6ziOq5hM2FIiFBYLCLzRn8zQ","x-callback-Authorization":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJyZWNlaXZlX2RhdGFkaW9kZV9jYWxsYmFjayIsImlzcyI6Ik9BdXRoIn0.4V6sQjKabkdw0m9dvqRjVdbMXlJe_hq1ZdxKQh9WpGPVDI-0yQdmZX84hs_TLZb4llSXa0fyIp9PnB8Arzn6SA","x-forward-client_id":"congthongtin","x-application-code":"APP12"}';
+    let headerTHT= '{"x-sync-application-id":"11234","x-forward-Authorization":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJSRF9SRUNFSVZFX0ZST01fUE9SVEFMX0FQSV9pbXBfZGF0YV9mcm9tX3BvcnRhbCIsImlzcyI6Ik9BdXRoIn0.WVBY3NMChkzsaAEmImpGHT6IEoPxQQvLHAp9v6Yk_eLfNHKzRJtWnosj4Bb0EK24886ODyaEYDNysjEf2ctOuw","x-callback-Authorization":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJyZWNlaXZlX2RhdGFkaW9kZV9jYWxsYmFjayIsImlzcyI6Ik9BdXRoIn0.4V6sQjKabkdw0m9dvqRjVdbMXlJe_hq1ZdxKQh9WpGPVDI-0yQdmZX84hs_TLZb4llSXa0fyIp9PnB8Arzn6SA","x-forward-client_id":"RD_RECEIVE_FROM_PORTAL_API_imp_data_from_portal","x-application-code":"APP12"}'; 
+    let headerTAT= '{"x-sync-application-id": "123456789012","x-forward-Authorization": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhcGlfaW1wX2RhdGFfZnJvbV9wb3J0YWwiLCJpc3MiOiJPQXV0aCJ9.6jzfzU5QPBTDrTTJKzDYdWX-001mmt7nxS49pUIWMw1PNrORA2IYwm-OoUC1RDK-ai-PlG35Ow3y31ALJjUSXw","x-callback-Authorization": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJyZWNlaXZlX2RhdGFkaW9kZV9jYWxsYmFjayIsImlzcyI6Ik9BdXRoIn0.4V6sQjKabkdw0m9dvqRjVdbMXlJe_hq1ZdxKQh9WpGPVDI-0yQdmZX84hs_TLZb4llSXa0fyIp9PnB8Arzn6SA","x-forward-client_id": "api_imp_data_from_portal","x-application-code":"APP12"}';
+    let headerTV= '{"x-sync-application-id":"1123422222222","x-forward-Authorization":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJjb25ndGhvbmd0aW4iLCJpc3MiOiJPQXV0aCJ9.PHsElndmeSNZzcVM5Fqp5RiKvfE-xCMtwKpi-rEx_sF69PZanlMOvDv3e7c2Ue6ziOq5hM2FIiFBYLCLzRn8zQ","x-callback-Authorization":"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJyZWNlaXZlX2RhdGFkaW9kZV9jYWxsYmFjayIsImlzcyI6Ik9BdXRoIn0.4V6sQjKabkdw0m9dvqRjVdbMXlJe_hq1ZdxKQh9WpGPVDI-0yQdmZX84hs_TLZb4llSXa0fyIp9PnB8Arzn6SA","x-forward-client_id":"congthongtin","x-application-code":"APP12"}';
+
+    var maxSizeFileDoc='10485760';
+    var _userType = 'USER_TYPE_VNCONNECT';
+    if(_userType == 'USER_TYPE_VNCONNECT' || _userType == 'USER_TYPE_STAY'){
+        if(_userType == 'USER_TYPE_VNCONNECT'){//Login vnconnect
+            userInfo = {"sub":"cbd1902e-f3c3-4fc6-8c31-50c6594c98d1","TechID":"76517dc6-ee60-4bb2-8428-a9cf1a2a7249","NoiSinh":"Xã Ngự Thiên,Tỉnh Hưng Yên","LoaiTaiKhoan":"1","loAs":"[{\n  \"level\" : 2,\n  \"claim\" : \"GioiTinh\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"NoiSinh\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"NguyenQuan\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"NoiSinhPhuongXa\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"QueQuanPhuongXa\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"QueQuanTinhThanhPho\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"DiaChiThuongTruPhuongXa\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"DiaChiThuongTruTinhThanhPho\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"HoVaTen\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"NgayThangNamSinh\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"CCCD\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"SoDienThoai\",\n  \"src\" : \"Viettel\"\n}]","QueQuan":"Xã Ngự Thiên, Tỉnh Hưng Yên","GioiTinh":"1","techIdVneid":"cbd1902e-f3c3-4fc6-8c31-50c6594c98d1","HoVaTen":"Nguyễn Minh Tuấn","ThuDienTu":"nguyentuanw135@gmail.com","SoDienThoai":"0972786005","SoDinhDanh":"034205011440","NgayThangNamSinh":"20050822"};
+            //console.log(userInfo)
+			$('#mobileLogoutDiv').show();
+			$('#mobileLogonDiv').hide();
+            //alert(userInfo);
+            $('#userLogin').text(userInfo.HoVaTen);
+            techId = userInfo;
+			if(userInfo.SoDinhDanh) userInfo.SoCMND = userInfo.SoDinhDanh;
+            $('.user-act').show();
+            $('#btnLogin').hide();
+			insertUserVnConnect();
+            //get_query_params_data(userInfo.SoCMND);
+			get_query_params_data_new(userInfo.SoCMND);
+            $('#itemLuutru').hide();
+        }else if(_userType == 'USER_TYPE_STAY'){
+            _userNameAbc = 'cbd1902e-f3c3-4fc6-8c31-50c6594c98d1';
+            //alert(_userNameAbc);
+            //$('#userLogin').text(_userNameAbc);
+            cslt_info = get_info_userlogin(_userNameAbc);
+			$('#userLogin').text(cslt_info[0].FULLNAME);
+            $('.itemDvc').hide();
+			checkLoginHiddenCSLT();
+        }
+        $('.user-act').show();
+        $('#btnLogin').hide();
+		$('#divNotification').show();
+    }else {
+        $('.user-act').hide();
+        $('#btnLogin').show();
+        checkLogin(listLogin);
+		$('#divNotification').hide();
+    }
+    $(".box .down").click(function(){
+        $(this).parents(".box").toggleClass("active");
+    })
+
+    /*
+    if (typeof {"sub":"cbd1902e-f3c3-4fc6-8c31-50c6594c98d1","TechID":"76517dc6-ee60-4bb2-8428-a9cf1a2a7249","NoiSinh":"Xã Ngự Thiên,Tỉnh Hưng Yên","LoaiTaiKhoan":"1","loAs":"[{\n  \"level\" : 2,\n  \"claim\" : \"GioiTinh\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"NoiSinh\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"NguyenQuan\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"NoiSinhPhuongXa\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"QueQuanPhuongXa\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"QueQuanTinhThanhPho\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"DiaChiThuongTruPhuongXa\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"DiaChiThuongTruTinhThanhPho\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"HoVaTen\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"NgayThangNamSinh\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"CCCD\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"SoDienThoai\",\n  \"src\" : \"Viettel\"\n}]","QueQuan":"Xã Ngự Thiên, Tỉnh Hưng Yên","GioiTinh":"1","techIdVneid":"cbd1902e-f3c3-4fc6-8c31-50c6594c98d1","HoVaTen":"Nguyễn Minh Tuấn","ThuDienTu":"nguyentuanw135@gmail.com","SoDienThoai":"0972786005","SoDinhDanh":"034205011440","NgayThangNamSinh":"20050822"} != 'undefined' || _userNameAbc != '') {
+        if(_userNameAbc != '' && typeof {"sub":"cbd1902e-f3c3-4fc6-8c31-50c6594c98d1","TechID":"76517dc6-ee60-4bb2-8428-a9cf1a2a7249","NoiSinh":"Xã Ngự Thiên,Tỉnh Hưng Yên","LoaiTaiKhoan":"1","loAs":"[{\n  \"level\" : 2,\n  \"claim\" : \"GioiTinh\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"NoiSinh\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"NguyenQuan\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"NoiSinhPhuongXa\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"QueQuanPhuongXa\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"QueQuanTinhThanhPho\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"DiaChiThuongTruPhuongXa\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"DiaChiThuongTruTinhThanhPho\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"HoVaTen\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"NgayThangNamSinh\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"CCCD\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"SoDienThoai\",\n  \"src\" : \"Viettel\"\n}]","QueQuan":"Xã Ngự Thiên, Tỉnh Hưng Yên","GioiTinh":"1","techIdVneid":"cbd1902e-f3c3-4fc6-8c31-50c6594c98d1","HoVaTen":"Nguyễn Minh Tuấn","ThuDienTu":"nguyentuanw135@gmail.com","SoDienThoai":"0972786005","SoDinhDanh":"034205011440","NgayThangNamSinh":"20050822"} == 'undefined'){
+            $('#userLogin').text(_userNameAbc);
+            cslt_info = get_info_userlogin(_userNameAbc);
+        }else{
+            userInfo ={"sub":"cbd1902e-f3c3-4fc6-8c31-50c6594c98d1","TechID":"76517dc6-ee60-4bb2-8428-a9cf1a2a7249","NoiSinh":"Xã Ngự Thiên,Tỉnh Hưng Yên","LoaiTaiKhoan":"1","loAs":"[{\n  \"level\" : 2,\n  \"claim\" : \"GioiTinh\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"NoiSinh\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"NguyenQuan\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"NoiSinhPhuongXa\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"QueQuanPhuongXa\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"QueQuanTinhThanhPho\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"DiaChiThuongTruPhuongXa\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"DiaChiThuongTruTinhThanhPho\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"HoVaTen\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"NgayThangNamSinh\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"CCCD\",\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"src\" : \"CSDL Quốc gia về Dân cư\"\n},{\n  \"level\" : 2,\n  \"claim\" : \"SoDienThoai\",\n  \"src\" : \"Viettel\"\n}]","QueQuan":"Xã Ngự Thiên, Tỉnh Hưng Yên","GioiTinh":"1","techIdVneid":"cbd1902e-f3c3-4fc6-8c31-50c6594c98d1","HoVaTen":"Nguyễn Minh Tuấn","ThuDienTu":"nguyentuanw135@gmail.com","SoDienThoai":"0972786005","SoDinhDanh":"034205011440","NgayThangNamSinh":"20050822"};
+            //alert(userInfo);
+            $('#userLogin').text(userInfo.HoVaTen);
+            techId = userInfo;
+			if(userInfo.SoDinhDanh) userInfo.SoCMND = userInfo.SoDinhDanh;
+            $('.user-act').show();
+            $('#btnLogin').hide();
+            //get_query_params_data(userInfo.SoCMND);
+			get_query_params_data_new(userInfo.SoCMND);
+        }
+    }else {
+        $('.user-act').hide();
+        $('#btnLogin').show();
+    }
+    */
+    function doLogout(){
+        if(_userType == 'USER_TYPE_VNCONNECT'){
+            $.post('/portal/conn/vnConnectLogout', function(data, status) {
+                if(data.MSG_CODE == 'OK'){
+                    window.location.href = data.LINKOUT;
+                }
+            });
+        }else if(_userType == 'USER_TYPE_STAY'){
+            window.location.href = "/portal/logout.jsp";
+        }
+    }
+
+    // test_params_data();
+    var _session = "";
+    $(document).ready(function () {
+        // syncDvcqg();
+        //getData(1);
+    });
+
+
+	function checkLoginHiddenCSLT() {
+		let listLoginCSLT= ['dang-ky-thuong-tru.html','dang-ky-tam-tru.html','khai-bao-tam-vang.html','dvc-CCCD.html'];
+		var str = window.location.href;
+		for(var i in listLoginCSLT){
+			if(str.search(listLoginCSLT[i]) != '-1'){
+				window.location.href = 'dvc-gioi-thieu.html';
+			}   
+		}
+	}
+
+
+    function myDropdown() {
+        $('.dropdown-menu').show();
+    }
+
+    // function test_param() {
+    //     var obj = new Object();
+    //     obj.type = "jsonclob";
+    //     obj.provider = "dancuportal";
+    //     obj.service = "search_subm_info";
+    //     obj.SUBM_CODE = "";
+    //     obj.PROCEDURE_CODE = "";
+    //     obj.STATUS_ID = "";
+    //     obj.FROM_DAY = "";
+    //     obj.TO_DAY = "";
+    //     obj.p_offset = 0;
+    //     obj.p_limit = 20;
+    //     console.log("---------xxx-----   ------------test call api: ", obj);
+    //     var result = apiservice.AjaxJson.executeQuery(obj);
+    //     console.log("---------xxx-----   ------------test call api: ", result);
+    // }
+
+    $(".header .menus > li >a").click(function(e){
+        var _html="";
+        var parent=$(this).parent();
+        if(parent.find(".dropdown-menu").length){
+            e.preventDefault();
+            $(this).siblings().removeClass("open");
+            $(this).addClass("open");
+
+            _html=parent.find(">.dropdown-menu").html();
+            $(".header-submenu .submenu").html(_html);
+        }
+        e.stopPropagation();
+
+    });
+
+
+
+    $(".header-submenu").click(function(e){
+        e.stopPropagation();
+    });
+
+    $(document).click(function(){
+        $(".header-submenu .submenu").html("");
+    });
+
+    function checkLogin(listLogin) {
+        var sPageURL = window.location.search.substring(1),
+        sURLVariables = sPageURL.split('&'),
+        sParameterName,
+        i;
+        //console.log("param log", sPageURL);
+        var str = window.location.href; 
+        if(getParameterByName('vnconnect',str)=='1'){
+            alert("login");
+            window.location.href = '/portal/oidc-login';
+
+        }
+        else{
+           // var str = window.location.href; 
+        // var listLogin = ['aaa','ddd', 'dvc-cms-feedback.html']
+            for(var i in listLogin){
+                if(str.search(listLogin[i]) != '-1'){
+                    window.location.href = '/portal/choose_login.jsp';
+                    return true
+                }   
+            } 
+        }        
+     
+    }
+
+    function getParameterByName(name, url) {
+        name = name.replace(/[\[\]]/g, '\\$&');
+        var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+            results = regex.exec(url);
+        if (!results) return null;
+        if (!results[2]) return '';
+        return decodeURIComponent(results[2].replace(/\+/g, ' '));
+    }
+    
+    $.urlParam = function (name) {
+        var results = new RegExp('[\?&]' + name + '=([^&#]*)')
+                          .exec(window.location.search);
+
+        return (results !== null) ? results[1] || 0 : false;
+
+    }
+    
+    function processPayment(){
+        var linkforward = decodeURIComponent($.urlParam('downloadbill'));       
+        try{
+            var textSearch = decodeURIComponent($.urlParam('payment'));
+            if(textSearch == 'success'){
+                $('#modal_notify_payment').modal('show');
+                $('#txtNOTIFY').html('<h4 style="color: green">Thanh toán thành công!</h4></br>Biên lai thanh toán điện tử sẽ được gửi tới thư điện tử (nếu có) của ông/bà sau khi hồ sơ hoàn thành xử lý.</br>Sau khi nhận được biên lai, ông/bà có thể xem chi tiết tại chức năng <b>Tra cứu hồ sơ >> Hồ sơ >> Đã xử lý</b>');
+            }
+        }catch(err){
+
+        }
+        (linkforward != "false")? window.location.href=linkforward: 0;
+
+    }
+	function insertUserVnConnect() {
+        try{
+            var obj = new Object();
+            // obj.p_cat_id = cat_id;
+            obj.P_SUB = userInfo.sub;
+            obj.P_SOCMND = userInfo.SoCMND;
+            obj.P_TECHID = userInfo.TechID;
+            obj.P_LOAITAIKHOAN = userInfo.LoaiTaiKhoan;
+            obj.P_HOVATEN = userInfo.HoVaTen;
+            obj.P_THUDIENTU = userInfo.ThuDienTu;
+            obj.P_SODIENTHOAI = userInfo.SoDienThoai;
+            obj.P_NGAYTHANGNAMSINH = userInfo.NgayThangNamSinh;
+            obj.p_user_id = "";
+            obj.p_user_ip = "";
+            obj.type = "json";
+            obj.provider = "dancuportal";
+            obj.service = "new_user_info";
+            var result = apiservice.AjaxJson.executeQuery(obj);
+           
+
+        }catch(err){
+
+        }
+
+
+
+        
+    }
+    
+    $(document).ready(function() {
+        processPayment();
+    });
+
+
+
+
+
+
+
+
+</script> 
+ </body>
+</html><html>
+ <head>
+  <style>
+    .select2-selection__clear {
+        display: none;
+    }
+
+
+    .file-upload input[type=file] {
+        position: absolute;
+        min-width: 50%;
+        min-height: 50%;
+        font-size: 100px;
+        text-align: right;
+        filter: alpha(opacity=0);
+        opacity: 0;
+        outline: none;
+        background: #ffffff;
+        cursor: inherit;
+        display: block;
+    }
+
+</style> 
+ </head>
+ <body>
+  <div class="main-wrapper"> 
+   <div class="container"> 
+    <ul class="breadcrumb"> 
+     <li><a href="dvc-gioi-thieu.html"><span class="icon main nc-icon-outline ui-1_home-simple"></span> Trang chủ</a></li> 
+     <li><a href="thong-bao-luu-tru.html"> Th&ocirc;ng b&aacute;o lưu tr&uacute;</a></li> 
+    </ul> 
+    <div class="dktt-box" id="formTTLT"> 
+     <div class="header-top bor0"> 
+      <h2 class="title upper fw6" id="lblQLHS">Th&ocirc;ng b&aacute;o lưu tr&uacute;</h2> 
+     </div> 
+     <h2 class="title upper fw6" id="lblSOHOSO_LT"></h2> 
+     <div class="italic padb5"> 
+      <span class="bold">Ghi ch&uacute;: </span>C&aacute;c th&ocirc;ng tin c&oacute; dấu 
+      <span class="red">(*)</span> l&agrave; th&ocirc;ng tin bắt buộc phải nhập 
+     </div> 
+     <div class="box active"> 
+      <div class="head"> 
+       <h3 class="title">Cơ quan thực hiện</h3>
+       <div class="down"></div> 
+      </div> 
+      <div class="body"> 
+       <div class="row disable_ntn_cslt"> 
+        <div class="col-sm-6 col-xs-12"> 
+         <div class="form-group"> 
+          <div class="label-text">
+           Tỉnh/ Th&agrave;nh phố 
+           <span class="red">*</span>
+          </div> 
+          <div class="select-custom"> 
+           <select class="form-control disable_edit" id="accomStay_cboPROVINCE_ID" name="accomStay_cboPROVINCE_ID"> <option value="-1" selected="selected">Chọn</option> </select> 
+          </div> 
+         </div> 
+        </div> 
+        <!-- <div class="col-sm-4 col-xs-12">
+                            <div class="form-group">
+                                <div class="label-text">Quận/ Huyện <span class="red">*</span></div>
+                                <div class="select-custom">
+                                    <select class="form-control disable_edit" id="accomStay_cboDISTRICT_ID"
+                                            name="accomStay_cboDISTRICT_ID">
+                                        <option value="-1" selected="selected">Chọn</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div> --> 
+        <div class="col-sm-6 col-xs-12"> 
+         <div class="form-group"> 
+          <div class="label-text">
+           X&atilde;/Phường/Đặc khu 
+           <span class="red">*</span>
+          </div> 
+          <div class="select-custom"> 
+           <select class="form-control disable_edit" id="accomStay_cboADDRESS_ID" name="accomStay_cboADDRESS_ID"> <option value="-1" selected="selected">Chọn</option> </select> 
+          </div> 
+         </div> 
+        </div> 
+       </div> 
+       <div class="row"> 
+        <div class="form-group disable_ntn_cslt col-sm-6 col-xs-12"> 
+         <div class="label-text">
+          Cơ quan thực hiện 
+          <span class="red">*</span>
+         </div> 
+         <div class="select-custom"> 
+          <select class="form-control" id="cboRECEIVE_ORG" name="cboRECEIVE_ORG" disabled=""> <option value="-1" selected="selected">Chọn</option> </select> 
+         </div> 
+        </div> 
+        <div class="form-group col-sm-6 col-xs-12"> 
+         <div class="label-text">
+          Số điện thoại
+         </div> 
+         <input type="text" placeholder="Số điện thoại" id="txtPHONE_NUMBER_ORG" name="txtPHONE_NUMBER_ORG" class="form-control" disabled="" /> 
+         <input type="text" placeholder="M&atilde; hồ sơ" id="txtDECLARECODE" name="txtDECLARECODE" class="" style="display: none;" disabled="" /> 
+        </div> 
+       </div> 
+      </div> 
+     </div> 
+     <div class="box active"> 
+      <div class="head"> 
+       <h3 class="title">Th&ocirc;ng tin người th&ocirc;ng b&aacute;o</h3>
+       <div class="down"></div> 
+      </div> 
+      <div class="body"> 
+       <div class="row"> 
+        <div class="col-sm-4 col-xs-12"> 
+         <div class="form-group"> 
+          <div class="label-text" id="lblname">
+           Họ v&agrave; t&ecirc;n
+          </div> 
+          <input type="text" class="form-control" name="txtNAME" id="txtNAME" onkeyup="this.value = this.value.toUpperCase();" disabled="" /> 
+         </div> 
+        </div> 
+        <div class="col-sm-4 col-xs-12"> 
+         <div class="form-group"> 
+          <div class="label-text">
+           Số điện thoại
+          </div> 
+          <input type="text" class="form-control" name="txtPHONE_NUMBER" id="txtPHONE_NUMBER" disabled="" /> 
+         </div> 
+        </div> 
+        <div class="col-sm-4 col-xs-12" id="so_dinhdanh"> 
+         <div class="form-group"> 
+          <div class="label-text">
+           CMND/CCCD/Số định danh
+          </div> 
+          <input type="text" class="form-control" name="txtIDENTIFIER_NUMBER" id="txtIDENTIFIER_NUMBER" disabled="" /> 
+         </div> 
+        </div> 
+       </div> 
+       <div class="title marb10 fw6 hidden_cslt"> 
+        <div class="list-check"> 
+         <div class="item"> 
+          <div class="check-action"> 
+           <input type="radio" class="check" id="radADDRESS_TYPE" name="radADDRESS_TYPE" value="0" checked="checked" /> 
+           <span class="name">Địa chỉ thường tr&uacute;</span> 
+          </div> 
+         </div> 
+         <div class="item"> 
+          <div class="check-action"> 
+           <input type="radio" class="check" id="radADDRESS_TYPE" name="radADDRESS_TYPE" value="1" /> 
+           <span class="name">Địa chỉ tạm tr&uacute;</span> 
+          </div> 
+         </div> 
+         <div class="item"> 
+          <div class="check-action"> 
+           <input type="radio" class="check" id="radADDRESS_TYPE" name="radADDRESS_TYPE" value="2" /> 
+           <span class="name">Địa chỉ kh&aacute;c</span> 
+          </div> 
+         </div> 
+        </div> 
+       </div> 
+       <div class="row hidden_cslt"> 
+        <div class="col-sm-6 col-xs-12"> 
+         <div class="form-group"> 
+          <div class="label-text">
+           Tỉnh/ Th&agrave;nh phố 
+           <span class="red">*</span>
+          </div> 
+          <div class="select-custom"> 
+           <select class="form-control" id="cboPROVINCE_ID" name="cboPROVINCE_ID"> <option value="-1" selected="selected">Chọn</option> </select> 
+          </div> 
+         </div> 
+        </div> 
+        <!-- <div class="col-sm-4 col-xs-12">
+                            <div class="form-group">
+                                <div class="label-text">Quận/ Huyện <span class="red">*</span></div>
+                                <div class="select-custom">
+                                    <select class="form-control" id="cboDISTRICT_ID" name="cboDISTRICT_ID">
+                                        <option value="-1" selected="selected">Chọn</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div> --> 
+        <div class="col-sm-6 col-xs-12"> 
+         <div class="form-group"> 
+          <div class="label-text">
+           X&atilde;/Phường/Đặc khu 
+           <span class="red">*</span>
+          </div> 
+          <div class="select-custom"> 
+           <select class="form-control" id="cboADDRESS_ID" name="cboADDRESS_ID"> <option value="-1" selected="selected">Chọn</option> </select> 
+          </div> 
+         </div> 
+        </div> 
+       </div> 
+       <div class="form-group hidden_cslt"> 
+        <div class="label-text">
+         Địa chỉ (số nh&agrave;, đường phố, th&ocirc;n, x&oacute;m, l&agrave;ng, ấp, bản, bu&ocirc;n, phum, s&oacute;c) 
+         <span class="red" id="addres_hidden_cslt">*</span> 
+        </div> 
+        <input type="text" id="txtADDRESS" name="txtADDRESS" class="form-control" /> 
+       </div> 
+      </div> 
+     </div> 
+     <div class="box active"> 
+      <div class="head"> 
+       <h3 class="title">Th&ocirc;ng tin cơ sở lưu tr&uacute;</h3>
+       <div class="down"></div> 
+      </div> 
+      <div class="body"> 
+       <div class="row"> 
+        <div class="col-sm-6 col-xs-12"> 
+         <div class="form-group"> 
+          <div class="label-text">
+           Loại h&igrave;nh cơ sở lưu tr&uacute; 
+           <span class="red">*</span> 
+          </div> 
+          <div class="select-custom"> 
+           <select class="form-control" id="accomStay_cboACCOMMODATION_TYPE" name="accomStay_cboACCOMMODATION_TYPE"> <option value="-1" selected="selected">Chọn</option> </select> 
+          </div> 
+         </div> 
+        </div> 
+        <div class="col-sm-6 col-xs-12"> 
+         <div class="form-group"> 
+          <div class="label-text">
+           T&ecirc;n cơ sở lưu tr&uacute; 
+           <span class="red" id="csctlt_name">*</span> 
+          </div> 
+          <input type="text" placeholder="Nhập T&ecirc;n cơ sở lưu tr&uacute;" id="accomStay_txtNAME_T" name="accomStay_cboNAME" class="form-control" /> 
+          <div class="select-custom csctlt_name_1" style="display: none;"> 
+           <select class="form-control" id="accomStay_cboNAME" name="accomStay_cboNAME"> <option value="-1" selected="selected">Chọn</option> </select> 
+          </div> 
+         </div> 
+        </div> 
+       </div> 
+       <div class="row"> 
+        <div class="col-sm-6 col-xs-12"> 
+         <div class="form-group"> 
+          <div class="label-text">
+           Tỉnh/ Th&agrave;nh phố
+          </div> 
+          <input type="text" id="PROVINCE_ACCOM" name="PROVINCE_ACCOM" class="form-control" disabled="" /> 
+         </div> 
+        </div> 
+        <!-- <div class="col-sm-4 col-xs-12">
+                            <div class="form-group">
+                                <div class="label-text">Quận/ Huyện</div>
+                                <input type="text" id="DISTRICT_ACCOM" name="DISTRICT_ACCOM" class="form-control"
+                                       DISABLED/>
+                            </div>
+                        </div> --> 
+        <div class="col-sm-6 col-xs-12"> 
+         <div class="form-group"> 
+          <div class="label-text">
+           X&atilde;/Phường/Đặc khu
+          </div> 
+          <input type="text" id="VILLAGE_ACCOM" name="VILLAGE_ACCOM" class="form-control" disabled="" /> 
+         </div> 
+        </div> 
+       </div> 
+       <div class="row"> 
+        <div class="col-sm-12 col-xs-12"> 
+         <div class="form-group"> 
+          <div class="label-text">
+           Địa chỉ (số nh&agrave;, đường phố, th&ocirc;n, x&oacute;m, l&agrave;ng, ấp, bản, bu&ocirc;n, phum, s&oacute;c) 
+           <span class="text-danger">*</span>
+          </div> 
+          <input type="text" placeholder="Nhập địa chỉ" id="accomStay_txtADDRESS" name="accomStay_txtADDRESS" class="form-control" /> 
+         </div> 
+        </div> 
+        <!--                        <div class="col-sm-6 col-xs-12">--> 
+        <!--                            <div class="form-group csctlt_name_1" style="display: none;">--> 
+        <!--                                <div class="label-text">Số phòng</div>--> 
+        <!--                                <input type="text" placeholder="Nhập số phòng" id="accomStay_txtROOM"--> 
+        <!--                                       name="accomStay_txtROOM"--> 
+        <!--                                       class="form-control"/>--> 
+        <!--                            </div>--> 
+        <!--                        </div>--> 
+       </div> 
+       <div class="row hidden"> 
+        <div class="col-sm-6 col-xs-12"> 
+         <div class="form-group"> 
+          <div class="label-text">
+           Thời gian th&ocirc;ng b&aacute;o 
+           <span class="text-danger">*</span>
+          </div> 
+          <div class="input-icon-right"> 
+           <input type="text" class="form-control datetimepicker" id="txtDECLAREDATEUIUX" name="txtDECLAREDATEUIUX" autocomplete="off" placeholder="Chọn thời gian th&ocirc;ng b&aacute;o" /> 
+           <span class="-ap icon icon-calendar-full"></span> 
+          </div> 
+         </div> 
+        </div> 
+        <div class="col-sm-6 col-xs-12"> 
+         <div class="form-group"> 
+          <div class="label-text">
+           H&igrave;nh thức th&ocirc;ng b&aacute;o 
+           <span class="text-danger">*</span>
+          </div> 
+          <div class="select-custom"> 
+           <select class="form-control" id="cboDECLARETYPE" name="cboDECLARETYPE"> </select> 
+          </div> 
+         </div> 
+        </div> 
+       </div> 
+      </div> 
+     </div> 
+     <div class="box active"> 
+      <div class="head"> 
+       <h3 class="title">Th&ocirc;ng tin về người lưu tr&uacute;</h3>
+       <div class="down"></div> 
+      </div> 
+      <div class="body"> 
+       <div class="form-group group-buttons"> 
+        <!--SIT--> 
+        <a id="link_file" class="main" style="margin: 10px;"> 
+         <!--UAT   a692ff81b44b4eeca0b5673283fa3f67--> 
+         <!--                        <a href="/portal/upload/UploadServlet?getfile=thongbaoluutru.xlsm&fileid=b0ef9424546744c599eb61bb9b3af16f" download="/portal/upload/UploadServletLuuTru?getfile=thongbaoluutru.xlsm&type=wcm_file_dvc" class="main" style="margin: 10px;">--> <button class="btn btn-sm btn-third"> <span class="icon nc-icon-outline arrows-2_square-download"></span> TẢI FILE MẪU </button> </a> 
+        <a href="#" class="main" id="upload-file-excel" data-toggle="modal" data-target="#importExcel" style="margin: 10px;"> <button class="btn btn-sm btn-third"> <span class="icon nc-icon-outline arrows-2_square-upload" style="margin-right: 5px;"></span> TẢI L&Ecirc;N FILE DANH S&Aacute;CH </button> </a> 
+       </div> 
+       <div class="table-content table-responsive" id="listCitizens"> 
+        <table class="table-result table-hover table-no-bordered" id="listTTNguoiLuuTru"></table> 
+       </div> 
+       <div class="form-group"> 
+        <a class="main" id="btnAddPersonLT" onclick="resetform()" style="margin: 10px;"> <button class="btn btn-sm btn-third"> <span class="act nc-icon-glyph users_add-29" style="margin-right: 5px;"></span> TH&Ecirc;M MỚI NGƯỜI LƯU TR&Uacute; </button> </a> 
+       </div> 
+      </div> 
+     </div> 
+     <div class="box active"> 
+      <div class="head"> 
+       <h3 class="title">TH&Ocirc;NG TIN NHẬN TH&Ocirc;NG B&Aacute;O T&Igrave;NH TRẠNG HỒ SƠ</h3>
+       <div class="down"></div> 
+      </div> 
+      <div class="body"> 
+       <div class="row"> 
+        <div class="col-sm-6 col-xs-12"> 
+         <div class="form-group"> 
+          <div class="label-text">
+           H&igrave;nh thức nhận th&ocirc;ng b&aacute;o t&igrave;nh trạng hồ sơ 
+           <span class="red">*</span> 
+          </div> 
+          <div class="select-custom"> 
+           <select class="form-control" id="result_mulNOTIFICATION_TYPE" name="cboNOTIFICATION_TYPE" multiple=""> </select> 
+          </div> 
+         </div> 
+        </div> 
+        <div class="col-sm-6 col-xs-12"> 
+        </div> 
+       </div> 
+       <div class="row"> 
+        <div class="col-sm-6 col-xs-12 hidden_noti_sms" style="display: none;"> 
+         <div class="form-group"> 
+          <div class="label-text">
+           Số điện thoại 
+           <span class="red">*</span>
+          </div> 
+          <input class="form-control" placeholder="Nhập số điện thoại" id="result_txtNOTIFICATION_PHONE" name="txtNOTIFICATION_PHONE" /> 
+         </div> 
+        </div> 
+        <div class="col-sm-6 col-xs-12 hidden_noti_email" style="display: none;"> 
+         <div class="form-group"> 
+          <div class="label-text">
+           Email 
+           <span class="red">*</span>
+          </div> 
+          <input class="form-control" placeholder="Nhập email" id="result_txtNOTIFICATION_EMAIL" name="txtNOTIFICATION_EMAIL" /> 
+         </div> 
+        </div> 
+       </div> 
+      </div> 
+     </div> 
+     <div class="box active"> 
+      <div class="body"> 
+       <div class="row"> 
+        <div class="form-label-inline form-group -inline padt5 pad20"> 
+         <div class="check-action"> 
+          <input type="checkbox" class="check" id="chkCHECK_LIABILITY" name="chkCHECK_LIABILITY" /> 
+          <span class="name bold">T&ocirc;i xin chịu tr&aacute;ch nhiệm trước ph&aacute;p luật về lời khai tr&ecirc;n</span> 
+         </div> 
+        </div> 
+       </div> 
+      </div> 
+     </div> 
+     <div class="group-buttons center -bottom"> 
+      <!--                <div class="pull-left padl50">--> 
+      <button class="btn btn-third" id="btnAdd"><span class="nc-icon-outline tech-2_sim-card"></span> Lưu nh&aacute;p </button> 
+      <button class="btn btn-third" id="btnSaveSend"><span class="nc-icon-outline ui-1_send"></span> Nộp hồ sơ </button> 
+      <button class="btn btn-third" id="btnBack"><span class="nc-icon-glyph arrows-1_curved-previous"></span> Quay lại </button> 
+      <!--                </div>--> 
+      <!--                <button class="btn btn-third"><span class="nc-icon-outline arrows-1_tail-left"></span> Quay lại</button>--> 
+      <!--                <button class="btn btn-third"><span class="nc-icon-outline tech-2_sim-card"></span> Lưu</button>--> 
+      <!--                <button class="btn btn-main"><span class="nc-icon-outline ui-1_email-83"></span> Lưu và gửi hồ sơ</button>--> 
+     </div> 
+    </div> 
+   </div> 
+  </div> 
+  <div class="modal fade in" id="addpersonLT" data-backdrop="static"> 
+   <div class="modal-dialog modal-lg"> 
+    <!-- Modal content--> 
+    <div class="modal-content"> 
+     <div class="modal-body pad30" id="divformLuutru"> 
+      <div class="title-main f20 center" id="title_guest_stay"></div> 
+      <div class="box-form"> 
+       <div class="mart20"> 
+        <div class="item"> 
+         <div class="check-action"> 
+          <input type="checkbox" class="check" name="radIsChangePerson" id="chkIS_CHANGED_PERSON" onclick="check_NTB_is_NLT()" /> 
+          <span id="chkIS_DECLARE" class="name">Người khai th&ocirc;ng tin l&agrave; Người lưu tr&uacute;</span> 
+         </div> 
+        </div> 
+       </div> 
+       <div id="form_add_luutru" class="mart20"> 
+        <div class="form-group"> 
+         <label for="txtTitle" class="control-label">Họ v&agrave; t&ecirc;n </label>
+         <span class="red">*</span> 
+         <div class="input"> 
+          <input type="text" placeholder="Nhập họ v&agrave; t&ecirc;n" id="guest_txtCITIZENNAME" name="txtCITIZENNAME" class="form-control" maxlength="100" /> 
+         </div> 
+        </div> 
+        <div class="form-group"> 
+         <label for="txtTitle" class="control-label">Ng&agrave;y, th&aacute;ng, năm sinh </label> 
+         <div class="input row"> 
+          <div class="col-sm-3 col-xs-12"> 
+           <select class="form-control" id="guest_cboDOB_FMT" name="cboDOB_FMT"> <option value="dd/mm/yyyy" selected="selected"> ng&agrave;y, th&aacute;ng, năm </option> <option value="mm/yyyy">th&aacute;ng, năm</option> <option value="yyyy">năm</option> </select> 
+          </div> 
+          <div class="col-sm-3 col-xs-12"> 
+           <div class="input-group date" id="datetimeFromday"> 
+            <input type="text" placeholder="Chọn ng&agrave;y sinh" id="guest_txtDOB" class="form-control datepicker" name="txtDOB" /> 
+            <span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></span> 
+           </div> 
+          </div> 
+         </div> 
+        </div> 
+        <div class="form-group"> 
+         <div class="row"> 
+          <div class="col-sm-6 col-xs-12"> 
+           <label for="txtTitle" class="control-label">Giới t&iacute;nh</label> 
+           <div class="input"> 
+            <select class="form-control" id="guest_cboGENDER_ID" name="cboGENDER_ID"> <option value="-1" selected="selected">Chọn</option> </select> 
+           </div> 
+          </div> 
+          <div class="col-sm-6 col-xs-12"> 
+           <label for="txtTitle" class="control-label">ĐDCN/CCCD/CMND </label>
+           <span class="blue">*</span> 
+           <div class="input"> 
+            <input type="text" placeholder="Nhập số ĐDCN/CCCD/CMND" id="guest_txtIDCARD_NUMBER" name="txtIDCARD_NUMBER" class="form-control" /> 
+           </div> 
+          </div> 
+         </div> 
+        </div> 
+        <div class="form-group"> 
+         <div class="row"> 
+          <div class="col-sm-6 col-xs-12"> 
+           <label for="txtTitle" class="control-label">Số hộ chiếu </label>
+           <span class="blue">*</span> 
+           <div class="input"> 
+            <input type="text" placeholder="Nhập số hộ chiếu" id="guest_txtPASSPORT_NO" name="txtPASSPORT_NO" class="form-control" /> 
+           </div> 
+          </div> 
+          <div class="col-sm-6 col-xs-12"> 
+           <label for="txtTitle" class="control-label">Giấy tờ kh&aacute;c </label>
+           <span class="blue">*</span> 
+           <div class="input"> 
+            <input type="text" placeholder="Nhập giấy tờ kh&aacute;c" id="guest_txtOTHER_PAPERS" name="txtOTHER_PAPERS" class="form-control" /> 
+           </div> 
+          </div> 
+         </div> 
+        </div> 
+        <div class="form-group"> 
+         <div class="row"> 
+          <div class="col-sm-6 col-xs-12"> 
+           <label for="txtTitle" class="control-label">Nghề nghiệp</label> 
+           <div class="input"> 
+            <select class="form-control" id="guest_cboOCCUPATION" name="cboOCCUPATION"> <option value="-1" selected="selected">Chọn</option> </select> 
+           </div> 
+          </div> 
+          <div class="col-sm-6 col-xs-12"> 
+           <label for="txtTitle" class="control-label">Số điện thoại</label> 
+           <div class="input"> 
+            <input type="text" placeholder="Nhập số điện thoại" id="guest_txtPHONE_NUMBER" name="txtPHONE_NUMBER" class="form-control" /> 
+           </div> 
+          </div> 
+         </div> 
+        </div> 
+        <div class="form-group"> 
+         <label for="txtTitle" class="control-label">Nơi l&agrave;m việc</label> 
+         <div class="input"> 
+          <input type="text" placeholder="Nhập nơi l&agrave;m việc" id="guest_txtPLACE_OF_WORK" name="txtPLACE_OF_WORK" class="form-control" /> 
+         </div> 
+        </div> 
+        <div class="form-group"> 
+         <div class="row"> 
+          <div class="col-sm-6 col-xs-12" id="dan_toc"> 
+           <label for="txtTitle" class="control-label">D&acirc;n tộc</label> 
+           <div class="input"> 
+            <!--                                        style="float: left; text-align-last: left;"--> 
+            <select class="form-control" id="guest_cboETHNIC_ID" name="cboETHNIC_ID"> <option value="-1" selected="selected">Chọn</option> </select> 
+           </div> 
+          </div> 
+          <div class="col-sm-6 col-xs-12"> 
+           <label for="txtTitle" class="control-label">Quốc tịch </label> 
+           <div class="input"> 
+            <select class="form-control" name="guest_mulNATIONALITY" id="guest_mulNATIONALITY" multiple="" style="float: left; text-align-last: left;"> </select> 
+           </div> 
+          </div> 
+         </div> 
+        </div> 
+        <div class="form-group"> 
+         <label for="txtTitle" class="control-label">Địa chỉ thường tr&uacute; hoặc tạm tr&uacute;</label> 
+         <div class="input"> 
+          <div class="value list-check" id="type_add"> 
+           <div class="check-action"> 
+            <input type="radio" class="check" id="guest_radADDRESS_TYPE" name="guest_radADDRESS_TYPE" value="0" checked="checked" /> 
+            <span class="name">Thường tr&uacute;</span> 
+           </div> 
+           <div class="check-action marl20"> 
+            <input type="radio" class="check" id="guest_radADDRESS_TYPE" name="guest_radADDRESS_TYPE" value="1" /> 
+            <span class="name">Tạm tr&uacute;</span> 
+           </div> 
+           <div class="check-action marl20"> 
+            <input type="radio" class="check" id="guest_radADDRESS_TYPE" name="guest_radADDRESS_TYPE" value="2" /> 
+            <span class="name">Địa chỉ kh&aacute;c</span> 
+           </div> 
+          </div> 
+         </div> 
+        </div> 
+        <div class="form-group"> 
+         <div class="row"> 
+          <div class="col-sm-6 col-xs-12"> 
+           <label for="txtTitle" class="control-label">Quốc gia</label> 
+           <div class="input"> 
+            <select class="form-control" name="cboCOUNTRY" id="guest_cboCOUNTRY" style="float: left; text-align-last: left;"> <option value="-1" selected="selected">Chọn</option> </select> 
+           </div> 
+          </div> 
+          <!-- <div class="col-sm-6 col-xs-12" id="noForeign_1">
+                                    <label for="txtTitle" class="control-label">Tỉnh/ Thành phố </label><span
+                                            class="red">*</span>
+                                    <div class="input">
+                                        <select class="form-control" name="cboRDPROVINCE_ID"
+                                                id="guest_cboRDPROVINCE_ID" DISABLED
+                                                style="float: left; text-align-last: left;">
+                                            <option value="-1" selected="selected">Chọn</option>
+                                        </select>
+                                    </div>
+                                </div> --> 
+         </div> 
+        </div> 
+        <div id="noForeign"> 
+         <div class="form-group"> 
+          <div class="row"> 
+           <div class="col-sm-6 col-xs-12"> 
+            <label for="txtTitle" class="control-label">Tỉnh/ Th&agrave;nh phố </label>
+            <span class="red">*</span> 
+            <div class="input"> 
+             <select class="form-control" name="cboRDPROVINCE_ID" id="guest_cboRDPROVINCE_ID" disabled="" style="float: left; text-align-last: left;"> <option value="-1" selected="selected">Chọn</option> </select> 
+            </div> 
+           </div> 
+           <!-- <div class="col-sm-6 col-xs-12">
+                                        <label for="txtTitle" class="control-label">Quận/ Huyện</label><span
+                                            class="red">*</span>
+                                        <div class="input">
+                                            <select class="form-control" name="cboRDDISTRICT_ID"
+                                                    id="guest_cboRDDISTRICT_ID" DISABLED
+                                                    style="float: left; text-align-last: left;">
+                                                <option value="-1" selected="selected">Chọn</option>
+                                            </select>
+                                        </div>
+                                    </div> --> 
+           <div class="col-sm-6 col-xs-12"> 
+            <label for="txtTitle" class="control-label">X&atilde;/Phường/Đặc khu</label>
+            <span class="red">*</span> 
+            <div class="input"> 
+             <select class="form-control" name="cboRDADDRESS_ID" id="guest_cboRDADDRESS_ID" disabled="" style="float: left; text-align-last: left;"> <option value="-1" selected="selected">Chọn</option> </select> 
+            </div> 
+           </div> 
+          </div> 
+         </div> 
+         <div class="form-group"> 
+          <label for="txtTitle" class="control-label">Số nh&agrave;, đường phố, th&ocirc;n, x&oacute;m l&agrave;ng, ấp, bản, bu&ocirc;n,phum, s&oacute;c/t&ecirc;n, địa chỉ nơi l&agrave;m việc</label> 
+          <div class="input"> 
+           <textarea name="txtRDADDRESS" id="guest_txtRDADDRESS" placeholder="Nhập địa chỉ chi tiết" cols="30" rows="10" class="form-control" style="height: 80px;resize: vertical;" disabled=""></textarea> 
+          </div> 
+         </div> 
+        </div> 
+        <div class="form-group" id="isForeign" style="display: none"> 
+         <label for="txtTitle" class="control-label">Địa chỉ chi tiết</label> 
+         <div class="input"> 
+          <textarea name="txtRDADDRESS_FOREIGN" id="guest_txtRDADDRESS_FOREIGN" placeholder="Nhập địa chỉ chi tiết" cols="30" rows="10" class="form-control" style="height: 80px;resize: vertical;"></textarea> 
+         </div> 
+        </div> 
+        <div class="form-group"> 
+         <label for="txtTitle" class="control-label">L&yacute; do lưu tr&uacute;</label>
+         <span class="red">*</span> 
+         <div class="input"> 
+          <textarea name="txtREASON" id="guest_txtREASON" placeholder="Nhập l&yacute; do lưu tr&uacute;" cols="30" rows="10" class="form-control" style="height: 70px;resize: vertical;"></textarea> 
+         </div> 
+        </div> 
+        <div class="form-group row"> 
+         <div class="col-sm-6 col-xs-12"> 
+          <label for="txtTitle" class="control-label">Thời gian lưu tr&uacute; </label>
+          <span class="red">*</span> 
+          <div class="input row row-cus5"> 
+           <div class="col-sm-6 col-xs-12"> 
+            <div class="input-icon-right date" id="datetimeFromday"> 
+             <input type="text" id="guest_txtSTART_DATE" class="form-control datepicker" name="txtSTART_DATE" /> 
+             <span class="-ap icon icon-calendar-full"></span> 
+            </div> 
+           </div> 
+           <div class="col-sm-6 col-xs-12"> 
+            <div class="input-icon-right date" id="datetimeToday"> 
+             <input type="text" id="guest_txtEND_DATE" class="form-control datepicker" name="txtEND_DATE" /> 
+             <span class="-ap icon icon-calendar-full"></span> 
+            </div> 
+           </div> 
+          </div> 
+         </div> 
+         <div class="col-sm-6 col-xs-12"> 
+          <div class="form-group"> 
+           <div class="label-text">
+            Số ph&ograve;ng (nếu c&oacute;)
+           </div> 
+           <input type="text" placeholder="Nhập số ph&ograve;ng" id="guest_txtROOM" name="guest_txtROOM" class="form-control" /> 
+          </div> 
+         </div> 
+        </div> 
+       </div> 
+      </div> 
+     </div> 
+     <div class="row"> 
+      <div class="action pull-right" style="margin-right: 50px"> 
+       <button id="btnSaveNLT" class="btn btn-main">Lưu</button> 
+       <button id="btnSaveNLT_Edit" class="btn btn-main">Lưu</button> 
+       <button id="btnCloseNLT" class="btn btn-main">Đ&oacute;ng</button> 
+      </div> 
+     </div> 
+    </div> 
+   </div> 
+  </div> 
+  <div class="modal fade in" id="importExcel" role="dialog" data-backdrop="static"> 
+   <div class="modal-dialog modal-lg" style="max-width: 1140px;width: 100%;"> 
+    <!-- Modal content--> 
+    <div id="loading_excel" style="position:absolute;top:0px;right:0px;bottom:0px;left:0px;background: #fff;display: none;z-index: 1052;opacity: 0.6;"> 
+     <div class="sk-circle "> 
+      <div class="sk-circle1 sk-child"></div> 
+      <div class="sk-circle2 sk-child"></div> 
+      <div class="sk-circle3 sk-child"></div> 
+      <div class="sk-circle4 sk-child"></div> 
+      <div class="sk-circle5 sk-child"></div> 
+      <div class="sk-circle6 sk-child"></div> 
+      <div class="sk-circle7 sk-child"></div> 
+      <div class="sk-circle8 sk-child"></div> 
+      <div class="sk-circle9 sk-child"></div> 
+      <div class="sk-circle10 sk-child"></div> 
+      <div class="sk-circle11 sk-child"></div> 
+      <div class="sk-circle12 sk-child"></div> 
+     </div> 
+    </div> 
+    <div class="modal-content"> 
+     <div class="modal-body" id="divformImportExcel"> 
+      <div class="title-main center">
+       TẢI L&Ecirc;N FILE DANH S&Aacute;CH
+      </div> 
+      <div class="box-import-file"> 
+       <div class="file-upload"> 
+        <input type="text" class="form-control" id="txtFilePath" disabled="" /> 
+        <button class="btn btn-third"><input type="file" id="FileUpload" accept=".xlsx,.xlsm" /> Chọn file </button> 
+       </div> 
+       <button class="btn btn-upload btn-main" id="btnUpload" onclick="javascript:loadFileAsTextNew();"> <span class="nc-icon-outline arrows-2_square-upload"></span> Tải tệp l&ecirc;n </button> 
+      </div> 
+      <div class="box-form pad0"> 
+       <div class="form-head"> 
+        <h3 class="title-main" id="title-search-result">Kết quả tải l&ecirc;n</h3> 
+       </div> 
+       <div class="form-content pad15"> 
+        <div id="divlistExcel" class="table-content"> 
+         <table class="table-result table-hover table-no-bordered pointer" id="listExcel"></table> 
+         <div id="pager_listExcel"></div> 
+        </div> 
+       </div> 
+      </div> 
+      <div class="group-buttons center -bottom"> 
+       <button style="min-width: 160px;" class="btn btn-main btn-sm" id="btnSaveExcelNLT"> <span class="nc-icon-outline tech-2_sim-card"></span> Lưu </button> 
+       <button style="min-width: 160px;" class="btn btn-third btn-sm" id="btnCloseNLT_EXCEL"> <span class="nc-icon-outline ui-1_simple-remove"></span> Đ&oacute;ng </button> 
+      </div> 
+     </div> 
+    </div> 
+   </div> 
+  </div> 
+  <div id="frm_View_Huongdan" class="modal fade"> 
+   <div class="modal-dialog" style="max-width: 1191px;width: 100%;"> 
+    <div class="modal-content pad10"> 
+     <div class="modal-body" id="t"> 
+      <div class="head-detail"> 
+       <div class="pull-left title" id="txtTENDVC">
+         Th&ocirc;ng tin chi tiết 
+       </div> 
+       <div class="pull-right"> 
+        <button class="btn btn-main" id="btnSubmiss" data-dismiss="modal">Nộp trực tuyến</button> 
+       </div> 
+       <div class="clearfix"></div> 
+      </div> 
+      <div class="form-title f20">
+       Tr&igrave;nh tự thực hiện
+      </div> 
+      <div class="list-steps article"> 
+       <div class="text-content-TTTH" id="txtTRINHTUTHUCHIEN"> 
+       </div> 
+      </div> 
+      <div class="form-title f20">
+       C&aacute;ch thức thực hiện
+      </div> 
+      <div class="table-content"> 
+       <table class="table-result" id="cachthucthuchien"> 
+       </table> 
+      </div> 
+      <div class="form-title f20">
+       Th&agrave;nh phần hồ sơ
+      </div> 
+      <div class="table-content"> 
+       <table class="table-result" id="thanhphanhoso"> 
+       </table> 
+      </div> 
+      <div class="form-title f20">
+       Cơ quan thực hiện
+      </div> 
+      <div class="article"> 
+       <p id="txtCOQUANTHUCHIEN"></p> 
+      </div> 
+      <div class="form-title f20">
+       Y&ecirc;u cầu, Điều kiện thực hiện
+      </div> 
+      <div class="article"> 
+       <p id="txtYCDK"></p> 
+      </div> 
+     </div> 
+     <div class="row"> 
+      <div class="actions right mart40 marb20 marr20" data-dismiss="modal"> 
+       <button class="btn btn-second"> Đ&oacute;ng </button> 
+      </div> 
+     </div> 
+    </div> 
+   </div> 
+  </div> 
+  <div id="Noti_Miss_Info" class="modal fade popup-success"> 
+   <div class="popup-success-content" style="border:#D71920 6px solid;background: white;width: 500px;margin: auto;"> 
+    <div class="article justify pad20 marb0"> 
+     <div class="desc">
+      C&ocirc;ng d&acirc;n 
+      <span class="bold main" id="lblNAME_CITIZEN"></span> 
+      <span id="lblCheck_Du_Thong_Tin"></span>
+      <span id="lblTHUTUC_TRUONGHOP"></span>
+     </div> 
+     <p>Đề nghị c&ocirc;ng d&acirc;n đến cơ quan đăng k&yacute; QLCT để thực hiện cập nhật bổ sung th&ocirc;ng tin.</p> 
+     <p class="italic">Tr&acirc;n trọng cảm ơn.</p> 
+     <button data-dismiss="modal" class="btn btn-main mart20" style="padding:5px 20px;min-width:100px;">Đ&oacute;ng</button> 
+    </div> 
+   </div> 
+  </div> 
+  <script src="vendor/bootstrap-datetimepicker/js/moment.min.js"></script> 
+  <link rel="stylesheet" href="vendor/bootstrap-datetimepicker/css/bootstrap-datetimepicker.css" /> 
+  <script type="text/javascript" src="vendor/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js"></script> 
+  <script type="text/javascript" src="vendor/sheetjs/dist/xlsx.full.min.js"></script> 
+  <script type="text/javascript" src="vendor/sheetjs/dist/jszip.js"></script> 
+  <script type="text/javascript" src="js/UtilApiDvc/HSDvc.js"></script> 
+  <!--<script src="/portal/assets/vendor/bootstrap-datetimepicker/js/moment.min.js"></script>--> 
+  <!--<link rel="stylesheet" href="/portal/assets/vendor/bootstrap-datetimepicker/css/bootstrap-datetimepicker.css" />--> 
+  <!--<script type="text/javascript" src="/portal/assets/vendor/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js"></script>--> 
+  <!--<script type="text/javascript" src="/portal/assets/vendor/sheetjs/dist/xlsx.full.min.js"></script>--> 
+  <!--<script type="text/javascript" src="/portal/assets/vendor/sheetjs/dist/jszip.js"></script>--> 
+  <!--<script type="text/javascript" src="/portal/assets/js/UtilApiDvc/HSDvc.js"></script>--> 
+  <script type="text/javascript">
     $(".box .down").click(function(){
         $(this).parents(".box").toggleClass("active");
     })
@@ -3542,3 +4906,828 @@ function normalizeJsonValues(inputObj) {
 }
 	
 
+</script> 
+ </body>
+</html><html>
+ <head></head>
+ <body>
+  ﻿
+  <style type="text/css">
+    .select2-selection__clear{
+        display: none;
+    }
+	.bootstrap-table .fixed-table-container .fixed-table-body{
+		height: auto;
+	}
+
+</style> 
+  <script type="text/javascript" src="theme/vendor/typeahead/index.js"></script> 
+  <script type="text/javascript" src="theme/vendor/typeahead/handlebars.js"></script> 
+  <!-- <script type="text/javascript" src="theme/js/custom.js"></script> --> 
+  <script type="text/javascript">
+    
+    toastr.options.timeOut = 3000;
+    function showLoading() {
+        $("#loading-all").show();
+    }
+    function hideLoading(){
+        $("#loading-all").hide();
+    }
+
+    function goToPage(url){
+        window.location.href = url;
+    }
+
+    $(".targetgroup-box .btn-readmore").click(function(e){
+        e.preventDefault();
+        if($(this).hasClass("active")){
+            $(this).html('Xem tiếp <span class="-ap icon-chevron-thin-down icon"></span>');
+            $(this).parents(".targetgroup-box").find(".links").css({"height":"250px"});
+            $(this).removeClass("active");
+        }else{
+            $(this).html('Thu gọn <span class="-ap icon-chevron-thin-up icon"></span>');
+            $(this).parents(".targetgroup-box").find(".links").css({"height":"auto"});
+            $(this).addClass("active");
+        }
+    });
+    var links = [
+            {name: "Thủ tục đăng ký khai tử", link: "http://abc.com"},
+            {name: "Thủ tục đăng ký lại khai sinh", link: "http://nbc.com"},
+            {name: "Thủ tục cấp lại Giấy phép lái xe", link: "http://nbc.com"},
+            {name: "Thủ tục cấp mới Giấy phép lái xe", link: "http://nbc.com"},
+            {name: "Thủ tục đăng ký nghĩa vụ quân sự lần đầu", link: "http://nbc.com"}
+        ];
+
+
+    function searchProcedure(){
+        var key = getWords($("#searchKeyWord").val(), 100);
+        console.log(key);
+        // if($("#searchKeyWord").val()) {
+        var href = 'dvc-ket-qua-thu-tuc.html?originKey=' + encodeURIComponent(key) + '&tukhoa=' + key.replace(/[&\/\\#,+()$~%'":*?<>{}^]/g, ' ').trim() + '&tinh_thanh=';
+        window.location.href = href;
+        //}
+    }
+
+function showAdvSearch() {
+    getLocation("dvcqg_get_tinh_thanh_by_selected_v2", null, null, "cboTINH_THANH");
+}
+
+function doAdvSearch(){
+
+    let mess = '';
+    let keyWord = $('#txtKEYWORD').val().trim();
+    keyWord = getWords(keyWord, 100);
+    if (!keyWord) {
+        mess += 'Bạn vui lòng nhập từ khóa tìm kiếm!\n';
+    }
+    let tinhThanhValue = $('#cboTINH_THANH').val();
+    let boNganhValue = $('#cboBO_NGANH').val();
+    var rdoBO = $("input[name='cap_thuc_hien']:checked").val();
+
+    if (((!tinhThanhValue || '-1' == tinhThanhValue) && rdoBO != 'bonganh') || (rdoBO == 'bonganh' && (!boNganhValue || '-1' == boNganhValue))) {
+        mess += 'Bạn phải chọn ít nhất một Tỉnh/ Thành phố hoặc một Bộ ngành!\n';
+    }
+
+    if (mess) {
+        toastr.warning(mess);
+        return;
+    }
+
+    var rdoSO = $("input[name='quan_huyen_or_so']:checked").val();
+    if (rdoBO != 'bonganh' && $('#cboTINH_THANH').val() && $('#cboTINH_THANH').val() != '-1' && ($('#cboQUAN_HUYEN').val() == '-1' || !$('#cboQUAN_HUYEN').val()) && ($('#cboSO').val() == '-1' || !$('#cboSO').val()) && ($('#cboPHUONG_XA').val() == '-1' || !$('#cboPHUONG_XA').val())) {
+
+        var params = 'originKey=' + encodeURIComponent(keyWord) + '&tukhoa=' + keyWord.replace(/[&\/\\#,+()$~%'":*?<>{}^]/g,' ').trim()
+        params+= "&tinh_thanh="+(($('#cboTINH_THANH').val() == '-1' || !$('#cboTINH_THANH').val()  || rdoBO == 'bonganh') ? "" : $('#cboTINH_THANH option:selected').text());
+        window.location = 'dvc-ket-qua-thu-tuc.html?' + params;
+    } else {
+
+        var params = "tu_khoa=" + keyWord;
+        //params += "&bo_nganh="+(($('#cboBO').val() != '-1' || !$('#cboBO').val() || rdoBO != 'bonganh') ? "" : $('#cboBO option:selected').text());
+        params += "&bo_nganh=" + ($('#cboBO_NGANH option:selected').text());
+        params += "&tinh_thanh=" + (($('#cboTINH_THANH').val() == '-1' || !$('#cboTINH_THANH').val() || rdoBO == 'bonganh') ? "" : $('#cboTINH_THANH option:selected').text());
+        params += "&so=" + (($('#cboSO').val() == '-1' || !$('#cboSO').val() || rdoSO != 'so') ? "" : $('#cboSO option:selected').text());
+        params += "&quan_huyen=" + (($('#cboQUAN_HUYEN').val() == '-1' || !$('#cboQUAN_HUYEN').val() || rdoSO == 'so') ? "" : $('#cboQUAN_HUYEN option:selected').text());
+        params += "&phuong_xa=" + (($('#cboPHUONG_XA').val() == '-1' || !$('#cboPHUONG_XA').val() || rdoSO == 'so') ? "" : $('#cboPHUONG_XA option:selected').text());
+        params += "&id_tinh_thanh=" + $('#cboTINH_THANH').val();
+        params += "&id_quan_huyen=" + $('#cboQUAN_HUYEN').val();
+        params += "&id_phuong_xa=" + $('#cboPHUONG_XA').val();
+        params += "&id_so=" + $('#cboSO').val();
+        params += "&id_bo_nganh=" + $('#cboBO_NGANH').val();
+        window.location = 'dvc-danh-sach-dich-vu-cong.html?' + params;
+    }
+
+    $('#advsearch').modal('hide');
+}
+$(document).ready(function(){
+    $("#searchKeyWord").keyup(function (e){
+        if (e.which == 13) {
+            searchProcedure();
+        }
+    });
+    bindEvent();
+    if(typeof userInfo !== 'undefined' || cslt_info != null){
+        show_notifications();
+    }
+});
+
+var arr_noti;
+function show_notifications(){
+    var obj_ = new Object();
+    obj_.provider = 'dancuportal';
+    if (cslt_info != null){
+        obj_.TECHNICAL_ID = 'cbd1902e-f3c3-4fc6-8c31-50c6594c98d1';
+    } else {
+        obj_.TECHNICAL_ID = userInfo.TechID;
+    }
+    obj_.type = "ref";
+    obj_.service = "get_all_notifications";
+    var result = apiservice.AjaxJson.executeQuery(obj_);
+    arr_noti = $.extend([], result);
+    var arr_noti_unread = $.extend([], result);
+    
+    arr_noti_unread = $.grep(result, function (item) {
+        return item.CHK_NOTIFICATIONS == '0';
+    });
+    //console.log('result----',result);
+    //console.log('arr_noti----',arr_noti);
+    if (result.length >0){
+        var content = "";
+        for (let i=0;i<result.length;i++){
+            //arr_noti[i].TEXT_RECEIVE_ORG = JSON.parse(arr_noti[i].SUBM_DATA).TEXT_RECEIVE_ORG;
+            //arr_noti[i].TEXT_PROC_TYPE = JSON.parse(arr_noti[i].SUBM_DATA).TEXT_PROC_TYPE;
+            //arr_noti[i].TEXT_PROC_CASE = JSON.parse(arr_noti[i].SUBM_DATA).TEXT_PROC_CASE;
+            //arr_noti[i].PHONE_NUMBER_ORG = JSON.parse(result[0].SUBM_DATA).PHONE_NUMBER_ORG;
+            if (result[i].CHK_NOTIFICATIONS == '0'){
+                content +=  '<div class="item unread"';
+            } else {
+                content +=  '<div class="item"';
+            }
+            content +=  ' onclick="update_notifications('+result[i].SUBM_ID+','+i+');';
+            if (result[i].STATUS_ID == 1){
+                content += 'window.location.href='+"'"+'xem-ho-so.html?type=2'+"'"+'">';
+            } else if (result[i].STATUS_ID == 2){
+                if (result[i].PROC_TYPE_ID == 3){
+                    content += 'window.location.href='+"'"+'xem-ho-so.html?type=4'+"'"+'">';
+                } else {
+                    content += 'window.location.href='+"'"+'xem-ho-so.html?type=5'+"'"+'">';
+                }
+            } else if (result[i].STATUS_ID == 3){
+                content += 'window.location.href='+"'"+'xem-ho-so.html?type=3'+"'"+'">';
+            } else if (result[i].STATUS_ID == 4){
+                content += 'window.location.href='+"'"+'xem-ho-so.html?type=5'+"'"+'">';
+            } else if (result[i].STATUS_ID == 5){
+                content += 'window.location.href='+"'"+'xem-ho-so.html?type=3'+"'"+'">';
+            } else if (result[i].STATUS_ID == 9){
+                content += 'window.location.href='+"'"+'xem-ho-so.html?type=4'+"'"+'">';
+            } else if (result[i].STATUS_ID == 10){
+                content += 'window.location.href='+"'"+'xem-ho-so.html?type=4'+"'"+'">';
+            }
+            content +=      '<div class="icon -ap icon-uniF132"></div>';
+            content +=      '<div class="title">Hồ sơ: <span class="stats text-warning">'+result[i].SUBM_CODE+'</span></div>';
+            content +=      '<p class="desc"><span class="fw6"><span class="stats text-danger">'+result[i].TENTHUTUC + '</span> '+ result[i].TENTRUONGHOP +'</span> tại <span class="stats text-success">'+result[i].NAME+'</span> đang là trạng thái <span class="stats text-success">'+result[i].STATUS+'</span></p>';
+            content +=  '</div>';
+        }
+        //arr_noti.forEach(function(v){
+         //   delete v.ORG_ID;
+        //    delete v.PROC_NAME;
+        //    delete v.SUBM_DATA;
+        //    delete v.SUBM_CODE;
+        //    delete v.STATUS;
+        //})
+        $('#list_HoSo_DVC').html(content);
+        $('#countUnread').html(arr_noti_unread.length)
+    }
+}
+
+function update_notifications(sub_id,indexArr){
+    if (indexArr != '-1'){
+        if (arr_noti[indexArr].CHK_NOTIFICATIONS == 0) {
+            var obj_ = new Object();
+            obj_.provider = 'dancuportal';
+	    if (cslt_info != null){
+	        obj_.TECH_ID = 'cbd1902e-f3c3-4fc6-8c31-50c6594c98d1';
+	    } else {
+	        obj_.TECH_ID = userInfo.TechID;
+	    }
+            obj_.ARRAY_UPDATE = sub_id;
+            obj_.type = "jsonclob";
+            obj_.service = "update_notifications";
+            var result = apiservice.AjaxJson.executeQuery(obj_);
+            // toastr.success(result.MSG_TEXT);
+        }
+    } else {
+        var obj_ = new Object();
+        obj_.provider = 'dancuportal';
+        if (cslt_info != null){
+	        obj_.TECH_ID = 'cbd1902e-f3c3-4fc6-8c31-50c6594c98d1';
+	    } else {
+	        obj_.TECH_ID = userInfo.TechID;
+	    }
+        obj_.ARRAY_UPDATE = sub_id;
+        obj_.type = "jsonclob";
+        obj_.service = "update_notifications";
+        var result = apiservice.AjaxJson.executeQuery(obj_);
+    }
+    if (sub_id == 'ALL')
+        show_notifications();
+    console.log(sub_id + indexArr);
+}
+
+function changeHeight(){
+    var vl = 1 - $('#popupChange').attr('height');
+    $('#popupChange').attr('height', vl);
+    $('#popupChange').css('height', vl + "px");
+}
+
+function bindEvent(){
+    $('#searchKeyWord').keydown(function(e){
+        if (e.keyCode == 13) {
+            searchProcedure();
+        }
+    });
+    $('#advsearch').on('hidden.bs.modal', function () {
+        $('#divClosePopupSearch').click();
+    });
+    $('#divClosePopupSearch').click(function(){
+        $("#txtKEYWORD").val('');
+        $('#rdoTINH_THANH').click();
+        $('#rdoQUAN_HUYEN').click();
+        $("#cboTINH_THANH").change();
+        getLocation("dvcqg_get_phuong_xa_by_selected", "huyen_id", -1, "cboPHUONG_XA");
+        $('#advsearch').modal('hide');
+
+    });
+
+    $('#rdoTINH_THANH').click(function(){
+        changeHeight();
+        $('#hide_for_bo_nganh').show();
+        $('#cboBO_NGANH').select2().next().hide();
+        $('#cboTINH_THANH').select2().next().show();
+        getLocation("dvcqg_get_tinh_thanh_by_selected_v2", null, null, "cboTINH_THANH");
+        getLocation("dvcqg_get_quan_huyen_by_selected_v2", "tinh_id", -1, "cboQUAN_HUYEN");
+        getLocation("dvcqg_get_so_by_selected_v2", "tinh_id", -1, "cboSO");
+        getLocation("dvcqg_get_phuong_xa_by_selected_v2", "huyen_id", -1, "cboPHUONG_XA");
+        if ($("input[name='quan_huyen_or_so']:checked").val() == "so") {
+
+            $('#cboQUAN_HUYEN,#cboPHUONG_XA').select2().next().hide();
+            $('#cboSO').select2().next().show();
+        } else {
+            $('#cboQUAN_HUYEN,#cboPHUONG_XA').select2().next().show();
+            $('#cboSO').select2().next().hide();
+
+        }
+    });
+    $('#rdoBO_NGANH').click(function(){
+        changeHeight();
+        $('#hide_for_bo_nganh').hide();
+        $('#cboBO_NGANH').select2().next().show();
+        $('#cboTINH_THANH').select2().next().hide();
+        getLocation("dvcqg_get_bo_nganh_by_selected_v2", null, null, "cboBO_NGANH");
+    });
+
+    $('#rdoQUAN_HUYEN').click(function(){
+        $('#cboQUAN_HUYEN,#cboPHUONG_XA').select2().next().show();
+        $('#cboSO').select2().next().hide();
+        getLocation("dvcqg_get_quan_huyen_by_selected_v2", "tinh_id", $("#cboTINH_THANH").val(), "cboQUAN_HUYEN");
+        getLocation("dvcqg_get_phuong_xa_by_selected_v2", "huyen_id", -1, "cboPHUONG_XA");
+    });
+
+    $('#rdoSO').click(function(){
+        $('#cboQUAN_HUYEN,#cboPHUONG_XA').select2().next().hide();
+        $('#cboSO').select2().next().show();
+        getLocation("dvcqg_get_so_by_selected_v2", "tinh_id", $("#cboTINH_THANH").val(), "cboSO");
+    });
+
+    $("#cboTINH_THANH,#cboQUAN_HUYEN,#cboPHUONG_XA,#cboSO,#cboBO_NGANH").select2({
+        allowClear: true,
+        width: "100%",
+    });
+    $('#cboSO,#cboBO_NGANH').select2().next().hide();
+
+    $("#cboTINH_THANH").change(function () {
+        getLocation("dvcqg_get_so_by_selected", "tinh_id", $("#cboTINH_THANH").val(), "cboSO");
+        getLocation("dvcqg_get_quan_huyen_by_selected_v2", "tinh_id", $("#cboTINH_THANH").val(), "cboQUAN_HUYEN");
+        getLocation("dvcqg_get_phuong_xa_by_selected_v2", "huyen_id", -1, "cboPHUONG_XA");
+        if ($("input[name='quan_huyen_or_so']:checked").val() == "so") {
+
+            $('#cboQUAN_HUYEN,#cboPHUONG_XA').select2().next().hide();
+            $('#cboSO').select2().next().show();
+        } else {
+            $('#cboQUAN_HUYEN,#cboPHUONG_XA').select2().next().show();
+            $('#cboSO').select2().next().hide();
+
+        }
+
+    });
+    $("#cboQUAN_HUYEN").change(function () {
+        getLocation("dvcqg_get_phuong_xa_by_selected_v2", "huyen_id", $("#cboQUAN_HUYEN").val(), "cboPHUONG_XA");
+    });
+}
+
+//suggestion search
+function sugggestProcedure(keyword) {
+    var obj = new Object();
+    obj.key_search = 'al:"${keyword}"~5';
+    obj.page_size = 5;
+    obj.start_row = 0;
+    obj.source_data = "thu_tuc_v1";
+    obj.type = "fts";
+    var result = apiservice.AjaxJson.executeQuery(obj);
+    var dataMap = result.response.docs.map(function (i) {
+        return {
+            name: i.ten_thu_tuc,
+            link: i.ten_thu_tuc,
+            id: i.ma_thu_tuc
+        }
+    });
+
+    return dataMap;
+}
+
+jQuery(document).ready(function($) {
+
+    var engine = new Bloodhound({
+        remote: {
+            url: '/jsp/procedure-typehead.jsp?keyword=al:"%QUERY%"~5',
+            wildcard: '%QUERY%'
+        },
+        datumTokenizer: Bloodhound.tokenizers.whitespace('keyword'),
+        queryTokenizer: Bloodhound.tokenizers.whitespace
+    });
+
+    $(".search-input").typeahead({
+        hint: true,
+        highlight: true,
+        minLength: 3
+    }, {
+        source: engine.ttAdapter(),
+        displayKey: 'ten_thu_tuc',
+        name: 'usersList',
+        templates: {
+            empty: [
+                '<div class="list-group search-results-dropdown"><div class="list-group-item">Không có kết quả phù hợp.</div></div>'
+            ],
+            header: [
+                '<div class="list-group search-results-dropdown">'
+            ],
+            suggestion: function (data) {
+                console.log(data);
+                if (data.isnganhdoc == 1) {
+                    return '<a href="dvc-chi-tiet-thu-tuc-nganh-doc.html?ma_thu_tuc=' + data.ma_thu_tuc + '" class="list-group-item">' + data.ten_thu_tuc + '</a>'
+                }
+                return '<a href="dvc-chi-tiet-thu-tuc-hanh-chinh.html?ma_thu_tuc=' + data.ma_thu_tuc + '" class="list-group-item">' + data.ten_thu_tuc + '</a>'
+            }
+        }
+    });
+    $('#searchKeyWord:text:visible:first').focus();
+});
+
+</script> 
+  <script type="text/javascript">
+
+    //
+    function autoSetmenu() {
+        var path = window.location.pathname;
+        var isRemoveDropdown = false;
+
+        // Cau hoi
+        if (path == '/p/home/dvc-chi-tiet-cau-hoi.html'){
+            path = '/p/home/dvc-cau-hoi-pho-bien.html';
+        }
+
+        // Huong dan su dung
+        if (path == '/p/home/dvc-huong-dan-bo-nganh-dia-phuong.html' || path == '/p/home/dvc-phan-mem-ho-tro.html' || path == '/p/home/dvc-thiet-ke-giao-dien.html' ||
+            path == '/p/home/dvc-nop-tien-dien.html' || path == '/p/home/dvc-liet-ket-giao-duc.html'
+            ){
+            path = '/p/dvc-huong-dan-cong-dan-doanh-nghiep.html';
+        }
+
+        // Thu tuc hanh hinh cong dan - doanh nghiep
+        if (path == '/p/home/dvc-ket-qua-thu-tuc-cho-cong-dan.html'
+                || path == '/p/home/dvc-chi-tiet-dich-vu-cho-cong-dan.html'
+                || path == '/p/home/dvc-chi-tiet-nhom-su-kien-cho-cong-dan.html'
+            ){
+            path = '/p/home/dvc-trang-chu-cong-dan.html';
+        }else if (path == '/p/home/dvc-ket-qua-thu-tuc-cho-doanh-nghiep.html'
+                || path == '/p/home/dvc-chi-tiet-dich-vu-cho-doanh-nghiep.html'
+                || path == '/p/home/dvc-chi-tiet-nhom-su-kien-cho-doanh-nghiep.html'
+            ){
+            path = '/p/home/dvc-trang-chu-doanh-nghiep.html';
+        }else if (path == '/p/home/dvc-danh-sach-thu-tuc-theo-nhom-su-kien.html'
+                || path == '/p/home/dvc-danh-sach-cau-hoi-theo-nhom-su-kien.html'
+            ) {
+            var objectId = GetURLParameter('objectId');
+            if (objectId == 1){
+                path = '/p/home/dvc-trang-chu-cong-dan.html';
+            }else if(objectId == 5){
+                path = '/p/home/dvc-trang-chu-doanh-nghiep.html';
+            }
+        }
+
+        // DVC trực tuyến
+        if (path == '/p/home/dvc-dich-vu-cong-truc-tuyen-ds.html'
+                || path == '/p/home/dvc-dich-vu-cong-truc-tuyen.html'
+            ) {
+            path = '/p/home/dvc-dich-vu-cong-truc-tuyen.html';
+        }
+
+        // Chi tiet TTHC va DVC
+        if (path == '/p/home/dvc-chi-tiet-thu-tuc-hanh-chinh.html' 
+                || path == '/p/home/dvc-danh-sach-dich-vu-cong.html'
+                || path == '/p/home/dvc-danh-sach-thu-tuc-theo-su-kien.html'
+                || path == '/p/home/dvc-ket-qua-thu-tuc.html'
+            ) {
+            path = '/p/home/dvc-trang-chu-cong-dan.html';
+            isRemoveDropdown = true;
+        }
+
+        // module TTHC
+        if (path == '/p/home/dvc-tthc-category.html') {
+            path = '/p/home/dvc-tthc-trang-chu.html';
+        }
+        if (path == '/p/home/dvc-tthc-thu-tuc-hanh-chinh-chi-tiet.html') {
+            path = '/p/home/dvc-tthc-thu-tuc-hanh-chinh.html';
+        }
+        if (path == '/p/home/dvc-tthc-thu-tuc-hanh-chinh-lien-thong-chi-tiet.html') {
+            path = '/p/home/dvc-tthc-thu-tuc-hanh-chinh-lien-thong.html';
+        }
+        if (path == '/p/home/dvc-tthc-quyet-dinh-cong-bo-chi-tiet.html') {
+            path = '/p/home/dvc-tthc-quyet-dinh-cong-bo.html';
+        }
+        if (path == '/p/home/dvc-tthc-bonganh-tinhtp.html') {
+            path = '/p/home/dvc-tthc-co-quan.html';
+        }
+
+        if (path == '/p/home/dvc-chi-tiet-tin-tuc.html') {
+            path = '/p/home/dvc-tin-tuc.html';
+        }
+
+        // Active main menu
+        $("#main-menu li").each(function () {
+            var link = $(this).find(">a").attr("href");
+            if (path.indexOf(link) != -1) {
+                $(this).parents('li').siblings().removeClass("active");
+                $(this).parents('li').addClass("active");
+                $(this).parents('li').find("li").removeClass("active");
+                $(this).addClass("active");
+            }
+        });
+
+        // Active dropdownmenu
+        $("#main-menu > li").each(function () {
+            if ($(this).hasClass("active")) {
+                var html = $(this).find(">ul").html();
+                $(this).addClass("active");
+                $(this).find(">ul").addClass("hidden");
+                $("#list-dropdown").html(html);
+                if($("#bn-ttp").hasClass("active")){
+                    $("#coquan").addClass("active");
+                }
+            }
+        });
+
+        // Remove
+        if (isRemoveDropdown) {
+            $('#list-dropdown > li').removeClass('active');
+        }
+    }
+
+    var pathHDSD = window.location.pathname;
+    $("#regionleft-introduce li").removeClass('active');
+    $("#left-introduce li a").each(function () {
+        var href = $(this).attr('href');
+        if (pathHDSD.indexOf(href) != -1) {
+            $(this).parent().addClass('active');
+        }
+    });
+    $('#left-introduce li:first-child').removeClass('active');
+    $('.child-menus a').each(function(){
+        var href = $(this).attr('href');
+        if (pathHDSD.indexOf(href) != -1) {
+            $(this).parent().addClass('active');
+        }
+    });
+
+    $(document).ready(function(){
+        autoSetmenu();
+    })
+
+
+</script> 
+  <div class="footer-box" style="background-image:url(/portal/assets/img/footer/bg-footer.png)"> 
+   <div class="footer-top"> 
+    <h1 class="title">CỔNG DỊCH VỤ C&Ocirc;NG - BỘ C&Ocirc;NG AN</h1> 
+    <div class="img"></div> 
+    <div class="desc ">
+     Địa chỉ: 96 Nguyễn Du, Cửa Nam, H&agrave; Nội.
+    </div> 
+   </div> 
+   <footer class="footer-bottom"> 
+    <div class="container"> 
+     <div class="footer-web"> 
+      <p>Bản quyền thuộc về CỔNG DỊCH VỤ C&Ocirc;NG - BỘ C&Ocirc;NG AN</p> 
+      <p>Khi sử dụng lại th&ocirc;ng tin, đề nghị ghi r&otilde; nguồn &quot;Cổng Dịch vụ c&ocirc;ng - Bộ C&ocirc;ng an&quot;</p> 
+     </div> 
+    </div> 
+   </footer> 
+  </div> 
+  <div class="scroll-top show">
+   <span class="fa fa-angle-up"></span>
+  </div> 
+  <!-- <script type="text/javascript" src="js/custom.js"></script> --> 
+  <!--<style>--> 
+  <!--    .hero-banner .user-act .avatar{--> 
+  <!--        width:32px;--> 
+  <!--        height:32px;--> 
+  <!--        display: inline-block;--> 
+  <!--        vertical-align: middle;--> 
+  <!--        margin-right: 5px;--> 
+  <!--    }--> 
+  <!--    @media(max-width: 991px){--> 
+  <!--        .hero-banner .top-menu{--> 
+  <!--            margin-bottom: 60px;--> 
+  <!--        }--> 
+  <!--        .hero-banner .links{--> 
+  <!--            position: absolute;--> 
+  <!--            right: 10px;--> 
+  <!--            top: 70px;--> 
+  <!--        }--> 
+  <!--    }--> 
+  <!--</style>--> 
+  <div class="scroll-top show">
+   <span class="fa fa-angle-up"></span>
+  </div> 
+  <style>
+	.notify .numb {
+		background: #FEBF60;
+        border: 1px solid #2C5809;
+        height: 16px;
+        line-height: 10px;
+        text-align: center;
+        padding: 2px;
+        position: absolute;
+        top: -5px;
+        right: 3px;
+        border-radius: 50%;
+        width: 16px;
+        font-size: 10px;
+	}
+	.notify .dropdown-menu {
+        left: auto;
+        right: 0px; 
+	}
+	.hero-banner .dropdown-noti .head .act {
+          float: right;
+          color: #019340;
+          display: block; 
+    }
+    .hero-banner .dropdown-noti .head:after {
+          content: "";
+          display: block;
+          clear: both; 
+    }
+    .hero-banner .dropdown-noti .item {
+        padding: 7px 10px;
+        border-bottom: 1px solid #E9EBF0;
+        position: relative;
+        padding-left: 60px; 
+	}
+    .hero-banner .dropdown-noti .item .icon {
+          width: 42px;
+          height: 42px;
+          border-radius: 50%;
+          background: #E5F4ED;
+          color: #499734;
+          text-align: center;
+          line-height: 42px;
+          position: absolute;
+          top: 10px;
+          left: 10px;
+          font-size: 20px; 
+    }
+    .hero-banner .dropdown-noti .item:last-child {
+          border-bottom: 0px; 
+    }
+    .hero-banner .dropdown-noti .item:hover {
+          background: #f5f5f5; 
+    }
+    .hero-banner .links .dropdown-noti .item.unread {
+          background: #F4FAF7; 
+    }
+    .hero-banner .dropdown-noti .item.unread:before {
+            content: "";
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #5EA15D; 
+	}
+    .hero-banner .dropdown-noti .stats {
+        font-weight: 600; 
+	}
+    .hero-banner .dropdown-noti .desc {
+        color: #82858A;
+        line-height: 24px; 
+	}
+    .hero-banner .dropdown-noti .desc .fw6 {
+          color: #292D34; 
+    }
+    .hero-banner .dropdown-noti .list-content {
+        max-height: 360px;
+        overflow: auto; 
+	}
+	.dropdown-noti {
+		white-space: normal;
+		width: 460px; 
+	}
+	.dropdown-noti .head {
+        border-bottom: 1px solid #C3C8D2;
+        padding-right: 40px;
+        position: relative;
+        padding: 7px 10px; 
+	}
+    .hero-banner .dropdown-noti .head .title {
+        font-size: 16px;
+        font-weight: bold;
+        float: left; 
+   }   
+    .sk-circle {
+        margin: 100px auto;
+        width: 40px;
+        height: 40px;
+        position: relative;
+    }
+    .sk-circle .sk-child {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        left: 0;
+        top: 0;
+    }
+    .sk-circle .sk-child:before {
+        content: '';
+        display: block;
+        margin: 0 auto;
+        width: 15%;
+        height: 15%;
+        background-color: #333;
+        border-radius: 100%;
+        -webkit-animation: sk-circleBounceDelay 1.2s infinite ease-in-out both;
+        animation: sk-circleBounceDelay 1.2s infinite ease-in-out both;
+    }
+    .sk-circle .sk-circle2 {
+        -webkit-transform: rotate(30deg);
+        -ms-transform: rotate(30deg);
+        transform: rotate(30deg); }
+    .sk-circle .sk-circle3 {
+        -webkit-transform: rotate(60deg);
+        -ms-transform: rotate(60deg);
+        transform: rotate(60deg); }
+    .sk-circle .sk-circle4 {
+        -webkit-transform: rotate(90deg);
+        -ms-transform: rotate(90deg);
+        transform: rotate(90deg); }
+    .sk-circle .sk-circle5 {
+        -webkit-transform: rotate(120deg);
+        -ms-transform: rotate(120deg);
+        transform: rotate(120deg); }
+    .sk-circle .sk-circle6 {
+        -webkit-transform: rotate(150deg);
+        -ms-transform: rotate(150deg);
+        transform: rotate(150deg); }
+    .sk-circle .sk-circle7 {
+        -webkit-transform: rotate(180deg);
+        -ms-transform: rotate(180deg);
+        transform: rotate(180deg); }
+    .sk-circle .sk-circle8 {
+        -webkit-transform: rotate(210deg);
+        -ms-transform: rotate(210deg);
+        transform: rotate(210deg); }
+    .sk-circle .sk-circle9 {
+        -webkit-transform: rotate(240deg);
+        -ms-transform: rotate(240deg);
+        transform: rotate(240deg); }
+    .sk-circle .sk-circle10 {
+        -webkit-transform: rotate(270deg);
+        -ms-transform: rotate(270deg);
+        transform: rotate(270deg); }
+    .sk-circle .sk-circle11 {
+        -webkit-transform: rotate(300deg);
+        -ms-transform: rotate(300deg);
+        transform: rotate(300deg); }
+    .sk-circle .sk-circle12 {
+        -webkit-transform: rotate(330deg);
+        -ms-transform: rotate(330deg);
+        transform: rotate(330deg); }
+    .sk-circle .sk-circle2:before {
+        -webkit-animation-delay: -1.1s;
+        animation-delay: -1.1s; }
+    .sk-circle .sk-circle3:before {
+        -webkit-animation-delay: -1s;
+        animation-delay: -1s; }
+    .sk-circle .sk-circle4:before {
+        -webkit-animation-delay: -0.9s;
+        animation-delay: -0.9s; }
+    .sk-circle .sk-circle5:before {
+        -webkit-animation-delay: -0.8s;
+        animation-delay: -0.8s; }
+    .sk-circle .sk-circle6:before {
+        -webkit-animation-delay: -0.7s;
+        animation-delay: -0.7s; }
+    .sk-circle .sk-circle7:before {
+        -webkit-animation-delay: -0.6s;
+        animation-delay: -0.6s; }
+    .sk-circle .sk-circle8:before {
+        -webkit-animation-delay: -0.5s;
+        animation-delay: -0.5s; }
+    .sk-circle .sk-circle9:before {
+        -webkit-animation-delay: -0.4s;
+        animation-delay: -0.4s; }
+    .sk-circle .sk-circle10:before {
+        -webkit-animation-delay: -0.3s;
+        animation-delay: -0.3s; }
+    .sk-circle .sk-circle11:before {
+        -webkit-animation-delay: -0.2s;
+        animation-delay: -0.2s; }
+    .sk-circle .sk-circle12:before {
+        -webkit-animation-delay: -0.1s;
+        animation-delay: -0.1s; }
+
+    @-webkit-keyframes sk-circleBounceDelay {
+        0%, 80%, 100% {
+            -webkit-transform: scale(0);
+            transform: scale(0);
+        } 40% {
+              -webkit-transform: scale(1);
+              transform: scale(1);
+          }
+    }
+
+    @keyframes sk-circleBounceDelay {
+        0%, 80%, 100% {
+            -webkit-transform: scale(0);
+            transform: scale(0);
+        } 40% {
+              -webkit-transform: scale(1);
+              transform: scale(1);
+          }
+    }
+</style> 
+  <div class="modal" id="loadMe" tabindex="-1" aria-labelledby="loadMeLabel"> 
+   <div class="sk-circle " style="position:fixed;width:80px;height:80px;top:0px;right:0px;left:0px;bottom:0px;margin:auto;"> 
+    <div class="sk-circle1 sk-child"></div> 
+    <div class="sk-circle2 sk-child"></div> 
+    <div class="sk-circle3 sk-child"></div> 
+    <div class="sk-circle4 sk-child"></div> 
+    <div class="sk-circle5 sk-child"></div> 
+    <div class="sk-circle6 sk-child"></div> 
+    <div class="sk-circle7 sk-child"></div> 
+    <div class="sk-circle8 sk-child"></div> 
+    <div class="sk-circle9 sk-child"></div> 
+    <div class="sk-circle10 sk-child"></div> 
+    <div class="sk-circle11 sk-child"></div> 
+    <div class="sk-circle12 sk-child"></div> 
+   </div> 
+  </div> 
+  <script type="text/javascript">
+    $(document).ready(function () {
+        if ($('.scroll-top').length) {
+            var scrollTrigger = 100, // px
+                backToTop = function() {
+                    var scrollTop = $(window).scrollTop();
+                    if (scrollTop > scrollTrigger) {
+                        $('.scroll-top').addClass('show');
+
+                    } else {
+                        $('.scroll-top').removeClass('show');
+                    }
+                };
+            backToTop();
+            $(window).on('scroll', function() {
+                backToTop();
+                
+            });
+            $('.scroll-top').on('click', function(e) {
+                e.preventDefault();
+                $('html,body').animate({
+                    scrollTop: 0
+                }, 700);
+            });
+        }
+    if (cslt_info == null) {
+            $('#sb_ttcd').show();
+        } else {
+            $('#sb_ttcd').hide();
+        }
+    });
+    
+</script>  
+ </body>
+</html><script id="f5_cspm">(function(){var f5_cspm={f5_p:'GBFAIILKLOBHPMPBGGJJGPEDMAKNMEPGDCCFIHCJBGHJFNPCEKEPBHBBGFLGMGLOPCGBGBBGAAKAIKHOFNKAJPPEAAMHLJFDEEEJAMNHPAMCFCANBJHFPMHIHCDKDLIH',setCharAt:function(str,index,chr){if(index>str.length-1)return str;return str.substr(0,index)+chr+str.substr(index+1);},get_byte:function(str,i){var s=(i/16)|0;i=(i&15);s=s*32;return((str.charCodeAt(i+16+s)-65)<<4)|(str.charCodeAt(i+s)-65);},set_byte:function(str,i,b){var s=(i/16)|0;i=(i&15);s=s*32;str=f5_cspm.setCharAt(str,(i+16+s),String.fromCharCode((b>>4)+65));str=f5_cspm.setCharAt(str,(i+s),String.fromCharCode((b&15)+65));return str;},set_latency:function(str,latency){latency=latency&0xffff;str=f5_cspm.set_byte(str,40,(latency>>8));str=f5_cspm.set_byte(str,41,(latency&0xff));str=f5_cspm.set_byte(str,35,2);return str;},wait_perf_data:function(){try{var wp=window.performance.timing;if(wp.loadEventEnd>0){var res=wp.loadEventEnd-wp.navigationStart;if(res<60001){var cookie_val=f5_cspm.set_latency(f5_cspm.f5_p,res);window.document.cookie='DCQGAnalytics1055551508aaaaaaaaaaaaaaaa_cspm_='+encodeURIComponent(cookie_val)+';path=/;'+'';}
+return;}}
+catch(err){return;}
+setTimeout(f5_cspm.wait_perf_data,100);return;},go:function(){var chunk=window.document.cookie.split(/\s*;\s*/);for(var i=0;i<chunk.length;++i){var pair=chunk[i].split(/\s*=\s*/);if(pair[0]=='DCQGCSPM'&&pair[1]=='1234')
+{var d=new Date();d.setTime(d.getTime()-1000);window.document.cookie='DCQGCSPM=;expires='+d.toUTCString()+';path=/;'+';';setTimeout(f5_cspm.wait_perf_data,100);}}}}
+f5_cspm.go();}());</script>

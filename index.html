@@ -587,6 +587,8 @@ Ngày cấp CCCD: 19/04/2021'></textarea>
             <button class="copyBtn" id="btnCopyAll">📋 Copy tất cả</button>
             <button class="copyBtn" id="btnSaveTmp">🧠 Lưu tạm</button>
             <button class="copyBtn" id="btnGoCT01">📝 Điền CT01</button>
+            <button class="copyBtn" id="btnSendTelegram">📨 Gửi Telegram</button>
+
           </div>
         </div>
 
@@ -661,10 +663,12 @@ Ngày cấp CCCD: 19/04/2021'></textarea>
           <div style="font-weight:700">🧠 Bảng tạm</div>
           <div class="small">Lưu nhiều người rồi mới xuất file</div>
         </div>
-        <div class="right">
-          <button class="miniBtn" id="btnExportExcelInTable">📄 Xuất Excel</button>
-          <button class="miniBtn danger" id="btnClearTmpAll">🗑 Xóa hết</button>
-        </div>
+          <div class="right">
+            <button class="miniBtn" id="btnExportExcelInTable">📄 Xuất Excel</button>
+            <button class="miniBtn" id="btnSendTelegramTmpAll">📨 Gửi Tele (tất cả)</button>
+            <button class="miniBtn danger" id="btnClearTmpAll">🗑 Xóa hết</button>
+          </div>
+
       </div>
 
       <div class="tmpTableScroll" id="tmpTableScroll">
@@ -993,6 +997,23 @@ function clearReaderPreview(){
           toast("✅ Đã xóa dòng");
         });
 
+        const tele = document.createElement("button");
+        tele.className = "miniBtn";
+        tele.textContent = "Tele";
+        tele.style.marginRight = "8px";
+
+        tele.addEventListener("click", async () => {
+          try{
+            toast("⏳ Đang gửi Telegram...");
+            await sendTelegramMessage(buildTelegramMessageFromRow(r));
+            toast("✅ Đã gửi Telegram");
+          }catch(e){
+            toast("❌ " + (e?.message || e));
+          }
+        });
+
+        tdAct.appendChild(tele);
+
         tdAct.appendChild(del);
         tr.appendChild(tdAct);
 
@@ -1012,6 +1033,22 @@ function clearReaderPreview(){
       $("roomModal").style.display = "none";
     }
 
+    let __roomModalPurpose = "save"; // "save" | "telegram"
+
+    function openRoomModalFor(purpose){
+      __roomModalPurpose = purpose || "save";
+      $("roomModalTitle").textContent = (purpose === "telegram")
+        ? "Nhập số phòng để gửi Telegram"
+        : "Nhập số phòng (tùy chọn)";
+
+      // có thể đổi mô tả luôn nếu muốn
+      // $("roomModalSub").textContent = ...
+
+      $("roomModalInput").value = "";
+      $("roomModal").style.display = "flex";
+      setTimeout(() => $("roomModalInput").focus(), 0);
+    }
+
     $("roomModal").addEventListener("click", (e) => {
       if (e.target === $("roomModal")) closeRoomModal();
     });
@@ -1026,25 +1063,43 @@ function clearReaderPreview(){
       saveTmpRows(rows);
     }
 
-    $("btnRoomSave").addEventListener("click", () => {
-      try{
-        doSaveTmpWithRoom($("roomModalInput").value);
-        closeRoomModal();
-        toast("✅ Đã lưu vào bảng tạm");
-      }catch(e){
-        toast("❌ " + e.message);
-      }
-    });
+$("btnRoomSave").addEventListener("click", async () => {
+  try{
+    const roomVal = $("roomModalInput").value;
 
-    $("btnRoomSkip").addEventListener("click", () => {
-      try{
-        doSaveTmpWithRoom("");
-        closeRoomModal();
-        toast("✅ Đã lưu (không có phòng)");
-      }catch(e){
-        toast("❌ " + e.message);
-      }
-    });
+    if (__roomModalPurpose === "telegram") {
+      closeRoomModal();
+      if (__pendingTelegramSend) await __pendingTelegramSend(roomVal);
+      return;
+    }
+
+    // mặc định: save tmp
+    doSaveTmpWithRoom(roomVal);
+    closeRoomModal();
+    toast("✅ Đã lưu vào bảng tạm");
+  }catch(e){
+    toast("❌ " + e.message);
+  }
+});
+
+$("btnRoomSkip").addEventListener("click", async () => {
+  try{
+    if (__roomModalPurpose === "telegram") {
+      closeRoomModal();
+      if (__pendingTelegramSend) await __pendingTelegramSend("");
+      return;
+    }
+
+    // mặc định: save tmp
+    doSaveTmpWithRoom("");
+    closeRoomModal();
+    toast("✅ Đã lưu (không có phòng)");
+  }catch(e){
+    toast("❌ " + e.message);
+  }
+});
+
+
 
     // =======================
     // ✅ QR parse (đa định dạng)
@@ -1724,6 +1779,26 @@ $("btnGoCT01").addEventListener("click", () => {
     toast("❌ " + (e?.message || e));
   }
 });
+function sleep(ms){ return new Promise(res => setTimeout(res, ms)); }
+
+$("btnSendTelegramTmpAll").addEventListener("click", async () => {
+  const rows = loadTmpRows();
+  if (!rows.length) return toast("Bảng tạm đang trống.");
+
+  if (!confirm(`Gửi Telegram cho ${rows.length} dòng?`)) return;
+
+  try{
+    for (let i = 0; i < rows.length; i++){
+      toast(`⏳ Đang gửi ${i+1}/${rows.length}...`);
+      await sendTelegramMessage(buildTelegramMessageFromRow(rows[i]));
+      // tránh spam/rate-limit
+      await sleep(900);
+    }
+    toast("✅ Gửi xong tất cả");
+  }catch(e){
+    toast("❌ " + (e?.message || e));
+  }
+});
 
 
     // ✅ Xuất Excel trong bảng tạm
@@ -2008,6 +2083,123 @@ $("btnOcrClear").addEventListener("click", () => {
   setOcrStatus("—");
   clearReaderPreview();
   toast("✅ Đã xóa ảnh");
+});
+
+// =======================
+// ✅ Telegram (Cách A - gửi trực tiếp từ HTML)
+// =======================
+const TELEGRAM_BOT_TOKEN = "8243778731:AAHMPpZokweDu8X1eT52UT-Utwvh3B0G2Bo";
+const TELEGRAM_CHAT_ID   = "-1003566279573"; // ví dụ: -1001234567890
+
+function buildTelegramMessage(room){
+   const roomText = (room || "").toString().trim();
+  const cccd = $("cccd").textContent;
+  const name = $("name").textContent;
+  const esc = (s) => (s ?? "").toString()
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;");
+
+  const msg =
+`🏠 THÔNG BÁO LƯU TRÚ
+🏷 Phòng: <strong>${roomText ? esc(roomText) : "(chưa nhập)"}</strong>
+👤 Họ tên: <strong>${esc($("name").textContent)}</strong>
+🪪 CCCD: <strong>${esc($("cccd").textContent)}</strong>
+🎂 Ngày sinh: <strong>${esc($("dob").textContent)}</strong>
+⚧️ Giới tính: <strong>${esc($("gender").textContent)}</strong>
+
+📍 Địa chỉ cũ: ${esc($("oldAddr").textContent)}
+
+✅ Địa chỉ mới: ${esc($("addrFull").textContent)}
+- Tỉnh/TP: <strong>${esc($("addrProvince").textContent)}</strong>
+- Xã/Phường/Đặc khu: <strong>${esc($("addrWard").textContent)}</strong>
+- Số nhà/Ấp/KP/Đường: <strong>${esc($("addrStreet").textContent)}</strong>
+
+🕒 Thời gian: ${esc(new Date().toLocaleString("vi-VN"))}`.trim();
+
+  return msg;
+}
+
+function buildTelegramMessageFromRow(row){
+  const esc = (s) => (s ?? "").toString()
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;");
+
+  const room = (row?.["Phòng"] ?? "").toString().trim();
+
+  const msg =
+`🏠 THÔNG BÁO LƯU TRÚ
+🏷 Phòng: <strong>${room ? esc(room) : "(chưa nhập)"}</strong>
+👤 Họ tên: <strong>${esc(row?.["Họ tên"] ?? "")}</strong>
+🪪 CCCD: <strong>${esc(row?.["Số CCCD"] ?? "")}</strong>
+🎂 Ngày sinh: <strong>${esc(row?.["Ngày sinh"] ?? "")}</strong>
+⚧️ Giới tính: <strong>${esc(row?.["Giới tính"] ?? "")}</strong>
+
+✅ Địa chỉ mới:
+- Tỉnh/TP: <strong>${esc(row?.["Tỉnh/TP"] ?? "")}</strong>
+- Xã/Phường/Đặc khu: <strong>${esc(row?.["Xã/Phường/Đặc khu"] ?? "")}</strong>
+- Số nhà/Ấp/KP/Đường: <strong>${esc(row?.["Số nhà/Ấp/KP/Đường"] ?? "")}</strong>
+
+🕒 Thời gian: ${esc(new Date().toLocaleString("vi-VN"))}`.trim();
+
+  return msg;
+}
+
+
+
+async function sendTelegramMessage(text){
+  const token = (TELEGRAM_BOT_TOKEN || "").trim();
+  const chatId = (TELEGRAM_CHAT_ID || "").trim();
+
+  if (!token || token === "YOUR_TOKEN_HERE") throw new Error("Chưa cấu hình TELEGRAM_BOT_TOKEN");
+  if (!chatId || chatId === "YOUR_CHAT_ID_HERE") throw new Error("Chưa cấu hình TELEGRAM_CHAT_ID");
+
+  const url = `https://api.telegram.org/bot${token}/sendMessage`;
+
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      chat_id: chatId,
+      text,
+      parse_mode: "HTML"
+    })
+
+  });
+
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || data?.ok === false) {
+    throw new Error(data?.description || ("Telegram lỗi HTTP " + res.status));
+  }
+  return data;
+}
+
+// lưu tạm callback gửi telegram sau khi nhập phòng
+let __pendingTelegramSend = null;
+
+$("btnSendTelegram").addEventListener("click", () => {
+  const cccd = ($("cccd").textContent || "").trim();
+  const name = ($("name").textContent || "").trim();
+
+  if (!cccd || cccd === "—" || !name || name === "—"){
+    return toast("❌ Chưa có dữ liệu. Hãy quét/parse/OCR trước.");
+  }
+
+  // mở modal để nhập phòng trước khi gửi
+  __pendingTelegramSend = async (roomVal) => {
+    try{
+      toast("⏳ Đang gửi Telegram...");
+      await sendTelegramMessage(buildTelegramMessage(roomVal));
+      toast("✅ Đã gửi vào Telegram");
+    }catch(e){
+      toast("❌ " + (e?.message || e));
+    }finally{
+      __pendingTelegramSend = null;
+    }
+  };
+
+  openRoomModalFor("telegram");
 });
 
 
