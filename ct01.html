@@ -662,6 +662,37 @@
     // ===== CT01 APP =====
     const $ = (id) => document.getElementById(id);
 
+    const ORIGINAL_TITLE = document.title;
+
+function removeVietnameseTones(str){
+  return (str || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
+
+function safeFilenamePart(str){
+  const s = removeVietnameseTones(str)
+    .replace(/[^a-zA-Z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .replace(/-+/g, "-");
+  return s || "unknown";
+}
+
+function buildBaseFilename(){
+  // ✅ lấy trực tiếp từ input cho chắc chắn (không phụ thuộc state scope)
+  const nameRaw = ($("fullName")?.value || "").trim();
+  const cccdRaw = digitsOnly($("idNumber")?.value || "");
+
+  const namePart = safeFilenamePart(nameRaw);
+  const cccdPart = cccdRaw || "CCCD";
+  return `CT01-${nameRaw}-${cccdPart}`;
+}
+
+window.addEventListener("afterprint", () => {
+  document.title = ORIGINAL_TITLE;
+});
+
+
     const state = {
       agency: "",
       fullName: "",
@@ -811,6 +842,8 @@
           }
         }
       }
+
+
 
       const rows = [...document.querySelectorAll("#membersTable tbody tr")];
       rows.forEach((tr) => {
@@ -1260,7 +1293,8 @@ function renderMembersPrint(){
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "ct01_data.json";
+      a.download = `${buildBaseFilename()}.json`;
+
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -1407,6 +1441,11 @@ function renderMembersPrint(){
     $("btnPrint").addEventListener("click", () => {
       ensureDefaults();
       if(!validateAll(true)) return;
+
+      // ✅ set title để Ctrl+P / Save as PDF gợi ý đúng tên
+      syncFromInputs();
+      document.title = buildBaseFilename();
+
       renderPreview();
       window.print();
     });
