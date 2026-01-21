@@ -1293,42 +1293,75 @@ $("btnRoomSkip").addEventListener("click", async () => {
     }
 
 function normName(s) {
-  return stripDiacritics((s || "").toString().normalize("NFC")).toLowerCase()
-    .replace(/\b(thanh pho|thi xa|quan|q\.|huyen|h\.|thi tran|xa|x\.|phuong|p\.|tp|t\.p\.|tx\.|dac khu)\b/g, " ")
-    .replace(/[^\w\s]/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
+  // 1) normalize unicode + lower
+  let t = (s || "").toString().normalize("NFC").toLowerCase();
+
+  // 2) bỏ dấu tiếng Việt
+  t = stripDiacritics(t);
+
+  // 3) chuẩn hoá dấu nháy
+  t = t.replace(/[’]/g, "'");
+
+  // 4) xử lý cực quan trọng: d'rong / d’rong / d rong -> drong
+  t = t.replace(/\bd'\s*/g, "d");     // d'rong -> drong
+  t = t.replace(/\bd\s+rong\b/g, "drong"); // d rong -> drong (OCR hay tách)
+
+  // 5) bỏ các tiền tố hành chính (để match theo "tên")
+  t = t.replace(/\b(thanh pho|thi xa|quan|q\.|huyen|h\.|thi tran|xa|x\.|phuong|p\.|tp|t\.p\.|tx\.|dac khu)\b/g, " ");
+
+  // 6) dọn ký tự lạ, gom space
+  t = t.replace(/[^a-z0-9\s]/g, " ");
+  t = t.replace(/\s+/g, " ").trim();
+
+  return t;
+}
+
+function compactName(s){
+  return normName(s).replace(/\s+/g, "");
 }
 
 
-    function bestMatch(list, rawName, typeHint){
-      if (!list?.length) return null;
 
-      const cleanedRaw = (rawName || "").toString().trim();
-      const cleaned = normName(cleanedRaw);
+function bestMatch(list, rawName, typeHint){
+  if (!list?.length) return null;
 
-      let candidates = list.filter(x => normName(x.name) === cleaned);
-      if (!candidates.length) {
-        candidates = list.filter(x => {
-          const n = normName(x.name);
-          return n.includes(cleaned) || cleaned.includes(n);
-        });
-      }
+  const cleanedRaw = (rawName || "").toString().trim();
+  const cleaned = normName(cleanedRaw);
+  const cleanedCompact = compactName(cleanedRaw);
 
-      if (!candidates.length) return null;
+  // 1) exact match theo normName
+  let candidates = list.filter(x => normName(x.name) === cleaned);
 
-      if (typeHint) {
-        const typed = candidates.filter(x => (x.type || "").toLowerCase().includes(typeHint.toLowerCase()));
-        if (typed.length) return typed[0];
-      }
+  // 2) exact match theo compact (bỏ khoảng trắng) -> bắt OCR lệch "d rong" vs "drong"
+  if (!candidates.length) {
+    candidates = list.filter(x => compactName(x.name) === cleanedCompact);
+  }
 
-      if (candidates.length > 1) {
-        logLine(`⚠️ Trùng tên "${cleanedRaw}". Candidates=` +
-          candidates.map(c => `${c.type} ${c.name}(${c.code})`).join(" | ")
-        );
-      }
-      return candidates[0];
-    }
+  // 3) contains match
+  if (!candidates.length) {
+    candidates = list.filter(x => {
+      const n = normName(x.name);
+      const nc = compactName(x.name);
+      return n.includes(cleaned) || cleaned.includes(n) || nc.includes(cleanedCompact) || cleanedCompact.includes(nc);
+    });
+  }
+
+  if (!candidates.length) return null;
+
+  // ưu tiên đúng type nếu có hint
+  if (typeHint) {
+    const typed = candidates.filter(x => (x.type || "").toLowerCase().includes(typeHint.toLowerCase()));
+    if (typed.length) return typed[0];
+  }
+
+  if (candidates.length > 1) {
+    logLine(`⚠️ Trùng tên "${cleanedRaw}". Candidates=` +
+      candidates.map(c => `${c.type} ${c.name}(${c.code})`).join(" | ")
+    );
+  }
+  return candidates[0];
+}
+
 
     function normalizeWardDisplayName(rawWard){
       const s = stripAdminPrefix(rawWard, "ward");
