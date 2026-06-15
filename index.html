@@ -248,6 +248,18 @@
       white-space:nowrap;
     }
     .copyBtn:hover{opacity:.96}
+    .copyBtn:disabled{
+      opacity:.45;
+      cursor:not-allowed;
+      transform:none;
+    }
+
+    .manualAddressBox{
+      padding:12px;
+      border:1px solid var(--line);
+      border-radius: var(--radius2);
+      background: var(--surface2);
+    }
 
     .two{
       display:grid;
@@ -628,16 +640,62 @@ Ngày cấp CCCD: 19/04/2021'></textarea>
             <label>Chế độ dò mã hành chính</label>
             <select id="mode">
               <option value="smart" selected>Tự tách & dò mã từ địa chỉ</option>
-              <option value="manual">Nhập tay province/district/ward + street</option>
+              <option value="manual-old">Chọn địa chỉ cũ để chuyển đổi</option>
+              <option value="manual-new">Chọn/nhập địa chỉ mới</option>
             </select>
           </div>
         </div>
 
-        <div class="two" id="manualCodes" style="display:none; margin-top: 8px">
-          <div><label>provinceCode</label><input id="provinceCode" placeholder="VD: 74" /></div>
-          <div><label>districtCode</label><input id="districtCode" placeholder="VD: 723..." /></div>
-          <div><label>wardCode</label><input id="wardCode" placeholder="VD: 257..." /></div>
-          <div><label>streetAddress</label><input id="streetAddress" placeholder="VD: Tổ 4B, Kp 1" /></div>
+        <div class="manualAddressBox" id="manualCodes" style="display:none; margin-top: 8px">
+          <div style="font-weight:700;font-size:14px">Chọn địa chỉ cũ để chuyển đổi</div>
+          <div class="small">Dùng khi app không tự tách đúng địa chỉ cũ. Gõ để tìm Tỉnh/Huyện/Xã.</div>
+          <div class="two" style="margin-top:8px">
+            <div><label>Tỉnh/Thành phố cũ *</label><input id="oldProvinceSearch" list="oldProvinceList" placeholder="Gõ để tìm tỉnh..." /></div>
+            <div><label>Quận/Huyện/Thị xã cũ *</label><input id="oldDistrictSearch" list="oldDistrictList" placeholder="Chọn tỉnh trước" disabled /></div>
+          </div>
+          <div class="two" style="margin-top:8px">
+            <div><label>Xã/Phường cũ *</label><input id="oldWardSearch" list="oldWardList" placeholder="Chọn huyện trước" disabled /></div>
+            <div><label>Số nhà/Ấp/KP/Đường cũ</label><input id="streetAddress" placeholder="VD: Tổ 4B, Kp 1" /></div>
+          </div>
+          <div class="row" style="margin-top:10px">
+            <button class="btn ok" id="btnConvertOldManual" type="button">Chuyển đổi địa chỉ cũ</button>
+          </div>
+          <input id="provinceCode" type="hidden" />
+          <input id="districtCode" type="hidden" />
+          <input id="wardCode" type="hidden" />
+          <datalist id="oldProvinceList"></datalist>
+          <datalist id="oldDistrictList"></datalist>
+          <datalist id="oldWardList"></datalist>
+        </div>
+
+        <div class="manualAddressBox" id="manualNewAddressBox" style="display:none; margin-top: 8px">
+          <div style="font-weight:700;font-size:14px">Chỉnh địa chỉ mới thủ công</div>
+          <div class="small">Dùng khi API không phân giải được. Chọn xong bấm áp dụng để cập nhật địa chỉ tổng.</div>
+          <div class="two" style="margin-top:8px">
+            <div>
+              <label>Tỉnh/Thành phố *</label>
+              <input id="manualProvinceSelect" list="manualProvinceList" placeholder="Gõ để tìm tỉnh..." />
+              <datalist id="manualProvinceList"></datalist>
+            </div>
+            <div>
+              <label>Xã/Phường/Đặc khu *</label>
+              <input id="manualWardSelect" list="manualWardList" placeholder="Chọn tỉnh trước" disabled />
+              <datalist id="manualWardList"></datalist>
+            </div>
+          </div>
+          <div class="two" style="margin-top:8px">
+            <div>
+              <label>Gõ Xã/Phường nếu danh sách không có</label>
+              <input id="manualWardText" placeholder="VD: Thạnh Hưng" />
+            </div>
+            <div>
+              <label>Số nhà/Ấp/KP/Đường</label>
+              <input id="manualStreetText" placeholder="VD: Ấp Trương Văn Vững" />
+            </div>
+          </div>
+          <div class="row" style="margin-top:10px">
+            <button class="btn ok" id="btnApplyManualNewAddress" type="button">Áp dụng địa chỉ mới</button>
+          </div>
         </div>
 
         <div class="status" id="convertStatus" style="margin-top:12px">—</div>
@@ -742,6 +800,20 @@ function clearReaderPreview(){
     function setScanStatus(html) { $("scanStatus").innerHTML = `Trạng thái: ${html}`; }
     function setConvertStatus(html) { $("convertStatus").innerHTML = html; }
     function setOcrStatus(html) { $("ocrStatus").innerHTML = `OCR: ${html}`; }
+
+    const INFO_ACTION_BUTTON_IDS = ["btnCopyAll", "btnSaveTmp", "btnGoCT01", "btnSendTelegram"];
+    function setInfoActionButtonsEnabled(enabled){
+      INFO_ACTION_BUTTON_IDS.forEach(id => {
+        const btn = $(id);
+        if (btn) btn.disabled = !enabled;
+      });
+    }
+
+    function hasReadablePersonInfo(){
+      const cccd = ($("cccd")?.textContent || "").trim();
+      const name = ($("name")?.textContent || "").trim();
+      return !!cccd && cccd !== "—" && !!name && name !== "—";
+    }
 
     function toast(msg){
       const t = $("toast");
@@ -1195,6 +1267,79 @@ $("btnRoomSkip").addEventListener("click", async () => {
       $("addrProvince").textContent = province || "—";
       $("addrWard").textContent = ward || "—";
       $("addrStreet").textContent = street || "—";
+      syncManualAddressInputsFromResult({province, ward, street});
+    }
+
+    function optionText(selectEl){
+      return (selectEl?.value || "").trim();
+    }
+
+    function setSelectByText(selectEl, text){
+      const target = (text || "").toString().trim();
+      if (!selectEl || !target) return false;
+      selectEl.value = target;
+      return false;
+    }
+
+    function syncManualAddressInputsFromResult({province, ward, street} = {}){
+      const provinceSelect = $("manualProvinceSelect");
+      const wardSelect = $("manualWardSelect");
+      const wardText = $("manualWardText");
+      const streetText = $("manualStreetText");
+
+      if (streetText) streetText.value = (street && street !== "—") ? street : "";
+
+      if (provinceSelect && province && province !== "—") provinceSelect.value = province;
+      if (wardSelect && ward && ward !== "—") wardSelect.value = ward;
+      else if (wardText && (!ward || ward === "—")) {
+        wardText.value = "";
+      }
+    }
+
+    function getManualNewAddressParts(){
+      const provinceSelect = $("manualProvinceSelect");
+      const wardSelect = $("manualWardSelect");
+      const provinceItem = findAdminByInput(addressPickerCache.newProvinces, optionText(provinceSelect));
+      const wardItem = findAdminByInput(addressPickerCache.manualWards, optionText(wardSelect));
+      const province = stripAdminPrefix(provinceItem?.name || optionText(provinceSelect), "province");
+      const selectedWard = stripAdminPrefix(wardItem?.name || optionText(wardSelect), "ward");
+      const typedWard = ($("manualWardText")?.value || "").trim();
+      const ward = stripAdminPrefix(typedWard || selectedWard, "ward");
+      const street = ($("manualStreetText")?.value || "").trim();
+
+      const validProvince = province && !/đang chờ|không tải|chọn tỉnh/i.test(province);
+      const validWard = ward && !/chọn xã|đang tải|không tải/i.test(ward);
+      const full = [street, validWard ? ward : "", validProvince ? province : ""].filter(Boolean).join(", ");
+
+      return { full, province, ward, street, validProvince, validWard };
+    }
+
+    function updateNewAddressFromManualInputs({apply = false} = {}){
+      const { full, province, ward, street, validProvince, validWard } = getManualNewAddressParts();
+
+      if (!apply) {
+        if (validProvince || validWard || street) {
+          setConvertStatus(`<span class="warn">Đã thay đổi địa chỉ mới thủ công. Bấm “Áp dụng địa chỉ mới” để cập nhật kết quả.</span>`);
+        }
+        return;
+      }
+
+      $("addrFull").textContent = full || "—";
+      $("addrProvince").textContent = validProvince ? province : "—";
+      $("addrWard").textContent = validWard ? ward : "—";
+      $("addrStreet").textContent = street || "—";
+
+      if (validProvince && validWard) {
+        setInfoActionButtonsEnabled(hasReadablePersonInfo());
+        setConvertStatus(
+          hasReadablePersonInfo()
+            ? `<span class="oktxt">Đã cập nhật địa chỉ mới thủ công.</span>`
+            : `<span class="warn">Đã cập nhật địa chỉ mới thủ công. Hãy quét/parse CCCD trước khi lưu hoặc gửi.</span>`
+        );
+      } else {
+        setInfoActionButtonsEnabled(false);
+        setConvertStatus(`<span class="warn">Chọn đủ Tỉnh/Thành phố và Xã/Phường/Đặc khu để dùng địa chỉ thủ công.</span>`);
+      }
     }
 
     function splitFullAddress(full){
@@ -1210,6 +1355,27 @@ $("btnRoomSkip").addEventListener("click", async () => {
       const ward = stripAdminPrefix(wardRaw, "ward");
 
       return { full, province, ward, street };
+    }
+
+    function tryParseAlreadyNewAddress(addr){
+      const raw = (addr || "").toString().trim();
+      const chunks = raw.split(",").map(s => s.trim()).filter(Boolean);
+      if (chunks.length !== 3) return null;
+
+      const [streetRaw, wardRaw, provinceRaw] = chunks;
+      const wardLooksLikeDistrict = /\b(quận|quan|huyện|huyen|thị xã|thi xa|thành phố|thanh pho|tp\.?)\b/i
+        .test(stripDiacritics(wardRaw).toLowerCase());
+      if (wardLooksLikeDistrict) return null;
+
+      const parts = {
+        full: raw,
+        province: stripAdminPrefix(provinceRaw, "province"),
+        ward: stripAdminPrefix(wardRaw, "ward"),
+        street: streetRaw
+      };
+
+      if (!parts.province || !parts.ward || !parts.street) return null;
+      return parts;
     }
 
     // =======================
@@ -1394,6 +1560,7 @@ function bestMatch(list, rawName, typeHint){
     // ✅ API tinhthanhpho
     // =======================
     const BASE = "https://tinhthanhpho.com/api/v1";
+    const NEW_ADDRESS_BASE = "https://provinces.open-api.vn/api/v2";
 
     async function apiGET(path, params) {
       const url = new URL(BASE + path);
@@ -1431,6 +1598,215 @@ function bestMatch(list, rawName, typeHint){
       if (!res.ok) throw new Error(`POST ${path} lỗi HTTP ${res.status}` + (data?.message ? `: ${data.message}` : ""));
       if (data && data.success === false) throw new Error(data.message || "API success=false");
       return data;
+    }
+
+    async function apiV2GET(path, params) {
+      const url = new URL(NEW_ADDRESS_BASE + path);
+      Object.entries(params || {}).forEach(([k,v]) => {
+        if (v !== undefined && v !== null && (""+v).length > 0) url.searchParams.set(k, v);
+      });
+
+      logLine("GET(v2) " + url.toString());
+      const res = await fetch(url.toString(), { headers: { "Accept": "application/json" }});
+      const data = await res.json().catch(() => ({}));
+      logLine("↳ " + res.status + " " + JSON.stringify(data).slice(0, 1200));
+
+      if (!res.ok) throw new Error(`GET ${path} lỗi HTTP ${res.status}`);
+      return data;
+    }
+
+    const addressPickerCache = {
+      oldProvinces: [],
+      newProvinces: [],
+      manualWards: [],
+      oldDistricts: [],
+      oldWards: []
+    };
+
+    function displayAdminName(item){
+      if (item?.division_type) return item?.name || "";
+      return [item?.type || item?.division_type, item?.name].filter(Boolean).join(" ").trim() || item?.name || "";
+    }
+
+    function fillDatalist(listId, items){
+      const listEl = $(listId);
+      if (!listEl) return;
+      listEl.innerHTML = "";
+      items.forEach(item => {
+        const opt = document.createElement("option");
+        opt.value = displayAdminName(item);
+        opt.dataset.code = item.code || "";
+        opt.dataset.name = item.name || "";
+        opt.dataset.type = item.type || item.division_type || "";
+        listEl.appendChild(opt);
+      });
+    }
+
+    function findAdminByInput(items, value){
+      const raw = (value || "").trim();
+      if (!raw) return null;
+      const key = compactName(raw);
+      return items.find(item => compactName(displayAdminName(item)) === key || compactName(item.name || "") === key) || null;
+    }
+
+    function enforceOptionValue(inputEl, items, message){
+      const raw = (inputEl?.value || "").trim();
+      if (!inputEl || !raw) return null;
+
+      const item = findAdminByInput(items, raw);
+      if (item) {
+        inputEl.value = displayAdminName(item);
+        return item;
+      }
+
+      inputEl.value = "";
+      setConvertStatus(`<span class="warn">${message}</span>`);
+      return null;
+    }
+
+    async function loadNewProvinceOptions(){
+      const manualInput = $("manualProvinceSelect");
+      if (addressPickerCache.newProvinces.length) return;
+
+      try{
+        if (manualInput) manualInput.placeholder = "Đang tải Tỉnh/Thành phố...";
+        const list = await apiV2GET("/p/", { search: "" });
+        addressPickerCache.newProvinces = Array.isArray(list) ? list : [];
+        fillDatalist("manualProvinceList", list);
+        if (manualInput) manualInput.placeholder = "Gõ để tìm tỉnh...";
+
+        const currentProvince = ($("addrProvince")?.textContent || "").trim();
+        if (currentProvince && currentProvince !== "—" && manualInput) {
+          manualInput.value = currentProvince;
+          const prov = findAdminByInput(addressPickerCache.newProvinces, currentProvince);
+          if (prov?.code) await loadManualWardOptions(prov.code);
+          syncManualAddressInputsFromResult({
+            province: currentProvince,
+            ward: ($("addrWard")?.textContent || "").trim(),
+            street: ($("addrStreet")?.textContent || "").trim()
+          });
+        }
+      }catch(e){
+        logLine("⚠️ Không tải được danh sách tỉnh mới (API v2): " + (e?.message || e));
+        if (manualInput) manualInput.placeholder = "Không tải được danh sách tỉnh";
+      }
+    }
+
+    async function loadOldProvinceOptions(){
+      const oldInput = $("oldProvinceSearch");
+      if (addressPickerCache.oldProvinces.length) return;
+
+      try{
+        if (oldInput) oldInput.placeholder = "Đang tải Tỉnh/Thành phố cũ...";
+        const res = await apiGET("/provinces", { limit: 100, page: 1 });
+        const list = res.data || [];
+        addressPickerCache.oldProvinces = list;
+        fillDatalist("oldProvinceList", list);
+        if (oldInput) oldInput.placeholder = "Gõ để tìm tỉnh...";
+      }catch(e){
+        logLine("⚠️ Không tải được danh sách tỉnh cũ: " + (e?.message || e));
+        if (oldInput) oldInput.placeholder = "Không tải được danh sách tỉnh";
+      }
+    }
+
+    async function loadManualWardOptions(provinceCode){
+      const wardInput = $("manualWardSelect");
+      if (!wardInput) return;
+      if (!provinceCode) {
+        wardInput.value = "";
+        wardInput.placeholder = "Chọn tỉnh trước";
+        wardInput.disabled = true;
+        return;
+      }
+
+      try{
+        wardInput.placeholder = "Đang tải Xã/Phường...";
+        wardInput.disabled = true;
+        const wards = await apiV2GET("/w/", { province: provinceCode, search: "" });
+
+        const seen = new Set();
+        const unique = (Array.isArray(wards) ? wards : []).filter(w => {
+          const key = compactName(displayAdminName(w));
+          if (!key || seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        }).sort((a, b) => displayAdminName(a).localeCompare(displayAdminName(b), "vi"));
+
+        addressPickerCache.manualWards = unique;
+        fillDatalist("manualWardList", unique);
+        wardInput.placeholder = "Gõ để tìm Xã/Phường/Đặc khu...";
+        wardInput.disabled = false;
+      }catch(e){
+        logLine("⚠️ Không tải được danh sách xã/phường: " + (e?.message || e));
+        addressPickerCache.manualWards = [];
+        fillDatalist("manualWardList", []);
+        wardInput.placeholder = "Không tải được, hãy gõ xã/phường bên dưới";
+        wardInput.disabled = true;
+      }
+    }
+
+    async function loadOldDistrictOptions(provinceCode){
+      const input = $("oldDistrictSearch");
+      if (!input) return;
+      $("districtCode").value = "";
+      $("wardCode").value = "";
+      $("oldWardSearch").value = "";
+      $("oldWardSearch").disabled = true;
+      fillDatalist("oldWardList", []);
+
+      if (!provinceCode) {
+        input.value = "";
+        input.placeholder = "Chọn tỉnh trước";
+        input.disabled = true;
+        fillDatalist("oldDistrictList", []);
+        return;
+      }
+
+      try{
+        input.value = "";
+        input.placeholder = "Đang tải Quận/Huyện...";
+        input.disabled = true;
+        const res = await apiGET(`/provinces/${encodeURIComponent(provinceCode)}/districts`, { limit: 500, page: 1 });
+        addressPickerCache.oldDistricts = res.data || [];
+        fillDatalist("oldDistrictList", addressPickerCache.oldDistricts);
+        input.placeholder = "Gõ để tìm Quận/Huyện/Thị xã...";
+        input.disabled = false;
+      }catch(e){
+        logLine("⚠️ Không tải được quận/huyện cũ: " + (e?.message || e));
+        addressPickerCache.oldDistricts = [];
+        fillDatalist("oldDistrictList", []);
+        input.placeholder = "Không tải được quận/huyện";
+      }
+    }
+
+    async function loadOldWardOptions(districtCode){
+      const input = $("oldWardSearch");
+      if (!input) return;
+      $("wardCode").value = "";
+
+      if (!districtCode) {
+        input.value = "";
+        input.placeholder = "Chọn huyện trước";
+        input.disabled = true;
+        fillDatalist("oldWardList", []);
+        return;
+      }
+
+      try{
+        input.value = "";
+        input.placeholder = "Đang tải Xã/Phường...";
+        input.disabled = true;
+        const res = await apiGET(`/districts/${encodeURIComponent(districtCode)}/wards`, { limit: 1000, page: 1 });
+        addressPickerCache.oldWards = res.data || [];
+        fillDatalist("oldWardList", addressPickerCache.oldWards);
+        input.placeholder = "Gõ để tìm Xã/Phường...";
+        input.disabled = false;
+      }catch(e){
+        logLine("⚠️ Không tải được xã/phường cũ: " + (e?.message || e));
+        addressPickerCache.oldWards = [];
+        fillDatalist("oldWardList", []);
+        input.placeholder = "Không tải được xã/phường";
+      }
     }
 
     async function findProvince(provinceName) {
@@ -1515,6 +1891,19 @@ function bestMatch(list, rawName, typeHint){
     let lastConvertAt = 0;
 
     async function autoConvertNow(){
+      setInfoActionButtonsEnabled(false);
+      try {
+        applyRawInputIfChanged();
+      } catch (e) {
+        setConvertStatus(`<span class="error">Lỗi dữ liệu ô QR thủ công:</span> ${e.message}`);
+        return;
+      }
+
+      if ($("mode").value === "manual-new") {
+        updateNewAddressFromManualInputs({ apply: true });
+        return;
+      }
+
       const apiKey = ($("apiKey").value || "").trim();
       if (!apiKey) {
         setConvertStatus(`<span class="warn">Chưa có API key.</span> Nhập API key để tự chuyển đổi sau khi có dữ liệu.`);
@@ -1536,7 +1925,7 @@ function bestMatch(list, rawName, typeHint){
         setNewAddressFields({full:"—", province:"—", ward:"—", street:"—"});
 
         let payload;
-        if ($("mode").value === "manual") {
+        if ($("mode").value === "manual-old") {
           const provinceCode = ($("provinceCode").value || "").trim();
           const districtCode = ($("districtCode").value || "").trim();
           const wardCode = ($("wardCode").value || "").trim();
@@ -1554,19 +1943,36 @@ function bestMatch(list, rawName, typeHint){
         const notes = res?.data?.mergeInfo?.notes || "";
 
         if (!newFull) {
-          setConvertStatus(`<span class="warn">Có phản hồi nhưng không thấy new.fullAddress.</span> Xem log để debug.`);
-          return;
+          throw new Error("Có phản hồi nhưng không thấy new.fullAddress.");
         }
 
         const parts = splitFullAddress(newFull);
         setNewAddressFields(parts);
+        setInfoActionButtonsEnabled(true);
 
         setConvertStatus(
           `<span class="oktxt">Thành công!</span> ` +
           (notes ? `<span class="small">Ghi chú: ${notes}</span>` : "")
         );
       }catch(e){
-        setConvertStatus(`<span class="error">Lỗi:</span> ${e.message}`);
+        const originalMessage = e?.message || String(e);
+        logLine("❌ Convert lỗi: " + originalMessage);
+
+        const fallback = tryParseAlreadyNewAddress(currentData?.address);
+        if (fallback) {
+          setNewAddressFields(fallback);
+          setInfoActionButtonsEnabled(true);
+          logLine("ℹ️ Fallback: phát hiện địa chỉ có dạng mới street, ward, province.");
+          logLine("Fallback result: " + JSON.stringify(fallback));
+          setConvertStatus(
+            `<span class="warn">Chuyển đổi lỗi:</span> ${originalMessage}<br>` +
+            `<span class="oktxt">Đã tự nhận diện địa chỉ mới và set kết quả.</span>`
+          );
+          return;
+        }
+
+        logLine("⚠️ Không fallback được: địa chỉ không đúng dạng mới 3 phần street, ward, province.");
+        setConvertStatus(`<span class="error">Lỗi:</span> ${originalMessage}`);
       }finally{
         converting = false;
       }
@@ -1658,6 +2064,7 @@ function bestMatch(list, rawName, typeHint){
       $("log").value = "";
       currentData = null;
       lastQrText = "";
+      setInfoActionButtonsEnabled(false);
       fillInfo({});
       setNewAddressFields({full:"—", province:"—", ward:"—", street:"—"});
       setScanStatus("<b>Chưa quét</b>");
@@ -1673,20 +2080,168 @@ function bestMatch(list, rawName, typeHint){
       // setTab("qr");
     });
 
-    $("btnParse").addEventListener("click", async () => {
+    let manualParseTimer = null;
+    let manualParseSeq = 0;
+    let lastManualParsedText = "";
+
+    async function parseManualInputNow({silentEmpty = false, force = false} = {}) {
+      const raw = ($("rawInput").value || "").trim();
+      if (!raw) {
+        if (!silentEmpty) setConvertStatus(`<span class="warn">Chưa có chuỗi QR để parse.</span>`);
+        return;
+      }
+      if (!force && raw === lastManualParsedText) return;
+
+      const seq = ++manualParseSeq;
       try {
-        const data = parseQRAny($("rawInput").value);
+        const data = parseQRAny(raw);
+        if (seq !== manualParseSeq) return;
+
+        lastManualParsedText = raw;
         currentData = data;
         fillInfo(data);
+        setInfoActionButtonsEnabled(false);
         setConvertStatus(`<span class="oktxt">Parse OK.</span> Đang tự chuyển đổi...`);
         await autoConvertNow();
       } catch (e) {
+        if (seq !== manualParseSeq) return;
         setConvertStatus(`<span class="error">Lỗi:</span> ${e.message}`);
       }
+    }
+
+    function applyRawInputIfChanged(){
+      const raw = ($("rawInput").value || "").trim();
+      if (!raw || raw === lastManualParsedText) return false;
+
+      const data = parseQRAny(raw);
+      lastManualParsedText = raw;
+      currentData = data;
+      fillInfo(data);
+      logLine("✅ Ưu tiên dữ liệu từ ô QR thủ công: đã parse lại trước khi thao tác.");
+      return true;
+    }
+
+    $("rawInput").addEventListener("input", () => {
+      clearTimeout(manualParseTimer);
+      setInfoActionButtonsEnabled(false);
+      const raw = ($("rawInput").value || "").trim();
+      if (!raw) {
+        lastManualParsedText = "";
+        currentData = null;
+        setInfoActionButtonsEnabled(false);
+        fillInfo({});
+        setNewAddressFields({full:"—", province:"—", ward:"—", street:"—"});
+        setConvertStatus("—");
+        return;
+      }
+
+      setConvertStatus(`<span class="warn">Đang chờ bạn nhập xong để tự parse...</span>`);
+      manualParseTimer = setTimeout(() => {
+        parseManualInputNow({ silentEmpty: true });
+      }, 650);
     });
 
-    $("mode").addEventListener("change", (e) => {
-      $("manualCodes").style.display = (e.target.value === "manual") ? "grid" : "none";
+    $("btnParse").addEventListener("click", async () => {
+      clearTimeout(manualParseTimer);
+      await parseManualInputNow({ force: true });
+    });
+
+    function updateAddressModePanels(){
+      const mode = $("mode").value;
+      $("manualCodes").style.display = (mode === "manual-old") ? "block" : "none";
+      $("manualNewAddressBox").style.display = (mode === "manual-new") ? "block" : "none";
+      if (mode === "manual-old") loadOldProvinceOptions();
+      if (mode === "manual-new") loadNewProvinceOptions();
+      if (mode === "manual-new") updateNewAddressFromManualInputs();
+    }
+
+    $("mode").addEventListener("change", updateAddressModePanels);
+
+    $("manualProvinceSelect").addEventListener("focus", loadNewProvinceOptions);
+    $("manualProvinceSelect").addEventListener("change", async (e) => {
+      $("manualWardText").value = "";
+      const province = enforceOptionValue(e.target, addressPickerCache.newProvinces, "Vui lòng chọn Tỉnh/Thành phố mới có trong danh sách.");
+      await loadManualWardOptions(province?.code || "");
+      updateNewAddressFromManualInputs();
+    });
+    $("manualProvinceSelect").addEventListener("blur", () => {
+      enforceOptionValue($("manualProvinceSelect"), addressPickerCache.newProvinces, "Vui lòng chọn Tỉnh/Thành phố mới có trong danh sách.");
+    });
+
+    $("manualWardSelect").addEventListener("change", () => {
+      const ward = enforceOptionValue($("manualWardSelect"), addressPickerCache.manualWards, "Vui lòng chọn Xã/Phường/Đặc khu mới có trong danh sách.");
+      if (ward) $("manualWardText").value = "";
+      updateNewAddressFromManualInputs();
+    });
+    $("manualWardSelect").addEventListener("blur", () => {
+      enforceOptionValue($("manualWardSelect"), addressPickerCache.manualWards, "Vui lòng chọn Xã/Phường/Đặc khu mới có trong danh sách.");
+    });
+
+    $("manualWardText").addEventListener("input", updateNewAddressFromManualInputs);
+    $("manualStreetText").addEventListener("input", updateNewAddressFromManualInputs);
+
+    $("btnApplyManualNewAddress").addEventListener("click", () => {
+      const province = enforceOptionValue($("manualProvinceSelect"), addressPickerCache.newProvinces, "Vui lòng chọn Tỉnh/Thành phố mới có trong danh sách.");
+      if (province && !$("manualWardText").value.trim()) {
+        enforceOptionValue($("manualWardSelect"), addressPickerCache.manualWards, "Vui lòng chọn Xã/Phường/Đặc khu mới có trong danh sách hoặc gõ thủ công bên dưới.");
+      }
+      updateNewAddressFromManualInputs({ apply: true });
+    });
+
+    $("oldProvinceSearch").addEventListener("focus", loadOldProvinceOptions);
+    $("oldProvinceSearch").addEventListener("change", async (e) => {
+      const province = enforceOptionValue(e.target, addressPickerCache.oldProvinces, "Vui lòng chọn Tỉnh/Thành phố cũ có trong danh sách.");
+      $("provinceCode").value = province?.code || "";
+      await loadOldDistrictOptions(province?.code || "");
+    });
+    $("oldProvinceSearch").addEventListener("blur", () => {
+      enforceOptionValue($("oldProvinceSearch"), addressPickerCache.oldProvinces, "Vui lòng chọn Tỉnh/Thành phố cũ có trong danh sách.");
+    });
+
+    $("oldDistrictSearch").addEventListener("change", async (e) => {
+      const district = enforceOptionValue(e.target, addressPickerCache.oldDistricts, "Vui lòng chọn Quận/Huyện cũ có trong danh sách.");
+      $("districtCode").value = district?.code || "";
+      await loadOldWardOptions(district?.code || "");
+    });
+    $("oldDistrictSearch").addEventListener("blur", () => {
+      enforceOptionValue($("oldDistrictSearch"), addressPickerCache.oldDistricts, "Vui lòng chọn Quận/Huyện cũ có trong danh sách.");
+    });
+
+    $("oldWardSearch").addEventListener("change", (e) => {
+      const ward = enforceOptionValue(e.target, addressPickerCache.oldWards, "Vui lòng chọn Xã/Phường cũ có trong danh sách.");
+      $("wardCode").value = ward?.code || "";
+    });
+    $("oldWardSearch").addEventListener("blur", () => {
+      enforceOptionValue($("oldWardSearch"), addressPickerCache.oldWards, "Vui lòng chọn Xã/Phường cũ có trong danh sách.");
+    });
+
+    $("btnConvertOldManual").addEventListener("click", async () => {
+      $("mode").value = "manual-old";
+      updateAddressModePanels();
+
+      const apiKey = ($("apiKey").value || "").trim();
+      const provinceCode = ($("provinceCode").value || "").trim();
+      const districtCode = ($("districtCode").value || "").trim();
+      const wardCode = ($("wardCode").value || "").trim();
+
+      if (!apiKey) {
+        setConvertStatus(`<span class="warn">Chưa có API key để chuyển đổi địa chỉ cũ.</span>`);
+        return;
+      }
+      if (!provinceCode || !districtCode || !wardCode) {
+        setConvertStatus(`<span class="warn">Chọn đủ Tỉnh/Thành phố cũ, Quận/Huyện cũ và Xã/Phường cũ từ danh sách.</span>`);
+        return;
+      }
+
+      currentData = currentData || {};
+      currentData.address = [
+        ($("streetAddress").value || "").trim(),
+        ($("oldWardSearch").value || "").trim(),
+        ($("oldDistrictSearch").value || "").trim(),
+        ($("oldProvinceSearch").value || "").trim()
+      ].filter(Boolean).join(", ");
+
+      await autoConvertNow();
     });
 
     $("apiKey").addEventListener("change", async () => {
@@ -1694,6 +2249,7 @@ function bestMatch(list, rawName, typeHint){
     });
 
     $("btnCopyAll").addEventListener("click", async () => {
+      try{ applyRawInputIfChanged(); }catch(e){ toast("❌ " + e.message); return; }
       const all =
 `CCCD: ${$("cccd").textContent}
 Họ tên: ${$("name").textContent}
@@ -1714,6 +2270,7 @@ Số nhà/Ấp/KP/Đường: ${$("addrStreet").textContent}
     // ✅ Lưu tạm -> mở popup nhập phòng (có thể bỏ qua)
     $("btnSaveTmp").addEventListener("click", () => {
       try{
+        applyRawInputIfChanged();
         buildRowFromUI(""); // validate
         openRoomModal();
       }catch(e){
@@ -1804,6 +2361,7 @@ function buildCT01Prefill(){
 
 $("btnGoCT01").addEventListener("click", () => {
   try{
+    applyRawInputIfChanged();
     const prefill = buildCT01Prefill();
     sessionStorage.setItem(CT01_PREFILL_KEY, JSON.stringify(prefill));
     // chuyển qua ct01.html (đổi đúng tên file của bạn)
@@ -2212,6 +2770,8 @@ async function sendTelegramMessage(text){
 let __pendingTelegramSend = null;
 
 $("btnSendTelegram").addEventListener("click", () => {
+  try{ applyRawInputIfChanged(); }catch(e){ toast("❌ " + e.message); return; }
+
   const cccd = ($("cccd").textContent || "").trim();
   const name = ($("name").textContent || "").trim();
 
@@ -2242,6 +2802,10 @@ $("btnSendTelegram").addEventListener("click", () => {
     (function boot() {
       renderSavedCount();
       renderTmpTable();
+      setInfoActionButtonsEnabled(false);
+      loadOldProvinceOptions();
+      loadNewProvinceOptions();
+      updateAddressModePanels();
 
       const badge = $("libStatus");
       if (typeof window.Html5Qrcode === "undefined") {
