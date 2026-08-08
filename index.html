@@ -31,10 +31,11 @@
       --btn2:#16a34a;
       --danger:#dc2626;
       --warn:#d97706;
+      --focus: rgba(37,99,235,.14);
 
       /* UI tokens */
-      --radius:18px;
-      --radius2:14px;
+      --radius:16px;
+      --radius2:12px;
 
       /* Shadows */
       --shadow: 0 10px 22px rgba(15,23,42,.08);
@@ -59,31 +60,31 @@
       font-size: var(--base);
       background: var(--bg);
       color: var(--text);
-      /* padding: 16px; */
       line-height: 1.55;
       -webkit-font-smoothing: antialiased;
       text-rendering: optimizeLegibility;
-      width: 100;
+      width: 100%;
     }
 
     .wrap{
-    max-width: 1700px;
-    margin:24px auto;
-    display:grid;
-    gap:14px; 
-    padding: 15px;
-  }
+      max-width: 1680px;
+      margin:18px auto 28px;
+      display:grid;
+      gap:14px;
+      padding: 0 16px 16px;
+    }
 
     /* Header */
     .top{
       display:flex; gap:12px; flex-wrap:wrap;
       align-items:center; justify-content:space-between;
-      padding: 14px 14px;
+      padding: 16px;
       border:1px solid var(--line);
       border-radius: var(--radius);
       background: var(--surface);
       box-shadow: var(--shadow);
     }
+    .top .small{max-width: 760px}
 
     h1{
       margin:0;
@@ -106,7 +107,7 @@
     /* Layout */
     .grid{
       display:grid;
-      grid-template-columns: minmax(320px, 420px) 1fr;
+      grid-template-columns: minmax(340px, 440px) minmax(0, 1fr);
       gap:14px;
       align-items:start;
     }
@@ -122,12 +123,35 @@
       border:1px solid var(--line);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
-      padding: 14px;
-
+      padding: 16px;
     }
 
     .row{display:flex;gap:10px;flex-wrap:wrap}
     .row.between{justify-content:space-between; align-items:center}
+    .sectionHeader{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+    .sectionTitle{
+      font-weight:750;
+      font-size:16px;
+      line-height:1.35;
+    }
+    .sectionSub{
+      margin-top:4px;
+      color:var(--muted);
+      font-size:13px;
+    }
+    .actionGroup{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:flex-end;
+    }
 
     label{
       display:block;
@@ -147,12 +171,19 @@
       outline:none;
       font-size: var(--control);
       min-height: var(--tap);
+      transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
     }
-    textarea{min-height:110px;resize:vertical}
+    textarea{min-height:112px;resize:vertical}
+    input::placeholder, textarea::placeholder{color:#94a3b8}
+    input:disabled, select:disabled, textarea:disabled{
+      background:#f1f5f9;
+      color:#94a3b8;
+      cursor:not-allowed;
+    }
 
     input:focus, textarea:focus, select:focus{
       border-color: rgba(37,99,235,.55);
-      box-shadow: 0 0 0 4px rgba(37,99,235,.12);
+      box-shadow: 0 0 0 4px var(--focus);
     }
 
     /* Buttons */
@@ -169,7 +200,7 @@
       min-width: 140px;
       transition: .15s transform, .15s opacity, .15s box-shadow;
     }
-    .btn:hover{opacity:.96}
+    .btn:hover{opacity:.96; box-shadow: 0 8px 18px rgba(37,99,235,.14)}
     .btn:active{transform: translateY(1px)}
     .btn.secondary{
       background: #fff;
@@ -178,11 +209,11 @@
     }
     .btn.ok{background: var(--btn2)}
     .btn.danger{background: var(--danger)}
-    .btn:disabled{opacity:.55; cursor:not-allowed}
+    .btn:disabled{opacity:.55; cursor:not-allowed; box-shadow:none}
 
     /* Reader */
     #reader{
-      border-radius: 16px;
+      border-radius: var(--radius);
       overflow:hidden;
       border:2px solid rgba(37,99,235,.16);
       background: var(--surface2);
@@ -197,11 +228,11 @@
       object-fit: cover !important;
     }
     #reader img{
-  width:100% !important;
-  height:100% !important;
-  object-fit: contain !important; /* muốn “giống camera” hơn thì đổi thành cover */
-  display:block;
-}
+      width:100% !important;
+      height:100% !important;
+      object-fit: contain !important;
+      display:block;
+    }
 
 
     .status{
@@ -226,10 +257,11 @@
     /* Info table */
     .kv{
       display:grid;
-      grid-template-columns: 160px 1fr auto;
-      gap:10px;
+      grid-template-columns: 160px minmax(0, 1fr) auto;
+      gap:12px;
       padding:12px 0;
       border-top:1px solid var(--line);
+      align-items:center;
     }
     .kv:first-child{border-top:0}
     .k{color:var(--muted);font-size:13px;align-self:center;font-weight:600}
@@ -246,8 +278,9 @@
       cursor:pointer;
       min-height: var(--tap);
       white-space:nowrap;
+      transition: background .15s ease, border-color .15s ease, opacity .15s ease;
     }
-    .copyBtn:hover{opacity:.96}
+    .copyBtn:hover{opacity:.96; background:#fff; border-color:#cbd5e1}
     .copyBtn:disabled{
       opacity:.45;
       cursor:not-allowed;
@@ -260,6 +293,7 @@
       border-radius: var(--radius2);
       background: var(--surface2);
     }
+    .manualAddressBox .sectionTitle{font-size:14px}
 
     .two{
       display:grid;
@@ -270,9 +304,12 @@
     @media (max-width: 640px){
       .two{grid-template-columns:1fr}
       .btn{min-width: 100%}
-      #reader{min-height: 520px;}
+      #reader{min-height: 440px;}
       .kv{grid-template-columns: 1fr; gap:6px}
       .copyBtn{width:100%}
+      .sectionHeader{align-items:stretch}
+      .actionGroup{width:100%; justify-content:stretch}
+      .actionGroup .copyBtn{flex:1 1 160px}
     }
 
     /* Sticky actions mobile */
@@ -306,6 +343,7 @@
     }
 
     #oldAddr, #addrFull { font-weight: 600; }
+    #log{min-height:150px}
 
     /* =======================
        Modal nhập phòng
@@ -510,9 +548,12 @@
     <div class="grid">
       <!-- LEFT -->
       <div class="card">
-        <div class="row between stickyActions">
-          <div style="font-weight:700;font-size:16px">📷 Quét QR bằng camera</div>
-          <div class="row">
+        <div class="sectionHeader stickyActions">
+          <div>
+            <div class="sectionTitle">📷 Quét QR bằng camera</div>
+            <div class="sectionSub">Quét trực tiếp, tải ảnh QR hoặc OCR ảnh CCCD.</div>
+          </div>
+          <div class="actionGroup">
             <button class="btn" id="btnStart">Bắt đầu quét</button>
             <button class="btn secondary" id="btnStop" disabled>Dừng</button>
           </div>
@@ -593,14 +634,16 @@ Ngày cấp CCCD: 19/04/2021'></textarea>
 
       <!-- RIGHT -->
       <div class="card">
-        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
-          <div style="font-weight:700;font-size:16px">🪪 Thông tin đọc được</div>
-          <div class="row" style="gap:8px">
+        <div class="sectionHeader">
+          <div>
+            <div class="sectionTitle">🪪 Thông tin đọc được</div>
+            <div class="sectionSub">Kiểm tra lại trước khi lưu, điền CT01 hoặc gửi Telegram.</div>
+          </div>
+          <div class="actionGroup">
             <button class="copyBtn" id="btnCopyAll">📋 Copy tất cả</button>
             <button class="copyBtn" id="btnSaveTmp">🧠 Lưu tạm</button>
             <button class="copyBtn" id="btnGoCT01">📝 Điền CT01</button>
             <button class="copyBtn" id="btnSendTelegram">📨 Gửi Telegram</button>
-
           </div>
         </div>
 
@@ -621,10 +664,10 @@ Ngày cấp CCCD: 19/04/2021'></textarea>
 
         <hr />
 
-        <div class="row between">
+        <div class="sectionHeader">
           <div>
-            <div style="font-weight:700;font-size:16px">🔁 Địa chỉ mới (tự động)</div>
-            <div class="small">POST <code class="inline">/api/v1/convert/address</code> (Bearer API key)</div>
+            <div class="sectionTitle">🔁 Địa chỉ mới</div>
+            <div class="sectionSub">Tự chuyển đổi hoặc chọn thủ công khi cần. POST <code class="inline">/api/v1/convert/address</code></div>
           </div>
         </div>
 
@@ -647,7 +690,7 @@ Ngày cấp CCCD: 19/04/2021'></textarea>
         </div>
 
         <div class="manualAddressBox" id="manualCodes" style="display:none; margin-top: 8px">
-          <div style="font-weight:700;font-size:14px">Chọn địa chỉ cũ để chuyển đổi</div>
+          <div class="sectionTitle">Chọn địa chỉ cũ để chuyển đổi</div>
           <div class="small">Dùng khi app không tự tách đúng địa chỉ cũ. Gõ để tìm Tỉnh/Huyện/Xã.</div>
           <div class="two" style="margin-top:8px">
             <div><label>Tỉnh/Thành phố cũ *</label><input id="oldProvinceSearch" list="oldProvinceList" placeholder="Gõ để tìm tỉnh..." /></div>
@@ -669,7 +712,7 @@ Ngày cấp CCCD: 19/04/2021'></textarea>
         </div>
 
         <div class="manualAddressBox" id="manualNewAddressBox" style="display:none; margin-top: 8px">
-          <div style="font-weight:700;font-size:14px">Chỉnh địa chỉ mới thủ công</div>
+          <div class="sectionTitle">Chỉnh địa chỉ mới thủ công</div>
           <div class="small">Dùng khi API không phân giải được. Chọn xong bấm áp dụng để cập nhật địa chỉ tổng.</div>
           <div class="two" style="margin-top:8px">
             <div>
@@ -718,15 +761,14 @@ Ngày cấp CCCD: 19/04/2021'></textarea>
     <div class="tmpWrap">
       <div class="tmpToolbar">
         <div class="left">
-          <div style="font-weight:700">🧠 Bảng tạm</div>
+          <div class="sectionTitle">🧠 Bảng tạm</div>
           <div class="small">Lưu nhiều người rồi mới xuất file</div>
         </div>
-          <div class="right">
-            <button class="miniBtn" id="btnExportExcelInTable">📄 Xuất Excel</button>
-            <button class="miniBtn" id="btnSendTelegramTmpAll">📨 Gửi Tele (tất cả)</button>
-            <button class="miniBtn danger" id="btnClearTmpAll">🗑 Xóa hết</button>
-          </div>
-
+        <div class="right">
+          <button class="miniBtn" id="btnExportExcelInTable">📄 Xuất Excel</button>
+          <button class="miniBtn" id="btnSendTelegramTmpAll">📨 Gửi Tele (tất cả)</button>
+          <button class="miniBtn danger" id="btnClearTmpAll">🗑 Xóa hết</button>
+        </div>
       </div>
 
       <div class="tmpTableScroll" id="tmpTableScroll">
