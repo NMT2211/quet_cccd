@@ -53,10 +53,7 @@ const res = await fetch("./nav.html?v=1", { cache: "force-cache" });
       if(!inside) closeNav();
     });
 
-    // ESC để đóng
-    document.addEventListener("keydown", (e) => {
-      if(e.key === "Escape") closeNav();
-    });
+    // Escape is routed centrally by ShortcutManager on the scanner page.
   }
 
   // ===== Theme button (nếu có) =====

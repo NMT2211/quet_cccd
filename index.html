@@ -543,6 +543,7 @@
         </div>
       </div>
       <div class="pill" id="libStatus">📦 Đang kiểm tra thư viện quét QR...</div>
+      <button class="copyBtn" id="btnShortcuts" type="button">⌨ Phím tắt</button>
     </div>
 
     <div class="grid">
@@ -654,7 +655,7 @@ Ngày cấp CCCD: 19/04/2021'></textarea>
         <div style="height:10px"></div>
 
         <div id="infoBox">
-          <div class="kv"><div class="k">Số CCCD</div><div class="v mono" id="cccd">—</div><button class="copyBtn" data-copy="#cccd">Copy</button></div>
+          <div class="kv"><div class="k">Số CCCD</div><div class="cccdValue v"><div class="cccdLine"><span class="v mono" id="cccd" aria-describedby="cccdDigitMessage">—</span><span id="cccdDigitBadge" class="digitBadge" data-state="empty">0/12</span></div><div class="small" id="cccdDigitMessage" role="status">Chưa có số CCCD</div></div><button class="copyBtn" data-copy="#cccd">Copy</button></div>
           <div class="kv"><div class="k">Họ tên</div><div class="v" id="name">—</div><button class="copyBtn" data-copy="#name">Copy</button></div>
           <div class="kv"><div class="k">Ngày sinh</div><div class="v" id="dob">—</div><button class="copyBtn" data-copy="#dob">Copy</button></div>
           <div class="kv"><div class="k">Giới tính</div><div class="v" id="gender">—</div><button class="copyBtn" data-copy="#gender">Copy</button></div>
@@ -783,7 +784,7 @@ Ngày cấp CCCD: 19/04/2021'></textarea>
     </div>
   </div>
 
-  <div class="toast" id="toast"></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <!-- ✅ MODAL NHẬP PHÒNG -->
   <div class="modalOverlay" id="roomModal">
@@ -791,15 +792,16 @@ Ngày cấp CCCD: 19/04/2021'></textarea>
       <div class="row between" style="align-items:flex-start">
         <div>
           <p class="modalTitle" id="roomModalTitle">Nhập số phòng (tùy chọn)</p>
-          <div class="modalSub">
+          <div class="modalSub" id="roomModalSub">
             Bạn có thể nhập số phòng để lưu chung trong Excel, hoặc bấm “Bỏ qua” nếu không cần.
           </div>
         </div>
         <button class="miniBtn" id="btnCloseRoomModal" aria-label="Đóng">✕</button>
       </div>
 
-      <label>Số phòng</label>
-      <input id="roomModalInput" placeholder="VD: 101 / A12..." />
+      <label for="roomModalInput">Số phòng</label>
+      <input id="roomModalInput" placeholder="VD: 101 / A12..." aria-describedby="roomModalHint" />
+      <p class="modalSub" id="roomModalHint">Enter để lưu • Esc để hủy</p>
 
       <div class="modalActions">
         <button class="btn secondary" id="btnRoomCancel">Hủy</button>
@@ -809,6 +811,45 @@ Ngày cấp CCCD: 19/04/2021'></textarea>
     </div>
   </div>
 
+  <div class="modalOverlay" id="shortcutModal">
+    <div class="modal shortcutDialog" role="dialog" aria-modal="true" aria-labelledby="shortcutTitle" aria-describedby="shortcutHelp">
+      <h2 class="modalTitle" id="shortcutTitle">Phím tắt</h2>
+      <p class="modalSub" id="shortcutHelp">Bấm Gán để đặt tổ hợp phím, hoặc Xóa để bỏ phím tắt của từng hành động. Esc để đóng.</p>
+      <div id="shortcutList"></div>
+      <p class="modalSub" id="shortcutMessage" role="status" aria-live="polite"></p>
+      <div class="modalActions">
+        <button class="btn secondary" id="btnResetShortcuts" type="button">Khôi phục mặc định</button>
+        <button class="btn" id="btnCloseShortcuts" type="button">Đóng</button>
+      </div>
+    </div>
+  </div>
+  <div class="modalOverlay" id="shortcutAssignModal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="shortcutAssignTitle" aria-describedby="shortcutAssignHelp">
+      <h2 class="modalTitle" id="shortcutAssignTitle">Gán phím tắt</h2>
+      <p class="modalSub" id="shortcutAssignHelp">Nhấn tổ hợp phím hoặc gõ như Ctrl + Shift + S. Enter để lưu • Esc để hủy.</p>
+      <label for="shortcutAssignInput">Tổ hợp phím</label>
+      <input id="shortcutAssignInput" autocomplete="off" spellcheck="false" placeholder="Ctrl + Shift + S" aria-describedby="shortcutAssignHelp shortcutAssignMessage" />
+      <p class="modalSub" id="shortcutAssignMessage" role="status" aria-live="polite"></p>
+      <div class="modalActions">
+        <button class="btn secondary" id="btnCancelShortcutAssign" type="button">Hủy</button>
+        <button class="btn" id="btnSaveShortcutAssign" type="button">Gán</button>
+      </div>
+    </div>
+  </div>
+  <div class="modalOverlay" id="editTmpModal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="editTmpTitle" aria-describedby="editTmpHelp">
+      <h2 class="modalTitle" id="editTmpTitle">Sửa dòng bảng tạm</h2>
+      <p class="modalSub" id="editTmpHelp">Chỉnh thông tin đã lưu. Enter để lưu thay đổi • Esc để hủy.</p>
+      <div class="two" id="editTmpFields"></div>
+      <p class="modalSub" id="editTmpDigitStatus" role="status"></p>
+      <p class="modalSub error" id="editTmpError" role="alert"></p>
+      <div class="modalActions">
+        <button class="btn secondary" id="btnCancelEditTmp" type="button">Hủy</button>
+        <button class="btn ok" id="btnSaveEditTmp" type="button">Lưu thay đổi</button>
+      </div>
+    </div>
+  </div>
+  <script src="./keyboard.js"></script>
   <script>
     const $ = (id) => document.getElementById(id);
 
@@ -1126,41 +1167,123 @@ function clearReaderPreview(){
           }
         });
 
-        tdAct.appendChild(tele);
-
-        tdAct.appendChild(del);
+        const edit = document.createElement("button");
+        edit.type = "button";
+        edit.className = "miniBtn";
+        edit.dataset.editRow = String(idx);
+        edit.textContent = "Sửa";
+        edit.setAttribute("aria-label", `Sửa dòng ${idx + 1}`);
+        edit.addEventListener("click", () => openEditTmpModal(idx, edit));
+        const rowActions = document.createElement("div");
+        rowActions.className = "tmpRowActions";
+        tele.style.marginRight = "0";
+        rowActions.append(edit, tele, del);
+        tdAct.appendChild(rowActions);
         tr.appendChild(tdAct);
 
         body.appendChild(tr);
       });
     }
 
+    let editingTmpRow = null;
+
+    function openEditTmpModal(index, opener){
+      if (ModalController.active) return;
+      const row = loadTmpRows()[index];
+      if (!row) return toast("Không tìm thấy dòng cần sửa.");
+      editingTmpRow = { index, original: JSON.stringify(row) };
+      $("editTmpTitle").textContent = `Sửa dòng ${index + 1} — bảng tạm`;
+      $("editTmpError").textContent = "";
+      $("editTmpFields").replaceChildren();
+      COLS.forEach((column, i) => {
+        const field = document.createElement("div");
+        const label = document.createElement("label");
+        label.htmlFor = `editTmpField${i}`;
+        label.textContent = column;
+        const input = document.createElement("input");
+        input.id = label.htmlFor;
+        input.value = row[column] ?? "";
+        if (column === "Số CCCD") {
+          input.inputMode = "numeric";
+          input.setAttribute("aria-describedby", "editTmpDigitStatus");
+          input.addEventListener("input", updateEditTmpDigitStatus);
+        }
+        field.append(label, input);
+        $("editTmpFields").append(field);
+      });
+      updateEditTmpDigitStatus();
+      ModalController.open($("editTmpModal"), {
+        opener, initialFocus: $("editTmpField0"), onConfirm: saveEditedTmpRow,
+        onClose: () => { editingTmpRow = null; }
+      });
+    }
+
+    function updateEditTmpDigitStatus(){
+      const count = $("editTmpField1").value.replace(/\D/g, "").length;
+      const status = $("editTmpDigitStatus");
+      status.textContent = `${count}/12 — ${count === 12 ? "CCCD hợp lệ về độ dài" : count > 12 ? "CCCD vượt quá 12 số" : "CCCD chưa đủ 12 số"}`;
+      status.className = `modalSub ${count === 12 ? "oktxt" : count > 12 ? "error" : "warn"}`;
+    }
+
+    function saveEditedTmpRow(){
+      if (!editingTmpRow || ModalController.active !== $("editTmpModal")) return;
+      const { index, original } = editingTmpRow;
+      const rows = loadTmpRows();
+      if (JSON.stringify(rows[index]) !== original) {
+        $("editTmpError").textContent = "Dòng đã thay đổi. Hãy đóng và mở lại để sửa dữ liệu mới nhất.";
+        return;
+      }
+      const updated = { ...rows[index] };
+      COLS.forEach((column, i) => { updated[column] = normalizeCell($(`editTmpField${i}`).value); });
+      for (const column of ["Họ tên", "Số CCCD", "Tỉnh/TP", "Xã/Phường/Đặc khu"]) {
+        if (!updated[column]) {
+          $("editTmpError").textContent = `Vui lòng nhập ${column}.`;
+          $(`editTmpField${COLS.indexOf(column)}`).focus();
+          return;
+        }
+      }
+      rows[index] = updated;
+      ModalController.close();
+      saveTmpRows(rows);
+      document.querySelector(`[data-edit-row="${index}"]`)?.focus({ preventScroll: true });
+      toast("✅ Đã cập nhật dòng bảng tạm");
+    }
+    $("btnSaveEditTmp").addEventListener("click", saveEditedTmpRow);
+    $("btnCancelEditTmp").addEventListener("click", () => ModalController.close());
+    $("editTmpModal").addEventListener("click", e => {
+      if (e.target === $("editTmpModal")) ModalController.close();
+    });
+
     // =======================
     // ✅ Popup nhập phòng khi lưu tạm
     // =======================
     function openRoomModal(){
-      $("roomModalInput").value = "";
-      $("roomModal").style.display = "flex";
-      setTimeout(() => $("roomModalInput").focus(), 0);
+      openRoomModalFor("save");
     }
     function closeRoomModal(){
-      $("roomModal").style.display = "none";
+      if (ModalController.active === $("roomModal")) ModalController.close();
     }
 
     let __roomModalPurpose = "save"; // "save" | "telegram"
 
     function openRoomModalFor(purpose){
+      if (ModalController.active) return;
       __roomModalPurpose = purpose || "save";
       $("roomModalTitle").textContent = (purpose === "telegram")
         ? "Nhập số phòng để gửi Telegram"
         : "Nhập số phòng (tùy chọn)";
 
-      // có thể đổi mô tả luôn nếu muốn
-      // $("roomModalSub").textContent = ...
-
+      $("btnRoomSave").textContent = purpose === "telegram" ? "Gửi Telegram" : "Lưu";
+      $("roomModalSub").textContent = purpose === "telegram"
+        ? "Nhập phòng để gửi Telegram. Bỏ qua sẽ gửi không có phòng; Hủy sẽ không gửi."
+        : "Nhập phòng để lưu vào bảng tạm. Bỏ qua sẽ lưu không có phòng; Hủy sẽ không lưu.";
+      $("roomModalHint").textContent = purpose === "telegram" ? "Enter để gửi Telegram • Esc để hủy" : "Enter để lưu • Esc để hủy";
       $("roomModalInput").value = "";
-      $("roomModal").style.display = "flex";
-      setTimeout(() => $("roomModalInput").focus(), 0);
+      ModalController.open($("roomModal"), {
+        initialFocus: $("roomModalInput"),
+        onConfirm: () => $("btnRoomSave").click(),
+        onClose: () => { __pendingTelegramSend = null; __roomModalPurpose = "save"; }
+      });
     }
 
     $("roomModal").addEventListener("click", (e) => {
@@ -1177,41 +1300,32 @@ function clearReaderPreview(){
       saveTmpRows(rows);
     }
 
-$("btnRoomSave").addEventListener("click", async () => {
+let roomConfirmBusy = false;
+async function confirmRoomModal(skip = false) {
+  if (roomConfirmBusy || ModalController.active !== $("roomModal")) return;
+  roomConfirmBusy = true;
   try{
-    const roomVal = $("roomModalInput").value;
+    const roomVal = skip ? "" : $("roomModalInput").value;
 
     if (__roomModalPurpose === "telegram") {
+      const send = __pendingTelegramSend;
       closeRoomModal();
-      if (__pendingTelegramSend) await __pendingTelegramSend(roomVal);
+      if (send) await send(roomVal);
       return;
     }
 
     // mặc định: save tmp
     doSaveTmpWithRoom(roomVal);
     closeRoomModal();
-    toast("✅ Đã lưu vào bảng tạm");
+    toast(skip ? "✅ Đã lưu (không có phòng)" : "✅ Đã lưu vào bảng tạm");
   }catch(e){
     toast("❌ " + e.message);
+  }finally{
+    roomConfirmBusy = false;
   }
-});
-
-$("btnRoomSkip").addEventListener("click", async () => {
-  try{
-    if (__roomModalPurpose === "telegram") {
-      closeRoomModal();
-      if (__pendingTelegramSend) await __pendingTelegramSend("");
-      return;
-    }
-
-    // mặc định: save tmp
-    doSaveTmpWithRoom("");
-    closeRoomModal();
-    toast("✅ Đã lưu (không có phòng)");
-  }catch(e){
-    toast("❌ " + e.message);
-  }
-});
+}
+$("btnRoomSave").addEventListener("click", () => confirmRoomModal());
+$("btnRoomSkip").addEventListener("click", () => confirmRoomModal(true));
 
 
 
@@ -1297,11 +1411,20 @@ $("btnRoomSkip").addEventListener("click", async () => {
 
     function fillInfo(data) {
       $("cccd").textContent = data?.cccd || "—";
+      updateCccdDigitStatus();
       $("name").textContent = data?.name || "—";
       $("dob").textContent = fmtDDMMYYYY(data?.dob);
       $("gender").textContent = data?.gender || "—";
       $("oldAddr").textContent = data?.address || "—";
       $("issue").textContent = fmtDDMMYYYY(data?.issue);
+    }
+
+    function updateCccdDigitStatus(){
+      const count = ($("cccd").textContent || "").replace(/\D/g, "").length;
+      $("cccdDigitBadge").textContent = `${count}/12${count === 12 ? " ✓" : ""}`;
+      $("cccdDigitBadge").dataset.state = count === 12 ? "valid" : count > 12 ? "long" : count ? "short" : "empty";
+      $("cccdDigitMessage").textContent = count === 12 ? "CCCD hợp lệ về độ dài"
+        : count > 12 ? "CCCD vượt quá 12 số" : count ? "CCCD chưa đủ 12 số" : "Chưa có số CCCD";
     }
 
     function setNewAddressFields({full, province, ward, street}){
@@ -2310,7 +2433,7 @@ Số nhà/Ấp/KP/Đường: ${$("addrStreet").textContent}
     });
 
     // ✅ Lưu tạm -> mở popup nhập phòng (có thể bỏ qua)
-    $("btnSaveTmp").addEventListener("click", () => {
+    function handleSaveTemporary(){
       try{
         applyRawInputIfChanged();
         buildRowFromUI(""); // validate
@@ -2318,7 +2441,8 @@ Số nhà/Ấp/KP/Đường: ${$("addrStreet").textContent}
       }catch(e){
         toast("❌ " + e.message);
       }
-    });
+    }
+    $("btnSaveTmp").addEventListener("click", handleSaveTemporary);
 
 // =======================
 // ✅ Điền CT01 & chuyển trang
@@ -2829,8 +2953,6 @@ $("btnSendTelegram").addEventListener("click", () => {
       toast("✅ Đã gửi vào Telegram");
     }catch(e){
       toast("❌ " + (e?.message || e));
-    }finally{
-      __pendingTelegramSend = null;
     }
   };
 
@@ -2842,6 +2964,8 @@ $("btnSendTelegram").addEventListener("click", () => {
     // Boot
     // =======================
     (function boot() {
+      ShortcutManager.init(toast);
+      updateCccdDigitStatus();
       renderSavedCount();
       renderTmpTable();
       setInfoActionButtonsEnabled(false);

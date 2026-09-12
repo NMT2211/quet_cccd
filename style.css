@@ -18,6 +18,90 @@
   --shadow: 0 18px 40px rgba(15,23,42,.08);
   --shadow2: 0 10px 20px rgba(15,23,42,.06);
 }
+
+/* Scanner productivity controls; scoped to avoid changing CT01 print layout. */
+body:has(#btnShortcuts) :is(button, a, input, textarea, select):focus-visible{
+
+  outline-offset: 3px;
+}
+body .modalOverlay{ z-index: 1100; }
+body .toast{ z-index: 1200; max-width: calc(100vw - 28px); }
+.kv:has(.cccdValue){ grid-template-columns: 160px minmax(0, 1fr) auto; gap: 12px; }
+.cccdValue{ min-width: 0; display: flex; align-items: center; gap: 10px; }
+.cccdLine{ display: flex; align-items: center; gap: 10px; flex-wrap: nowrap; min-width: 0; flex: 1 0 auto; }
+.cccdLine .digitBadge{ margin-left: auto; }
+.cccdLine #cccd{ white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.digitBadge{
+  display: inline-flex;
+  flex: 0 0 auto;
+  padding: 2px 8px;
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.digitBadge[data-state="valid"]{ color: #166534; background: #f0fdf4; border-color: #bbf7d0; }
+.digitBadge[data-state="short"]{ color: #92400e; background: #fffbeb; border-color: #fde68a; }
+.digitBadge[data-state="long"]{ color: #991b1b; background: #fef2f2; border-color: #fecaca; }
+#cccdDigitMessage{ margin: 0; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.shortcutHint{
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 5px;
+  border: 1px solid currentColor;
+  border-radius: 5px;
+  font: 12px ui-monospace, monospace;
+  white-space: nowrap;
+  opacity: .8;
+}
+body .shortcutDialog{ width: min(660px, 100%);     max-height: 100% !important; }
+.shortcutRow{
+  display: grid;
+  grid-template-columns: minmax(120px, 1fr) minmax(140px, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+.shortcutRow .shortcutLabel{ margin: 0; color: #0f172a; font-size: 14px; }
+.shortcutValue{ min-width: 0; overflow-wrap: anywhere; font-size: 14px; }
+.shortcutRowActions{ display: flex; gap: 6px; }
+.tmpRowActions{ display: flex; flex-wrap: wrap; gap: 6px; min-width: 0; }
+body #editTmpModal .modal{ width: min(640px, 100%); }
+.shortcutRowActions button:disabled{ opacity: .45; cursor: not-allowed; }
+#shortcutAssignModal{ z-index: 1110; }
+.shortcutRow input{ min-width: 0; }
+#shortcutMessage{ min-height: 1.5em; }
+#btnRoomSave{ font-weight: 700; }
+#roomModal .row.between{ flex-wrap: nowrap; }
+#roomModal .row.between > div{ flex: 1; min-width: 0; }
+#roomModal .row.between > button{ flex: 0 0 auto; }
+.shortcutDialog .modalActions{
+  position: sticky;
+  bottom: -14px;
+  background: #fff;
+  padding: 12px 0;
+  border-top: 1px solid #e5e7eb;
+}
+body .shortcutDialog .modalActions .btn{ flex: 1; min-width: 0; font-size: 14px; }
+@media (max-width: 640px){
+  .kv:has(.cccdValue){ grid-template-columns: auto minmax(0, 1fr) auto; gap: 6px; }
+  .kv:has(.cccdValue) > .copyBtn{ width: auto; padding: 8px; }
+  .cccdLine{ gap: 6px; }
+  .cccdLine #cccd{ font-size: 13px; }
+  .cccdLine .digitBadge{ padding: 2px 5px; font-size: 12px; }
+  #cccdDigitMessage{
+    position: absolute; width: 1px; height: 1px; padding: 0;
+    clip-path: inset(50%); overflow: hidden; white-space: nowrap;
+  }
+  .shortcutHint{ display: none; }
+  .shortcutRow{ grid-template-columns: minmax(0, 1fr) auto; }
+  .shortcutRow .shortcutLabel{ grid-column: 1 / -1; }
+  body .modal{ max-height: 85dvh; }
+}
 .brand, .brand *{
   -webkit-user-drag: none;
   user-drag: none;
@@ -91,7 +175,7 @@ body{
   gap: 5px;
   text-decoration:none;
   color: var(--text);
-  font-weight: 900;
+  font-weight: 700;
   letter-spacing: .3px;
   min-width: auto;
   margin-right: 50px;
@@ -130,7 +214,7 @@ body{
 
 .brand-badge{
   font-size: 11px;
-  font-weight: 900;
+  font-weight: 700;
   padding: 4px 8px;
   border-radius: 999px;
   background: rgba(37,99,235,.10);
@@ -156,7 +240,7 @@ body{
   position: relative;
   text-decoration:none;
   color: rgba(15,23,42,.76);
-  font-weight: 900;
+  font-weight: 700;
   font-size: 13px;
   padding: 9px 12px;
   border-radius: 999px;
@@ -189,7 +273,7 @@ body{
   align-items:center;
   gap: 10px;
   text-decoration:none;
-  font-weight: 900;
+  font-weight: 700;
   font-size: 13px;
   color: var(--text);
 
