@@ -25,14 +25,36 @@ body:has(#btnShortcuts) :is(button, a, input, textarea, select):focus-visible{
   outline-offset: 3px;
 }
 body .modalOverlay{ z-index: 1100; }
-body .toast{ z-index: 1200; max-width: calc(100vw - 28px); }
+body .toast{ z-index: 1200; max-width: calc(100vw - 28px); pointer-events: none; }
+body .toast::before{
+  content: "";
+  position: fixed;
+  inset: -100vh -100vw;
+  background: rgba(15,23,42,.35);
+  z-index: -1;
+  pointer-events: none;
+}
+body .lucide{ width: 1em; height: 1em; vertical-align: -0.125em; flex: 0 0 auto; }
+body .toast .lucide{ margin-right: 6px; }
+body :is(.btn, .copyBtn, .miniBtn, .pill, .sectionTitle, .tabBtn) > .lucide{ margin-right: 6px; }
+body .sectionTitle > :is(.lucide-camera, .lucide-id-card){
+  width: 1.4em;
+  height: 1.4em;
+  vertical-align: -0.3em;
+  margin-right: 8px;
+}
+body .iconBtn > .lucide,
+body .tmpRowActions .iconBtn > .lucide{ margin-right: 0; }
+body .toast--success .lucide{ color: #86efac; }
+body .toast--error .lucide{ color: #fca5a5; }
+body .toast--warning .lucide{ color: #fde68a; }
 .kv:has(.cccdValue){ grid-template-columns: 160px minmax(0, 1fr) auto; gap: 12px; }
 .cccdValue{ min-width: 0; display: flex; align-items: center; gap: 10px; }
 .cccdLine{ display: flex; align-items: center; gap: 10px; flex-wrap: nowrap; min-width: 0; flex: 1 0 auto; }
 .cccdLine .digitBadge{ margin-left: auto; }
 .cccdLine #cccd{ white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .digitBadge{
-  display: inline-flex;
+  /* display: inline-flex; */
   flex: 0 0 auto;
   padding: 2px 8px;
   border: 1px solid #cbd5e1;
@@ -42,6 +64,7 @@ body .toast{ z-index: 1200; max-width: calc(100vw - 28px); }
   font-size: 13px;
   font-weight: 600;
   white-space: nowrap;
+  /* gap: 5px; */
 }
 .digitBadge[data-state="valid"]{ color: #166534; background: #f0fdf4; border-color: #bbf7d0; }
 .digitBadge[data-state="short"]{ color: #92400e; background: #fffbeb; border-color: #fde68a; }
@@ -67,9 +90,27 @@ body .shortcutDialog{ width: min(660px, 100%);     max-height: 100% !important; 
   border-bottom: 1px solid #e5e7eb;
 }
 .shortcutRow .shortcutLabel{ margin: 0; color: #0f172a; font-size: 14px; }
-.shortcutValue{ min-width: 0; overflow-wrap: anywhere; font-size: 14px; }
+.shortcutValue{ min-width: 0; overflow-wrap: anywhere; font-size: 14px;
+padding: 10px 12px;
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    background: var(--surface2);
+
+    cursor: pointer;
+    min-height: var(--tap);
+    white-space: nowrap;
+    transition: background .15s ease, border-color .15s ease, opacity .15s ease;
+  }
 .shortcutRowActions{ display: flex; gap: 6px; }
 .tmpRowActions{ display: flex; flex-wrap: wrap; gap: 6px; min-width: 0; }
+.tmpRowActions .iconBtn{
+  width: 40px;
+  min-width: 40px;
+  padding: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
 body #editTmpModal .modal{ width: min(640px, 100%); }
 .shortcutRowActions button:disabled{ opacity: .45; cursor: not-allowed; }
 #shortcutAssignModal{ z-index: 1110; }

@@ -8,6 +8,7 @@ const http = require('node:http');
 const root = path.resolve(__dirname, '..');
 const raw = '091213006838|NGƯỜI KIỂM THỬ|01011990|Nam|12 Đường Mẫu, Phường Mẫu, Huyện Mẫu, Tỉnh Mẫu|01012020';
 const person = { cccd: '091213006838', name: 'NGƯỜI KIỂM THỬ', dob: '01011990', gender: 'Nam', address: '12 Đường Mẫu, Phường Mẫu, Huyện Mẫu, Tỉnh Mẫu', issue: '01012020' };
+const columns = ['Họ tên','Số CCCD','Ngày sinh','Giới tính','Tỉnh/TP','Xã/Phường/Đặc khu','Số nhà/Ấp/KP/Đường','Phòng'];
 const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aX1sAAAAASUVORK5CYII=', 'base64');
 const passed = [];
 async function main() {
@@ -34,6 +35,9 @@ async function main() {
         return route.fulfill({ contentType: 'text/javascript', body: `window.Html5Qrcode = class { async start(c,o,cb){window.scanCallback=cb;window.scanStarted=true;} async stop(){window.scanStarted=false;} async clear(){} async scanFile(){return ${JSON.stringify(raw)};} };` });
       }
       if (url.origin === base) return route.continue();
+      if (url.hostname === 'unpkg.com') {
+        return route.fulfill({ contentType: 'text/javascript', body: `window.lucide={createIcons(){document.querySelectorAll('i[data-lucide]').forEach(el=>{const name=el.dataset.lucide;const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('data-lucide',name);svg.setAttribute('aria-hidden','true');svg.classList.add('lucide','lucide-'+name);el.replaceWith(svg);});}};` });
+      }
       if (url.hostname === 'api.telegram.org') {
         telegram.push(route.request().postDataJSON());
         return json({ ok: true });
@@ -69,10 +73,15 @@ async function main() {
       await ready();
     };
     await fresh();
-    assert.equal(await page.locator('#cccdDigitBadge').textContent(), '12/12 ✓');
+    assert.equal(await page.locator('#btnCopyAll svg.lucide-copy').count(), 1);
+    await page.locator('#btnCopyAll').click();
+    await page.locator('#toast svg.lucide-circle-check').waitFor();
+    assert.equal(await page.locator('#cccdDigitBadge').textContent(), '12/12');
+    assert.equal(await page.locator('#cccdDigitBadge svg.lucide-check').count(), 1);
     assert.equal(await page.locator('#cccdDigitBadge').getAttribute('data-state'), 'valid');
     assert.deepEqual(conversions[0], { provinceCode: '1', districtCode: '2', wardCode: '3', streetAddress: '12 Đường Mẫu' });
     passed.push('Manual QR parse and automatic address conversion payload');
+
 
     await page.locator('#btnSaveTmp').focus();
     await page.keyboard.press('Control+s');
@@ -121,7 +130,7 @@ async function main() {
     await page.keyboard.press('Escape');
     passed.push('Cases 4–5: textarea newline, modal isolation and focus loop');
 
-    for (const [cccd, badge, state] of [['09121300683','11/12','short'], ['0912130068389','13/12','long'], ['09 1213-006838','12/12 ✓','valid'], ['', '0/12','empty']]) {
+    for (const [cccd, badge, state] of [['09121300683','11/12','short'], ['0912130068389','13/12','long'], ['09 1213-006838','12/12','valid'], ['', '0/12','empty']]) {
       await page.evaluate(cccd => fillInfo({ cccd }), cccd);
       assert.equal(await page.locator('#cccdDigitBadge').textContent(), badge);
       assert.equal(await page.locator('#cccdDigitBadge').getAttribute('data-state'), state);
@@ -212,6 +221,12 @@ async function main() {
     passed.push('Telegram context cancel/save/confirm, single-row send (mock), field/all clipboard');
 
     const originalRows = await page.evaluate(() => loadTmpRows());
+    assert.equal(await page.locator('[data-copy-row="0"] svg.lucide-copy').count(), 1);
+    await page.locator('[data-copy-row="0"]').click();
+    const copiedRow = await page.evaluate(() => navigator.clipboard.readText());
+    assert.equal(copiedRow.split(/\r?\n/).length, 1);
+    assert.deepEqual(copiedRow.split('\t'), columns.map(column => originalRows[0][column] ?? ''));
+
     await page.locator('[data-edit-row="0"]').click();
     await page.locator('#editTmpField7').fill('99');
     await page.keyboard.press('Escape');
@@ -236,6 +251,15 @@ async function main() {
     assert((await page.evaluate(() => buildTelegramMessageFromRow(loadTmpRows()[0]))).includes('NGƯỜI ĐÃ SỬA'));
     passed.push('Edit temporary row: cancel, required fields, Enter once, preserve other rows and current scan, updated Telegram payload');
 
+    await page.locator('#btnCopyTmpAll').click();
+    const copiedTable = await page.evaluate(() => navigator.clipboard.readText());
+    const copiedLines = copiedTable.split(/\r?\n/);
+    assert.deepEqual(copiedLines[0].split('\t'), columns);
+    assert.equal(copiedLines.length, editedRows.length + 1);
+    assert.deepEqual(copiedLines[1].split('\t'), columns.map(column => editedRows[0][column] ?? ''));
+    assert.equal(await page.evaluate(() => toExcelClipboard([{ 'Họ tên': 'A\tB\nC' }], false).split('\t')[0]), 'A B C');
+    passed.push('Copy one row without header and full table with header as Excel-compatible TSV');
+
     const downloadPromise = page.waitForEvent('download');
     await page.locator('#btnExportExcelInTable').click();
     const download = await downloadPromise;
@@ -252,14 +276,40 @@ async function main() {
     await page.locator('#tmpBody .danger').first().click();
     assert.equal(await count(), 2);
     await page.locator('#btnClearTmpAll').click();
+    assert(await page.locator('#confirmModal').isVisible());
+    assert((await page.locator('#confirmModalMessage').textContent()).includes('Xóa toàn bộ'));
+    await page.locator('#btnConfirmCancel').click();
+    assert.equal(await count(), 2);
+    await page.locator('#btnClearTmpAll').click();
+    await page.locator('#btnConfirmAccept').click();
     assert.equal(await count(), 0);
+    const clipboardBeforeEmptyCopy = await page.evaluate(() => navigator.clipboard.readText());
+    await page.locator('#btnCopyTmpAll').click();
+    assert.equal(await page.evaluate(() => navigator.clipboard.readText()), clipboardBeforeEmptyCopy);
     passed.push('CSV actual download, XLSX contract, delete one/all temporary rows');
 
     await page.locator('#btnGoCT01').click();
     await page.waitForURL('**/ct01.html');
     assert.equal(await page.locator('#idNumber').inputValue(), person.cccd);
     assert.equal(await page.locator('#fullName').inputValue(), person.name);
+    assert.equal(await page.locator('#tempAddress').inputValue(), 'Tổ 4B, KP1, Phường Bình Cơ, TP.Hồ Chí Minh');
+    assert(!(await page.locator('#tempAddress').inputValue()).includes('Đường Mẫu'));
     assert((await page.locator('#a4').textContent()).includes(person.name));
+    await page.locator('#btnReset').click();
+    assert(await page.locator('#appPopup').isVisible());
+    assert.equal(await page.locator('#appPopupTitle').textContent(), 'Xác nhận xóa dữ liệu');
+    await page.locator('#appPopupCancel').click();
+    assert.equal(await page.locator('#fullName').inputValue(), person.name);
+    await page.locator('#jsonFile').setInputFiles({ name: 'invalid.json', mimeType: 'application/json', buffer: Buffer.from('{invalid') });
+    await page.locator('#appPopup').waitFor({ state: 'visible' });
+    assert.equal(await page.locator('#appPopupTitle').textContent(), 'Không thể nạp dữ liệu');
+    await page.locator('#appPopupAccept').click();
+    assert.deepEqual(await page.locator('#householdHeadSuggestions option').evaluateAll(options => options.map(option => option.value)), [
+      'NGUYỄN VĂN XUÂN CHUÂN', 'NGUYỄN THỊ NGUYỆT', 'NGUYỄN MINH TUẤN'
+    ]);
+    await page.evaluate(() => sessionStorage.clear());
+    await page.goto(`${base}/ct01.html`);
+    assert.equal(await page.locator('#tempAddress').inputValue(), 'Tổ 4B, KP1, Phường Bình Cơ, TP.Hồ Chí Minh');
     passed.push('CT01 navigation, prefill, preview');
     await fresh();
     await page.evaluate(() => { lastConvertAt = 0; });
@@ -271,7 +321,7 @@ async function main() {
     await page.locator('#btnStart').click();
     await page.evaluate(raw => window.scanCallback(raw), raw);
     await ready();
-    assert.equal(await page.locator('#cccdDigitBadge').textContent(), '12/12 ✓');
+    assert.equal(await page.locator('#cccdDigitBadge').textContent(), '12/12');
     await page.locator('#btnClear').click();
     await page.evaluate(() => { lastConvertAt = 0; });
     await page.locator('#qrFile').setInputFiles({ name: 'qr-fixture.png', mimeType: 'image/png', buffer: png });
@@ -285,7 +335,7 @@ async function main() {
       await page.locator('#groqKey').fill(key);
       await page.locator('#idFile').setInputFiles({ name: 'ocr-fixture.png', mimeType: 'image/png', buffer: png });
       await ready();
-      assert.equal(await page.locator('#cccdDigitBadge').textContent(), '12/12 ✓');
+      assert.equal(await page.locator('#cccdDigitBadge').textContent(), '12/12');
       await page.locator('#btnOcrClear').click();
       assert.equal(await page.locator('#reader img').count(), 0);
     }

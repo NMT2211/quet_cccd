@@ -16,6 +16,7 @@
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
   <link rel="stylesheet" href="style.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
 
   <style>
     :root{
@@ -328,8 +329,9 @@
 
     .toast{
       position: fixed;
-      right: 14px;
-      bottom: 14px;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
       background: rgba(15,23,42,.92);
       border: 1px solid rgba(255,255,255,.18);
       padding: 12px 14px;
@@ -337,7 +339,8 @@
       font-size: 13px;
       color: #fff;
       display:none;
-      max-width: 420px;
+      width: min(420px, calc(100vw - 28px));
+      text-align: center;
       box-shadow: 0 14px 30px rgba(0,0,0,.18);
       z-index: 60;
     }
@@ -542,8 +545,8 @@
           Quét QR / OCR ảnh CCCD → tự gọi API chuyển đổi địa chỉ → lưu bảng tạm → xuất Excel
         </div>
       </div>
-      <div class="pill" id="libStatus">📦 Đang kiểm tra thư viện quét QR...</div>
-      <button class="copyBtn" id="btnShortcuts" type="button">⌨ Phím tắt</button>
+      <div class="pill" id="libStatus"><i data-lucide="archive" aria-hidden="true"></i> Đang kiểm tra thư viện quét QR...</div>
+      <button class="copyBtn" id="btnShortcuts" type="button"><i data-lucide="keyboard" aria-hidden="true"></i> Phím tắt</button>
     </div>
 
     <div class="grid">
@@ -551,7 +554,7 @@
       <div class="card">
         <div class="sectionHeader stickyActions">
           <div>
-            <div class="sectionTitle">📷 Quét QR bằng camera</div>
+            <div class="sectionTitle"><i data-lucide="camera" aria-hidden="true"></i> Quét QR bằng camera</div>
             <div class="sectionSub">Quét trực tiếp, tải ảnh QR hoặc OCR ảnh CCCD.</div>
           </div>
           <div class="actionGroup">
@@ -568,10 +571,10 @@
         <!-- ✅ Tabs: Upload QR / OCR CCCD -->
         <div class="tabs" role="tablist" aria-label="Chọn chế độ ảnh">
           <button class="tabBtn active" id="tabQrBtn" type="button" role="tab" aria-selected="true" aria-controls="tabQrPane">
-            🧾 Ảnh QR
+            <i data-lucide="qr-code" aria-hidden="true"></i> Ảnh QR
           </button>
           <button class="tabBtn" id="tabOcrBtn" type="button" role="tab" aria-selected="false" aria-controls="tabOcrPane">
-            🧠 OCR CCCD
+            <i data-lucide="wand-sparkles" aria-hidden="true"></i> OCR CCCD
           </button>
         </div>
 
@@ -585,7 +588,7 @@
         <!-- TAB 2: OCR CCCD -->
         <div class="tabPane" id="tabOcrPane" role="tabpanel" aria-labelledby="tabOcrBtn">
           <div class="noticeBox">
-            <b>⚠️ Lưu ý:</b> OCR có thể sai (đặc biệt ảnh mờ/chói). Hãy <b>kiểm tra lại thông tin</b> sau khi OCR xong trước khi lưu/xuất.
+            <b><i data-lucide="triangle-alert" aria-hidden="true"></i> Lưu ý:</b> OCR có thể sai (đặc biệt ảnh mờ/chói). Hãy <b>kiểm tra lại thông tin</b> sau khi OCR xong trước khi lưu/xuất.
           </div>
 
           <div style="height:10px"></div>
@@ -604,7 +607,7 @@
           </select>
 
           <div class="row" style="margin-top:10px">
-            <button class="btn ok" id="btnOcrId" disabled>🧠 OCR CCCD</button>
+            <button class="btn ok" id="btnOcrId" disabled><i data-lucide="wand-sparkles" aria-hidden="true"></i> OCR CCCD</button>
             <button class="btn secondary" id="btnOcrClear" disabled>Xóa ảnh</button>
           </div>
           <div class="status" id="ocrStatus">OCR: —</div>
@@ -629,7 +632,7 @@ Ngày cấp CCCD: 19/04/2021'></textarea>
         </div>
 
         <div class="status">
-          💡 Điện thoại: dùng camera sau + bật flash + zoom 2x–3x để bắt QR nhỏ.
+          <i data-lucide="lightbulb" aria-hidden="true"></i> Điện thoại: dùng camera sau + bật flash + zoom 2x–3x để bắt QR nhỏ.
         </div>
       </div>
 
@@ -637,14 +640,14 @@ Ngày cấp CCCD: 19/04/2021'></textarea>
       <div class="card">
         <div class="sectionHeader">
           <div>
-            <div class="sectionTitle">🪪 Thông tin đọc được</div>
+            <div class="sectionTitle"><i data-lucide="id-card" aria-hidden="true"></i> Thông tin đọc được</div>
             <div class="sectionSub">Kiểm tra lại trước khi lưu, điền CT01 hoặc gửi Telegram.</div>
           </div>
           <div class="actionGroup">
-            <button class="copyBtn" id="btnCopyAll">📋 Copy tất cả</button>
-            <button class="copyBtn" id="btnSaveTmp">🧠 Lưu tạm</button>
-            <button class="copyBtn" id="btnGoCT01">📝 Điền CT01</button>
-            <button class="copyBtn" id="btnSendTelegram">📨 Gửi Telegram</button>
+            <button class="copyBtn" id="btnCopyAll"><i data-lucide="copy" aria-hidden="true"></i> Copy tất cả</button>
+            <button class="copyBtn" id="btnSaveTmp"><i data-lucide="save" aria-hidden="true"></i> Lưu tạm</button>
+            <button class="copyBtn" id="btnGoCT01"><i data-lucide="file-pen-line" aria-hidden="true"></i> Điền CT01</button>
+            <button class="copyBtn" id="btnSendTelegram"><i data-lucide="send" aria-hidden="true"></i> Gửi Telegram</button>
           </div>
         </div>
 
@@ -667,7 +670,7 @@ Ngày cấp CCCD: 19/04/2021'></textarea>
 
         <div class="sectionHeader">
           <div>
-            <div class="sectionTitle">🔁 Địa chỉ mới</div>
+            <div class="sectionTitle"><i data-lucide="refresh-cw" aria-hidden="true"></i> Địa chỉ mới</div>
             <div class="sectionSub">Tự chuyển đổi hoặc chọn thủ công khi cần. POST <code class="inline">/api/v1/convert/address</code></div>
           </div>
         </div>
@@ -762,18 +765,19 @@ Ngày cấp CCCD: 19/04/2021'></textarea>
     <div class="tmpWrap">
       <div class="tmpToolbar">
         <div class="left">
-          <div class="sectionTitle">🧠 Bảng tạm</div>
+          <div class="sectionTitle"><i data-lucide="table-properties" aria-hidden="true"></i> Bảng tạm</div>
           <div class="small">Lưu nhiều người rồi mới xuất file</div>
         </div>
         <div class="right">
-          <button class="miniBtn" id="btnExportExcelInTable">📄 Xuất Excel</button>
-          <button class="miniBtn" id="btnSendTelegramTmpAll">📨 Gửi Tele (tất cả)</button>
-          <button class="miniBtn danger" id="btnClearTmpAll">🗑 Xóa hết</button>
+          <button class="miniBtn" id="btnCopyTmpAll" type="button"><i data-lucide="table" aria-hidden="true"></i> Sao chép bảng</button>
+          <button class="miniBtn" id="btnExportExcelInTable"><i data-lucide="file-spreadsheet" aria-hidden="true"></i> Xuất Excel</button>
+          <button class="miniBtn" id="btnSendTelegramTmpAll"><i data-lucide="send" aria-hidden="true"></i> Gửi Tele (tất cả)</button>
+          <button class="miniBtn danger" id="btnClearTmpAll"><i data-lucide="trash-2" aria-hidden="true"></i> Xóa hết</button>
         </div>
       </div>
 
       <div class="tmpTableScroll" id="tmpTableScroll">
-        <div class="tmpEmpty" id="tmpEmpty">Chưa có dòng nào. Bấm “🧠 Lưu tạm” để thêm.</div>
+        <div class="tmpEmpty" id="tmpEmpty">Chưa có dòng nào. Bấm “Lưu tạm” để thêm.</div>
         <table class="tmpTable" id="tmpTable" style="display:none">
           <thead>
             <tr id="tmpHead"></tr>
@@ -786,6 +790,17 @@ Ngày cấp CCCD: 19/04/2021'></textarea>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+  <div class="modalOverlay" id="confirmModal">
+    <div class="modal" role="alertdialog" aria-modal="true" aria-labelledby="confirmModalTitle" aria-describedby="confirmModalMessage">
+      <h2 class="modalTitle" id="confirmModalTitle">Xác nhận</h2>
+      <p class="modalSub" id="confirmModalMessage"></p>
+      <div class="modalActions">
+        <button class="btn secondary" id="btnConfirmCancel" type="button">Hủy</button>
+        <button class="btn danger" id="btnConfirmAccept" type="button">Xác nhận</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ✅ MODAL NHẬP PHÒNG -->
   <div class="modalOverlay" id="roomModal">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="roomModalTitle">
@@ -796,7 +811,7 @@ Ngày cấp CCCD: 19/04/2021'></textarea>
             Bạn có thể nhập số phòng để lưu chung trong Excel, hoặc bấm “Bỏ qua” nếu không cần.
           </div>
         </div>
-        <button class="miniBtn" id="btnCloseRoomModal" aria-label="Đóng">✕</button>
+        <button class="miniBtn iconBtn" id="btnCloseRoomModal" aria-label="Đóng" title="Đóng"><i data-lucide="x" aria-hidden="true"></i></button>
       </div>
 
       <label for="roomModalInput">Số phòng</label>
@@ -898,13 +913,67 @@ function clearReaderPreview(){
       return !!cccd && cccd !== "—" && !!name && name !== "—";
     }
 
+    function renderLucideIcons(){
+      if (window.lucide?.createIcons) window.lucide.createIcons();
+    }
+
+    function iconElement(icon){
+      const el = document.createElement("i");
+      el.setAttribute("data-lucide", icon);
+      el.setAttribute("aria-hidden", "true");
+      return el;
+    }
+
+    function setIconLabel(element, icon, text){
+      element.replaceChildren(iconElement(icon), document.createTextNode(text));
+      renderLucideIcons();
+    }
+
     function toast(msg){
       const t = $("toast");
-      t.textContent = msg;
+      const raw = (msg ?? "").toString();
+      const matched = raw.match(/^\s*(✅|✓|❌|⚠️|⏳)\s*/);
+      const iconMap = {
+        "✅": ["circle-check", "toast--success"], "✓": ["circle-check", "toast--success"],
+        "❌": ["circle-x", "toast--error"], "⚠️": ["triangle-alert", "toast--warning"],
+        "⏳": ["hourglass", "toast--info"]
+      };
+      t.className = `toast ${matched ? iconMap[matched[1]][1] : "toast--info"}`;
+      t.replaceChildren();
+      if (matched) t.append(iconElement(iconMap[matched[1]][0]), document.createTextNode(` ${raw.slice(matched[0].length)}`));
+      else t.textContent = raw;
+      renderLucideIcons();
       t.style.display = "block";
       clearTimeout(window.__toastTimer);
       window.__toastTimer = setTimeout(()=>{ t.style.display="none"; }, 1600);
     }
+
+    let confirmPopupState = null;
+    function confirmPopup(message, title = "Xác nhận"){
+      if (confirmPopupState) return Promise.resolve(false);
+      $("confirmModalTitle").textContent = title;
+      $("confirmModalMessage").textContent = message;
+      return new Promise(resolve => {
+        const settle = value => {
+          if (!confirmPopupState) return;
+          confirmPopupState = null;
+          resolve(value);
+        };
+        confirmPopupState = { settle };
+        const opened = ModalController.open($("confirmModal"), {
+          initialFocus: $("btnConfirmAccept"),
+          onConfirm: () => { settle(true); ModalController.close(); },
+          onClose: () => settle(false)
+        });
+        if (!opened) settle(false);
+      });
+    }
+
+    $("btnConfirmCancel").addEventListener("click", () => ModalController.close());
+    $("btnConfirmAccept").addEventListener("click", () => {
+      confirmPopupState?.settle(true);
+      ModalController.close();
+    });
 
     function fmtDDMMYYYY(s) {
       if (!s) return "—";
@@ -1047,6 +1116,28 @@ function clearReaderPreview(){
       return "\ufeff" + head + "\n" + body;
     }
 
+    function toExcelClipboard(rows, includeHeader = false){
+      const clean = value => (value ?? "").toString()
+        .replace(/\t/g, " ")
+        .replace(/\r?\n/g, " ")
+        .trim();
+      const lines = rows.map(row => COLS.map(column => clean(row?.[column])).join("\t"));
+      if (includeHeader) lines.unshift(COLS.join("\t"));
+      return lines.join("\r\n");
+    }
+
+    async function copyTmpRow(row){
+      await copyText(toExcelClipboard([row]));
+      toast("✅ Đã sao chép dòng — có thể dán vào Excel");
+    }
+
+    async function copyTmpTable(){
+      const rows = loadTmpRows();
+      if (!rows.length) return toast("Bảng tạm đang trống.");
+      await copyText(toExcelClipboard(rows, true));
+      toast(`✅ Đã sao chép ${rows.length} dòng — có thể dán vào Excel`);
+    }
+
     function exportExcel(){
       const rows = loadTmpRows();
       if (!rows.length) return toast("Chưa có dòng nào trong bảng tạm để xuất.");
@@ -1144,7 +1235,7 @@ function clearReaderPreview(){
 
         const del = document.createElement("button");
         del.className = "miniBtn danger";
-        del.textContent = "Xóa";
+        setIconLabel(del, "trash-2", "Xóa");
         del.addEventListener("click", () => {
           const cur = loadTmpRows();
           cur.splice(idx, 1);
@@ -1154,7 +1245,7 @@ function clearReaderPreview(){
 
         const tele = document.createElement("button");
         tele.className = "miniBtn";
-        tele.textContent = "Tele";
+        setIconLabel(tele, "send", "Tele");
         tele.style.marginRight = "8px";
 
         tele.addEventListener("click", async () => {
@@ -1171,18 +1262,27 @@ function clearReaderPreview(){
         edit.type = "button";
         edit.className = "miniBtn";
         edit.dataset.editRow = String(idx);
-        edit.textContent = "Sửa";
+        setIconLabel(edit, "pen-line", "Sửa");
         edit.setAttribute("aria-label", `Sửa dòng ${idx + 1}`);
         edit.addEventListener("click", () => openEditTmpModal(idx, edit));
+        const copy = document.createElement("button");
+        copy.type = "button";
+        copy.className = "miniBtn iconBtn";
+        copy.dataset.copyRow = String(idx);
+        copy.append(iconElement("copy"));
+        copy.title = "Sao chép dòng để dán vào Excel";
+        copy.setAttribute("aria-label", `Sao chép dòng ${idx + 1} để dán vào Excel`);
+        copy.addEventListener("click", () => copyTmpRow(r));
         const rowActions = document.createElement("div");
         rowActions.className = "tmpRowActions";
         tele.style.marginRight = "0";
-        rowActions.append(edit, tele, del);
+        rowActions.append(copy, edit, tele, del);
         tdAct.appendChild(rowActions);
         tr.appendChild(tdAct);
 
         body.appendChild(tr);
       });
+      renderLucideIcons();
     }
 
     let editingTmpRow = null;
@@ -1421,7 +1521,11 @@ $("btnRoomSkip").addEventListener("click", () => confirmRoomModal(true));
 
     function updateCccdDigitStatus(){
       const count = ($("cccd").textContent || "").replace(/\D/g, "").length;
-      $("cccdDigitBadge").textContent = `${count}/12${count === 12 ? " ✓" : ""}`;
+      $("cccdDigitBadge").replaceChildren(document.createTextNode(`${count}/12`));
+      if (count === 12) {
+        $("cccdDigitBadge").append(iconElement("check"));
+        renderLucideIcons();
+      }
       $("cccdDigitBadge").dataset.state = count === 12 ? "valid" : count > 12 ? "long" : count ? "short" : "empty";
       $("cccdDigitMessage").textContent = count === 12 ? "CCCD hợp lệ về độ dài"
         : count > 12 ? "CCCD vượt quá 12 số" : count ? "CCCD chưa đủ 12 số" : "Chưa có số CCCD";
@@ -1434,6 +1538,7 @@ $("btnRoomSkip").addEventListener("click", () => confirmRoomModal(true));
       $("addrStreet").textContent = street || "—";
       syncManualAddressInputsFromResult({province, ward, street});
     }
+
 
     function optionText(selectEl){
       return (selectEl?.value || "").trim();
@@ -1660,15 +1765,12 @@ function bestMatch(list, rawName, typeHint){
   const cleaned = normName(cleanedRaw);
   const cleanedCompact = compactName(cleanedRaw);
 
-  // 1) exact match theo normName
   let candidates = list.filter(x => normName(x.name) === cleaned);
 
-  // 2) exact match theo compact (bỏ khoảng trắng) -> bắt OCR lệch "d rong" vs "drong"
   if (!candidates.length) {
     candidates = list.filter(x => compactName(x.name) === cleanedCompact);
   }
 
-  // 3) contains match
   if (!candidates.length) {
     candidates = list.filter(x => {
       const n = normName(x.name);
@@ -1679,14 +1781,13 @@ function bestMatch(list, rawName, typeHint){
 
   if (!candidates.length) return null;
 
-  // ưu tiên đúng type nếu có hint
   if (typeHint) {
     const typed = candidates.filter(x => (x.type || "").toLowerCase().includes(typeHint.toLowerCase()));
     if (typed.length) return typed[0];
   }
 
   if (candidates.length > 1) {
-    logLine(`⚠️ Trùng tên "${cleanedRaw}". Candidates=` +
+    logLine(`[Cảnh báo] Trùng tên "${cleanedRaw}". Candidates=` +
       candidates.map(c => `${c.type} ${c.name}(${c.code})`).join(" | ")
     );
   }
@@ -1852,7 +1953,7 @@ function bestMatch(list, rawName, typeHint){
           });
         }
       }catch(e){
-        logLine("⚠️ Không tải được danh sách tỉnh mới (API v2): " + (e?.message || e));
+        logLine("[Cảnh báo] Không tải được danh sách tỉnh mới (API v2): " + (e?.message || e));
         if (manualInput) manualInput.placeholder = "Không tải được danh sách tỉnh";
       }
     }
@@ -1869,7 +1970,7 @@ function bestMatch(list, rawName, typeHint){
         fillDatalist("oldProvinceList", list);
         if (oldInput) oldInput.placeholder = "Gõ để tìm tỉnh...";
       }catch(e){
-        logLine("⚠️ Không tải được danh sách tỉnh cũ: " + (e?.message || e));
+        logLine("[Cảnh báo] Không tải được danh sách tỉnh cũ: " + (e?.message || e));
         if (oldInput) oldInput.placeholder = "Không tải được danh sách tỉnh";
       }
     }
@@ -1902,7 +2003,7 @@ function bestMatch(list, rawName, typeHint){
         wardInput.placeholder = "Gõ để tìm Xã/Phường/Đặc khu...";
         wardInput.disabled = false;
       }catch(e){
-        logLine("⚠️ Không tải được danh sách xã/phường: " + (e?.message || e));
+        logLine("[Cảnh báo] Không tải được danh sách xã/phường: " + (e?.message || e));
         addressPickerCache.manualWards = [];
         fillDatalist("manualWardList", []);
         wardInput.placeholder = "Không tải được, hãy gõ xã/phường bên dưới";
@@ -1937,7 +2038,7 @@ function bestMatch(list, rawName, typeHint){
         input.placeholder = "Gõ để tìm Quận/Huyện/Thị xã...";
         input.disabled = false;
       }catch(e){
-        logLine("⚠️ Không tải được quận/huyện cũ: " + (e?.message || e));
+        logLine("[Cảnh báo] Không tải được quận/huyện cũ: " + (e?.message || e));
         addressPickerCache.oldDistricts = [];
         fillDatalist("oldDistrictList", []);
         input.placeholder = "Không tải được quận/huyện";
@@ -1967,7 +2068,7 @@ function bestMatch(list, rawName, typeHint){
         input.placeholder = "Gõ để tìm Xã/Phường...";
         input.disabled = false;
       }catch(e){
-        logLine("⚠️ Không tải được xã/phường cũ: " + (e?.message || e));
+        logLine("[Cảnh báo] Không tải được xã/phường cũ: " + (e?.message || e));
         addressPickerCache.oldWards = [];
         fillDatalist("oldWardList", []);
         input.placeholder = "Không tải được xã/phường";
@@ -1991,14 +2092,11 @@ function bestMatch(list, rawName, typeHint){
       const cleanName = stripAdminPrefix(districtRaw, "district");
 
       let d = bestMatch(list, cleanName, hint);
-
       if (!d && /thi xa/i.test(stripDiacritics(districtRaw))) {
         d = bestMatch(list, cleanName, "Thị xã") || bestMatch(list, cleanName, "Thành phố");
       }
-
       if (!d?.code) throw new Error("Không match được district: " + districtRaw);
-
-      logLine(`✅ Pick district: ${d.type} ${d.name} (${d.code}) [hint=${hint||"none"}]`);
+      logLine(`[OK] Pick district: ${d.type} ${d.name} (${d.code}) [hint=${hint||"none"}]`);
       return d;
     }
 
@@ -2013,10 +2111,8 @@ function bestMatch(list, rawName, typeHint){
 
       let w = bestMatch(list, cleanName, hint);
       if (!w) w = bestMatch(list, stripAdminPrefix(wardRaw, "ward"), hint);
-
       if (!w?.code) throw new Error("Không match được ward: " + wardRaw);
-
-      logLine(`✅ Pick ward: ${w.type} ${w.name} (${w.code}) [hint=${hint||"none"}]`);
+      logLine(`[OK] Pick ward: ${w.type} ${w.name} (${w.code}) [hint=${hint||"none"}]`);
       return w;
     }
 
@@ -2121,13 +2217,13 @@ function bestMatch(list, rawName, typeHint){
         );
       }catch(e){
         const originalMessage = e?.message || String(e);
-        logLine("❌ Convert lỗi: " + originalMessage);
+        logLine("[Lỗi] Convert lỗi: " + originalMessage);
 
         const fallback = tryParseAlreadyNewAddress(currentData?.address);
         if (fallback) {
           setNewAddressFields(fallback);
           setInfoActionButtonsEnabled(true);
-          logLine("ℹ️ Fallback: phát hiện địa chỉ có dạng mới street, ward, province.");
+          logLine("[Thông tin] Fallback: phát hiện địa chỉ có dạng mới street, ward, province.");
           logLine("Fallback result: " + JSON.stringify(fallback));
           setConvertStatus(
             `<span class="warn">Chuyển đổi lỗi:</span> ${originalMessage}<br>` +
@@ -2136,7 +2232,7 @@ function bestMatch(list, rawName, typeHint){
           return;
         }
 
-        logLine("⚠️ Không fallback được: địa chỉ không đúng dạng mới 3 phần street, ward, province.");
+        logLine("[Cảnh báo] Không fallback được: địa chỉ không đúng dạng mới 3 phần street, ward, province.");
         setConvertStatus(`<span class="error">Lỗi:</span> ${originalMessage}`);
       }finally{
         converting = false;
@@ -2282,7 +2378,7 @@ function bestMatch(list, rawName, typeHint){
       lastManualParsedText = raw;
       currentData = data;
       fillInfo(data);
-      logLine("✅ Ưu tiên dữ liệu từ ô QR thủ công: đã parse lại trước khi thao tác.");
+      logLine("[OK] Ưu tiên dữ liệu từ ô QR thủ công: đã parse lại trước khi thao tác.");
       return true;
     }
 
@@ -2448,6 +2544,7 @@ Số nhà/Ấp/KP/Đường: ${$("addrStreet").textContent}
 // ✅ Điền CT01 & chuyển trang
 // =======================
 const CT01_PREFILL_KEY = "ct01_prefill_v1";
+const CT01_DEFAULT_TEMP_ADDRESS = "Tổ 4B, KP1, Phường Bình Cơ, TP.Hồ Chí Minh";
 
 function todayDDMMYYYY(){
   const d = new Date();
@@ -2463,23 +2560,13 @@ function buildCT01Prefill(){
   const dob = ($("dob")?.textContent || "").trim();
   const gender = ($("gender")?.textContent || "").trim();
 
-  // Ưu tiên địa chỉ mới (địa chỉ tổng), fallback địa chỉ cũ
-  const newFull = ($("addrFull")?.textContent || "").trim();
-  const oldAddr = ($("oldAddr")?.textContent || "").trim();
-
-
-
-  const tempAddress = (newFull && newFull !== "—") ? newFull : ((oldAddr && oldAddr !== "—") ? oldAddr : "");
+  // CT01 luôn dùng địa chỉ tạm trú mặc định, không lấy địa chỉ từ CCCD.
+  const tempAddress = CT01_DEFAULT_TEMP_ADDRESS;
 
   // Nếu không có đủ dữ liệu cơ bản thì báo
   if (!fullName || fullName === "—" || !idNumber || idNumber === "—"){
     throw new Error("Chưa có Họ tên/CCCD. Hãy quét/parse/OCR trước.");
   }
-  if (!tempAddress){
-    // vẫn cho qua nếu bạn muốn, nhưng thường CT01 cần địa chỉ
-    // throw new Error("Chưa có địa chỉ để điền CT01.");
-  }
-
   // Đẩy theo đúng schema state của ct01.html mình gửi trước đó
   return {
     agency: "Công an phường Bình Cơ, TP. Hồ Chí Minh",
@@ -2542,7 +2629,7 @@ $("btnSendTelegramTmpAll").addEventListener("click", async () => {
   const rows = loadTmpRows();
   if (!rows.length) return toast("Bảng tạm đang trống.");
 
-  if (!confirm(`Gửi Telegram cho ${rows.length} dòng?`)) return;
+  if (!await confirmPopup(`Gửi Telegram cho ${rows.length} dòng?`, "Gửi Telegram")) return;
 
   try{
     for (let i = 0; i < rows.length; i++){
@@ -2560,12 +2647,13 @@ $("btnSendTelegramTmpAll").addEventListener("click", async () => {
 
     // ✅ Xuất Excel trong bảng tạm
     $("btnExportExcelInTable").addEventListener("click", exportExcel);
+    $("btnCopyTmpAll").addEventListener("click", copyTmpTable);
 
     // ✅ Xóa hết bảng tạm
-    $("btnClearTmpAll").addEventListener("click", () => {
+    $("btnClearTmpAll").addEventListener("click", async () => {
       const rows = loadTmpRows();
       if (!rows.length) return toast("Bảng tạm đang trống.");
-      if (!confirm("Xóa toàn bộ dòng trong bảng tạm?")) return;
+      if (!await confirmPopup("Xóa toàn bộ dòng trong bảng tạm?", "Xóa bảng tạm")) return;
       saveTmpRows([]);
       toast("✅ Đã xóa hết");
     });
@@ -2975,7 +3063,7 @@ $("btnSendTelegram").addEventListener("click", () => {
 
       const badge = $("libStatus");
       if (typeof window.Html5Qrcode === "undefined") {
-        badge.textContent = "📦 Không load được Html5Qrcode (local). Kiểm tra ./assets/html5-qrcode.min.js";
+        setIconLabel(badge, "archive", "Không load được Html5Qrcode (local). Kiểm tra ./assets/html5-qrcode.min.js");
         badge.classList.add("error");
         $("btnStart").disabled = true;
         setScanStatus(`<b class="warn">Không thể quét camera</b> • Bạn vẫn có thể dán chuỗi QR thủ công, upload ảnh QR, hoặc OCR ảnh CCCD.`);
@@ -2983,7 +3071,7 @@ $("btnSendTelegram").addEventListener("click", () => {
         setOcrStatus("—");
         return;
       }
-      badge.textContent = "📦 Thư viện QR: OK (local)";
+      setIconLabel(badge, "archive", "Thư viện QR: OK (local)");
       badge.classList.add("oktxt");
       $("btnStart").disabled = false;
       setScanStatus("<b class='oktxt'>Sẵn sàng</b> • Bấm “Bắt đầu quét”.");

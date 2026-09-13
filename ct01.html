@@ -6,8 +6,22 @@
   <title>CT01 – Tờ khai thay đổi thông tin cư trú (Nhập liệu + Preview + In/PDF)</title>
 <link rel="icon" type="image/png" href="./assets/fav.png">
   <link rel="stylesheet" href="./style.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
 
   <style>
+    dialog.appPopup{
+      width:min(460px, calc(100vw - 32px));
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:18px;
+      color:var(--text);
+      background:var(--card);
+      box-shadow:0 20px 50px rgba(15,23,42,.2);
+    }
+    dialog.appPopup::backdrop{ background:rgba(15,23,42,.55); }
+    .appPopup h2{ margin:0 0 8px; font-size:18px; }
+    .appPopup p{ margin:0; color:var(--muted); line-height:1.5; }
+    .appPopupActions{ display:flex; justify-content:flex-end; gap:10px; margin-top:18px; }
     :root{
       /* ✅ LIGHT THEME */
       --bg:#ffffff;
@@ -414,16 +428,16 @@
           Công cụ hỗ trợ điền CT01 để in/lưu. Bạn vẫn nên đối chiếu lại với mẫu CT01 bạn đang dùng trên Cổng DVC/VNeID trước khi nộp.
         </p>
         <div class="badge">
-          💡 Gợi ý: Nhấn <span class="kbd">Ctrl</span> + <span class="kbd">P</span> → “Save as PDF” để tải file PDF
+          <i data-lucide="lightbulb" aria-hidden="true"></i> Gợi ý: Nhấn <span class="kbd">Ctrl</span> + <span class="kbd">P</span> → “Save as PDF” để tải file PDF
         </div>
       </div>
 
       <div class="actions">
-        <button class="btn primary" id="btnPreview" type="button">👀 Cập nhật Preview</button>
-        <button class="btn ok" id="btnPrint" type="button">🖨️ In / Lưu PDF</button>
-        <button class="btn warn" id="btnDownloadJson" type="button">⬇️ Tải JSON</button>
-        <button class="btn" id="btnLoadJson" type="button">⬆️ Nạp JSON</button>
-        <button class="btn danger" id="btnReset" type="button">🧹 Xóa dữ liệu</button>
+        <button class="btn primary" id="btnPreview" type="button"><i data-lucide="eye" aria-hidden="true"></i> Cập nhật Preview</button>
+        <button class="btn ok" id="btnPrint" type="button"><i data-lucide="printer" aria-hidden="true"></i> In / Lưu PDF</button>
+        <button class="btn warn" id="btnDownloadJson" type="button"><i data-lucide="download" aria-hidden="true"></i> Tải JSON</button>
+        <button class="btn" id="btnLoadJson" type="button"><i data-lucide="upload" aria-hidden="true"></i> Nạp JSON</button>
+        <button class="btn danger" id="btnReset" type="button"><i data-lucide="trash-2" aria-hidden="true"></i> Xóa dữ liệu</button>
       </div>
     </div>
 
@@ -484,7 +498,12 @@
           <div class="row">
             <div>
               <label>7. Họ, chữ đệm và tên chủ hộ</label>
-              <input id="householdHeadName" placeholder="VD: TRẦN VĂN B" />
+              <input id="householdHeadName" list="householdHeadSuggestions" placeholder="Chọn gợi ý hoặc nhập tên khác" />
+              <datalist id="householdHeadSuggestions">
+                <option value="NGUYỄN VĂN XUÂN CHUÂN"></option>
+                <option value="NGUYỄN THỊ NGUYỆT"></option>
+                <option value="NGUYỄN MINH TUẤN"></option>
+              </datalist>
             </div>
 
             <div>
@@ -515,7 +534,7 @@
               <div class="row1">
                 <div>
                   <label>Địa chỉ nơi đề nghị đăng ký tạm trú</label>
-                  <input id="tempAddress" placeholder="VD: 12/3 Đường ABC, P. ..., Q. ..., TP. ..." />
+                  <input id="tempAddress" value="Tổ 4B, KP1, Phường Bình Cơ, TP.Hồ Chí Minh" placeholder="VD: 12/3 Đường ABC, P. ..., Q. ..., TP. ..." />
                 </div>
               </div>
               <div class="row3">
@@ -540,7 +559,7 @@
             <div>
               <label>10. Nội dung đề nghị (2)</label>
               <textarea id="requestContent" placeholder="Nội dung sẽ tự gợi ý theo loại yêu cầu, bạn có thể sửa lại cho đúng thực tế..."></textarea>
-              <div class="hint">✅ Tự gợi ý sẽ cập nhật theo “Chủ hộ/Địa chỉ/Từ ngày…”. Nếu bạn tự gõ vào ô này thì hệ thống sẽ không tự ghi đè nữa.</div>
+              <div class="hint"><i data-lucide="circle-check" aria-hidden="true"></i> Tự gợi ý sẽ cập nhật theo “Chủ hộ/Địa chỉ/Từ ngày…”. Nếu bạn tự gõ vào ô này thì hệ thống sẽ không tự ghi đè nữa.</div>
             </div>
           </div>
 
@@ -565,7 +584,7 @@
               </table>
 
               <div class="subactions">
-                <button class="btn" id="btnAddMember" type="button">➕ Thêm thành viên</button>
+                <button class="btn" id="btnAddMember" type="button"><i data-lucide="plus" aria-hidden="true"></i> Thêm thành viên</button>
               </div>
               <div class="hint">Nếu không có ai cùng thay đổi, cứ để trống bảng này.</div>
             </div>
@@ -632,6 +651,15 @@
 
   <input type="file" id="jsonFile" accept="application/json" style="display:none" />
 
+  <dialog class="appPopup" id="appPopup" aria-labelledby="appPopupTitle" aria-describedby="appPopupMessage">
+    <h2 id="appPopupTitle">Thông báo</h2>
+    <p id="appPopupMessage"></p>
+    <div class="appPopupActions">
+      <button class="btn" id="appPopupCancel" type="button">Hủy</button>
+      <button class="btn primary" id="appPopupAccept" type="button">Đồng ý</button>
+    </div>
+  </dialog>
+
   <script>
     // ===== NAV LOADER (optional) =====
     async function mountNav(){
@@ -662,7 +690,35 @@
     // ===== CT01 APP =====
     const $ = (id) => document.getElementById(id);
 
+    let appPopupResolve = null;
+    function showAppPopup(message, { title = "Thông báo", confirm = false } = {}){
+      const dialog = $("appPopup");
+      if (dialog.open) dialog.close();
+      $("appPopupTitle").textContent = title;
+      $("appPopupMessage").textContent = message;
+      $("appPopupCancel").style.display = confirm ? "inline-flex" : "none";
+      $("appPopupAccept").textContent = confirm ? "Xác nhận" : "Đóng";
+      return new Promise(resolve => {
+        appPopupResolve = resolve;
+        dialog.showModal();
+        $("appPopupAccept").focus();
+      });
+    }
+    function closeAppPopup(value){
+      const resolve = appPopupResolve;
+      appPopupResolve = null;
+      if ($("appPopup").open) $("appPopup").close();
+      resolve?.(value);
+    }
+    $("appPopupCancel").addEventListener("click", () => closeAppPopup(false));
+    $("appPopupAccept").addEventListener("click", () => closeAppPopup(true));
+    $("appPopup").addEventListener("cancel", event => {
+      event.preventDefault();
+      closeAppPopup(false);
+    });
+
     const ORIGINAL_TITLE = document.title;
+    const DEFAULT_TEMP_ADDRESS = "Tổ 4B, KP1, Phường Bình Cơ, TP.Hồ Chí Minh";
 
 function removeVietnameseTones(str){
   return (str || "")
@@ -880,7 +936,7 @@ window.addEventListener("afterprint", () => {
 
       if(errors.length){
         if(showAlert){
-          alert("Vui lòng kiểm tra lại các trường đang bị lỗi (bôi đỏ) trước khi in/lưu PDF.");
+          showAppPopup("Vui lòng kiểm tra lại các trường đang bị lỗi (bôi đỏ) trước khi in/lưu PDF.", { title: "Dữ liệu chưa hợp lệ" });
           if(first.el){
             first.el.scrollIntoView({ behavior:"smooth", block:"center" });
             first.el.focus();
@@ -1259,7 +1315,7 @@ function renderMembersPrint(){
         <td><input class="m-id" maxlength="12" inputmode="numeric" placeholder="12 số" value="${sanitize(data.id||"")}" /></td>
         <td><input class="m-rel" placeholder="Quan hệ với chủ hộ" value="${sanitize(data.relation||"")}" /></td>
         <td style="text-align:center">
-          <button class="btn danger" type="button" style="padding:8px 10px; border-radius:10px">✖</button>
+          <button class="btn danger" type="button" style="padding:8px 10px; border-radius:10px" aria-label="Xóa thành viên" title="Xóa thành viên"><i data-lucide="x" aria-hidden="true"></i></button>
         </td>
       `;
       tr.querySelector("button").addEventListener("click", () => {
@@ -1280,6 +1336,7 @@ function renderMembersPrint(){
       });
 
       tbody.appendChild(tr);
+      if (window.lucide?.createIcons) window.lucide.createIcons();
     }
 
     function reindexMembers(){
@@ -1312,7 +1369,7 @@ function renderMembersPrint(){
           validateAll(false);
           renderPreview();
         }catch(e){
-          alert("File JSON không hợp lệ.");
+          showAppPopup("File JSON không hợp lệ.", { title: "Không thể nạp dữ liệu" });
         }
       };
       reader.readAsText(file);
@@ -1389,6 +1446,7 @@ function renderMembersPrint(){
       $("declareDate").value = todayDDMMYYYY();
       $("place").value = "TP. Hồ Chí Minh";
       $("fromDate").value = todayDDMMYYYY();
+      $("tempAddress").value = DEFAULT_TEMP_ADDRESS;
       $("sigDeclarer").value = $("fullName").value || "";
 
       renderPreview();
@@ -1459,8 +1517,8 @@ function renderMembersPrint(){
       e.target.value = "";
     });
 
-    $("btnReset").addEventListener("click", () => {
-      if(confirm("Xóa toàn bộ dữ liệu đang nhập?")) resetAll();
+    $("btnReset").addEventListener("click", async () => {
+      if(await showAppPopup("Xóa toàn bộ dữ liệu đang nhập?", { title: "Xác nhận xóa dữ liệu", confirm: true })) resetAll();
     });
 
     window.addEventListener("resize", () => requestAnimationFrame(fitA4Preview));
@@ -1469,6 +1527,7 @@ function renderMembersPrint(){
     ensureDefaults();
     renderPreview();
     validateAll(false);
+    if (window.lucide?.createIcons) window.lucide.createIcons();
   </script>
 </body>
 </html>

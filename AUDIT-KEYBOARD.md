@@ -29,6 +29,11 @@ Lưu tạm: kiểm tra QR thủ công → `buildRowFromUI` kiểm tra CCCD, họ
 | `tests/keyboard-regression.cjs` | Regression Chromium với toàn bộ external request được intercept |
 | `.gitignore` | Bỏ qua screenshot được sinh trong `test-artifacts/` |
 
+Bảng tạm có nút icon sao chép trên từng dòng để sao chép riêng dữ liệu dòng đó và nút **Sao chép bảng** trên thanh công cụ. Dữ liệu clipboard dùng TSV: tab phân cột, xuống dòng phân hàng; sao chép toàn bảng có tiêu đề, sao chép một dòng không có tiêu đề. Có thể dán trực tiếp vào Excel hoặc Google Sheets.
+
+Icon giao diện của trang quét và CT01 dùng Lucide qua `https://unpkg.com/lucide@latest`. Icon tạo động trong toast, bảng tạm và danh sách thành viên được render lại sau khi DOM thay đổi; log kỹ thuật dùng nhãn chữ vì textarea không thể render SVG. Emoji trong nội dung gửi Telegram được giữ nguyên vì Telegram không sử dụng icon web của website.
+
+
 Các hàm/thành phần mới:
 
 - `ModalController.open/close/route`: focus đầu vào, inert nền, Tab/Shift+Tab, đóng và trả focus.
