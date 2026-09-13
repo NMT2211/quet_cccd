@@ -321,12 +321,12 @@ async function main() {
     await page.goBack();
     await page.reload();
 
-    await page.locator('#btnSelectTmpAll').click();
+    await page.locator('#tmpSelectAllCheckbox').check();
     assert.equal(await page.locator('[data-select-tmp-row]:checked').count(), 3);
     assert.equal(await page.locator('#tmpSelectionCount').textContent(), 'Đã chọn 3 người');
-    await page.locator('#btnClearTmpSelection').click();
+    await page.locator('#tmpSelectAllCheckbox').uncheck();
     assert.equal(await page.locator('[data-select-tmp-row]:checked').count(), 0);
-    await page.locator('#btnSelectTmpAll').click();
+    await page.locator('#tmpSelectAllCheckbox').check();
     await page.locator('#btnPrintSelectedCT01').click();
     await page.keyboard.press('Escape');
     assert(!(await page.locator('#batchCT01Modal').isVisible()));

@@ -37,9 +37,11 @@ body .toast{
   pointer-events: none;
 }
 body .toast::before{ content:none; }
-body .lucide{ width: 1em; height: 1em; vertical-align: -0.125em; flex: 0 0 auto; }
+body .lucide{ width: 18px;
+    height: 18px;
+    }
 body .toast .lucide{ margin-right: 6px; }
-body :is(.btn, .copyBtn, .miniBtn, .pill, .sectionTitle, .tabBtn) > .lucide{ margin-right: 6px; }
+body :is(.btn, .copyBtn, .miniBtn, .pill, .sectionTitle, .tabBtn) > .lucide{ margin-right: 0px; }
 body .sectionTitle > :is(.lucide-camera, .lucide-id-card){
   width: 1.4em;
   height: 1.4em;
@@ -107,7 +109,7 @@ padding: 10px 12px;
     transition: background .15s ease, border-color .15s ease, opacity .15s ease;
   }
 .shortcutRowActions{ display: flex; gap: 6px; }
-.tmpRowActions{ display: flex; flex-wrap: wrap; gap: 6px; min-width: 0; }
+.tmpRowActions{ display: flex; flex-wrap: wrap; gap: 6px; min-width: 0;  justify-content: center;}
 .tmpSelectionCount{ display:inline-flex; align-items:center; font-size:13px; font-weight:700; color:var(--muted); padding:0 4px; }
 .tmpSelectCell{ width:44px; min-width:44px; text-align:center; }
 .tmpSelectCell input{ width:18px; height:18px; min-height:0; cursor:pointer; }

@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Quét QR CCCD + Chuyển đổi địa chỉ mới</title>
-  
+
 <link rel="icon" type="image/png" href="./assets/fav.png">
   <!-- Local lib -->
   <script src="./assets/html5-qrcode.min.js"></script>
@@ -270,6 +270,10 @@
     .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}
 
     .copyBtn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:7px;
       padding:10px 12px;
       border-radius: 12px;
       border:1px solid var(--line);
@@ -280,6 +284,20 @@
       min-height: var(--tap);
       white-space:nowrap;
       transition: background .15s ease, border-color .15s ease, opacity .15s ease;
+    }
+    :is(.btn, .copyBtn, .miniBtn, .pill, .tabBtn){
+      align-items:center;
+      justify-content:center;
+      gap:7px;
+      line-height:1.2;
+    }
+    :is(.btn, .copyBtn, .miniBtn, .tabBtn){display:inline-flex;}
+    :is(.btn, .copyBtn, .miniBtn, .pill, .tabBtn) > .lucide{
+      display:block;
+      flex:0 0 auto;
+      align-self:center;
+      margin:0;
+      vertical-align:middle;
     }
     .copyBtn:hover{opacity:.96; background:#fff; border-color:#cbd5e1}
     .copyBtn:disabled{
@@ -399,74 +417,80 @@
        Bảng tạm (Excel-like)
        ======================= */
     .tmpWrap{
-      margin-top: 14px;
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      overflow: hidden;
-      background: #fff;
-      box-shadow: var(--shadow);
+      margin-top:18px; padding:16px; border:1px solid #dbe4f0; border-radius:18px;
+      overflow:hidden; background:rgba(255,255,255,.96); box-shadow:0 12px 32px rgba(15,23,42,.07);
     }
     .tmpToolbar{
       display:flex;
-      gap:10px;
+      gap:16px;
       flex-wrap:wrap;
       align-items:center;
       justify-content:space-between;
-      padding: 10px 10px;
-      background: var(--surface2);
-      border-bottom: 1px solid var(--line);
+      padding:0 0 16px; background:transparent; border-bottom:0;
     }
-    .tmpToolbar .left{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
-    .tmpToolbar .right{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+    .tmpToolbar .left{display:flex;gap:12px;flex-wrap:nowrap;align-items:center;}
+    .tmpTitleIcon{width:46px;height:46px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#1683eb;background:#eaf4ff;}
+    .tmpTitleIcon .lucide{width:25px;height:25px;margin:0;}
+    .tmpTitleText .sectionTitle{font-size:21px;line-height:1.2;font-weight:650;}
+    .tmpTitleText .small{margin-top:2px;color:#718198;font-size:14px;}
+    .tmpToolbar .right{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:flex-end;}
 
     .tmpTableScroll{
       overflow:auto;
       max-height: 320px;
       -webkit-overflow-scrolling: touch;
+      border:1px solid #dbe6f3; border-radius:14px; background:#f3f8fe;
     }
     table.tmpTable{
       width: 100%;
       border-collapse: collapse;
-      min-width: 920px;
+      min-width: 1280px;
     }
     .tmpTable th, .tmpTable td{
-      border-bottom: 1px solid var(--line);
-      padding: 10px 10px;
-      font-size: 13px;
-      vertical-align: top;
+      border-bottom:1px solid #dfeaf6; padding:13px 14px; font-size:14px; vertical-align:middle;
     }
     .tmpTable th{
       position: sticky;
       top: 0;
-      background: #fff;
+      background: #edf5fd;
       z-index: 2;
-      font-weight: 700;
+      font-weight: 650;
       text-align: left;
       white-space: nowrap;
     }
     .tmpTable td{
       word-break: break-word;
       max-width: 360px;
+      background:#f7fbff; color:#29405f;
     }
+    .tmpTable tbody tr:last-child td{border-bottom:0;}
     .tmpEmpty{
       padding: 14px;
       color: var(--muted);
       font-size: 13px;
     }
     .miniBtn{
-      padding: 8px 10px;
-      border-radius: 12px;
-      border: 1px solid var(--line);
+      display:inline-flex; align-items:center; justify-content:center; gap:6px;
+      padding:9px 12px; border-radius:10px; border:1px solid #d8e1ed;
       background: #fff;
+      color:#14233b;
       cursor: pointer;
-      font-weight: 700;
+      font-weight: 650;
       min-height: 40px;
+      box-shadow:0 2px 6px rgba(15,23,42,.025);
     }
-    .miniBtn:hover{opacity:.96}
-    .miniBtn.danger{border-color: rgba(220,38,38,.35); color: var(--danger)}
+    .miniBtn:hover{background:#f8fbff;border-color:#b9c9dc;}
+    .miniBtn.danger{border-color:#fca5a5;color:#ef4444;background:#fff;}
+    .miniBtn.ok{background:#fff;color:#14233b;border-color:#d8e1ed;}
+    .tmpSelectionCount{min-height:40px;padding:8px 12px;border:1px solid #bfdbfe;border-radius:10px;color:#1677e8;background:#eaf4ff;font-size:14px;font-weight:650;}
+    .tmpSelectionCount svg{width:18px;height:18px;margin-right:6px}
+
+    .tmpTable input[type="checkbox"]{width:22px;height:22px;min-height:0;accent-color:#1683eb;cursor:pointer;}
 
     /* ✅ Mobile: bảng tạm hiển thị dạng card */
     @media (max-width: 640px){
+      .tmpWrap{padding:12px;}
+      .tmpTitleText .sectionTitle{font-size:19px;}
       table.tmpTable{min-width: 0;}
       .tmpTable thead{display:none;}
       .tmpTable, .tmpTable tbody, .tmpTable tr, .tmpTable td{display:block; width:100%;}
@@ -488,8 +512,11 @@
         color: var(--muted);
         font-weight: 600;
       }
-      .tmpToolbar .right{width:100%}
+      .tmpToolbar .right{width:100%;justify-content:stretch;}
       .tmpToolbar .right .miniBtn{flex:1}
+      .tmpSelectionCount{flex:1 1 100%;justify-content:center;}
+      .tmpTableScroll{border:0;background:transparent;}
+      .tmpTable tr{margin-bottom:10px;border:1px solid #dbe6f3;border-radius:12px;background:#f7fbff;}
     }
 
     /* =======================
@@ -766,15 +793,16 @@ Ngày cấp CCCD: 19/04/2021'></textarea>
     <div class="tmpWrap">
       <div class="tmpToolbar">
         <div class="left">
-          <div class="sectionTitle"><i data-lucide="table-properties" aria-hidden="true"></i> Bảng tạm</div>
-          <div class="small">Lưu nhiều người rồi mới xuất file</div>
+          <div class="tmpTitleIcon"><i data-lucide="table-2" aria-hidden="true"></i></div>
+          <div class="tmpTitleText">
+            <div class="sectionTitle">Bảng tạm</div>
+            <div class="small">Lưu nhiều người rồi mới xuất file</div>
+          </div>
         </div>
         <div class="right">
-          <button class="miniBtn" id="btnSelectTmpAll" type="button">Chọn tất cả</button>
-          <button class="miniBtn" id="btnClearTmpSelection" type="button">Bỏ chọn tất cả</button>
-          <span class="tmpSelectionCount" id="tmpSelectionCount">Đã chọn 0 người</span>
+          <span class="tmpSelectionCount" id="tmpSelectionCount"><i data-lucide="users" aria-hidden="true"></i> Đã chọn 0 người</span>
           <button class="miniBtn ok" id="btnPrintSelectedCT01" type="button"><i data-lucide="printer" aria-hidden="true"></i> In CT01 đã chọn</button>
-          <button class="miniBtn" id="btnCopyTmpAll" type="button"><i data-lucide="table" aria-hidden="true"></i> Sao chép bảng</button>
+          <button class="miniBtn" id="btnCopyTmpAll" type="button"><i data-lucide="copy" aria-hidden="true"></i> Sao chép bảng</button>
           <button class="miniBtn" id="btnExportExcelInTable"><i data-lucide="file-spreadsheet" aria-hidden="true"></i> Xuất Excel</button>
           <button class="miniBtn" id="btnSendTelegramTmpAll"><i data-lucide="send" aria-hidden="true"></i> Gửi Tele (tất cả)</button>
           <button class="miniBtn danger" id="btnClearTmpAll"><i data-lucide="trash-2" aria-hidden="true"></i> Xóa hết</button>
@@ -1091,7 +1119,7 @@ function clearReaderPreview(){
     function updateTmpSelectionUI(total = loadTmpRows().length){
       for (const index of [...selectedTmpRows]) if (index < 0 || index >= total) selectedTmpRows.delete(index);
       try { sessionStorage.setItem(TMP_SELECTION_KEY, JSON.stringify([...selectedTmpRows].sort((a, b) => a - b))); } catch {}
-      $("tmpSelectionCount").textContent = `Đã chọn ${selectedTmpRows.size} người`;
+      setIconLabel($("tmpSelectionCount"), "users", `Đã chọn ${selectedTmpRows.size} người`);
       const all = $("tmpSelectAllCheckbox");
       if (all) {
         all.checked = total > 0 && selectedTmpRows.size === total;
@@ -1371,13 +1399,6 @@ function clearReaderPreview(){
       renderLucideIcons();
     }
 
-    function selectAllTmpRows(selected){
-      const rows = loadTmpRows();
-      selectedTmpRows.clear();
-      if (selected) rows.forEach((_, index) => selectedTmpRows.add(index));
-      renderTmpTable();
-    }
-
     function openBatchCT01Modal(){
       const rows = loadTmpRows();
       const selected = [...selectedTmpRows].filter(index => rows[index]);
@@ -1437,8 +1458,6 @@ function clearReaderPreview(){
       window.location.href = "./ct01.html";
     }
 
-    $("btnSelectTmpAll").addEventListener("click", () => selectAllTmpRows(true));
-    $("btnClearTmpSelection").addEventListener("click", () => selectAllTmpRows(false));
     $("btnPrintSelectedCT01").addEventListener("click", openBatchCT01Modal);
     $("btnCancelBatchCT01").addEventListener("click", () => ModalController.close());
     $("btnPreviewBatchCT01").addEventListener("click", () => submitBatchCT01("preview"));
