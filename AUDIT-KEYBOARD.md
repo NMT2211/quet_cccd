@@ -31,6 +31,8 @@ Lưu tạm: kiểm tra QR thủ công → `buildRowFromUI` kiểm tra CCCD, họ
 
 Bảng tạm có nút icon sao chép trên từng dòng để sao chép riêng dữ liệu dòng đó và nút **Sao chép bảng** trên thanh công cụ. Dữ liệu clipboard dùng TSV: tab phân cột, xuống dòng phân hàng; sao chép toàn bảng có tiêu đề, sao chép một dòng không có tiêu đề. Có thể dán trực tiếp vào Excel hoặc Google Sheets.
 
+Bảng tạm hỗ trợ chọn một hoặc nhiều người, chọn tất cả, bỏ chọn tất cả và chuyển danh sách sang CT01 bằng `ct01_batch_prefill_v1`. Mỗi dòng được chuyển sang cùng schema prefill của flow một người qua `createCT01Prefill()`. Trang CT01 tiếp tục dùng duy nhất `buildCT01Html()` để dựng từng mẫu, ghép mỗi người thành một trang A4 riêng và ngắt trang khi in. Tên chủ hộ dùng chung được đồng bộ với mục 7 và phần chữ ký chủ hộ.
+
 Icon giao diện của trang quét và CT01 dùng Lucide qua `https://unpkg.com/lucide@latest`. Icon tạo động trong toast, bảng tạm và danh sách thành viên được render lại sau khi DOM thay đổi; log kỹ thuật dùng nhãn chữ vì textarea không thể render SVG. Emoji trong nội dung gửi Telegram được giữ nguyên vì Telegram không sử dụng icon web của website.
 
 

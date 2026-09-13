@@ -383,11 +383,12 @@
       line-height: 1.45;
     }
     .modalActions{
-      margin-top: 12px;
+      margin-top: 20px;
+          margin-bottom: 20px;
       display:flex;
       gap:10px;
       flex-wrap:wrap;
-      justify-content:flex-end;
+      justify-content:center;
     }
     .modal .btn{min-width: 140px}
     @media (max-width: 420px){
@@ -769,6 +770,10 @@ Ngày cấp CCCD: 19/04/2021'></textarea>
           <div class="small">Lưu nhiều người rồi mới xuất file</div>
         </div>
         <div class="right">
+          <button class="miniBtn" id="btnSelectTmpAll" type="button">Chọn tất cả</button>
+          <button class="miniBtn" id="btnClearTmpSelection" type="button">Bỏ chọn tất cả</button>
+          <span class="tmpSelectionCount" id="tmpSelectionCount">Đã chọn 0 người</span>
+          <button class="miniBtn ok" id="btnPrintSelectedCT01" type="button"><i data-lucide="printer" aria-hidden="true"></i> In CT01 đã chọn</button>
           <button class="miniBtn" id="btnCopyTmpAll" type="button"><i data-lucide="table" aria-hidden="true"></i> Sao chép bảng</button>
           <button class="miniBtn" id="btnExportExcelInTable"><i data-lucide="file-spreadsheet" aria-hidden="true"></i> Xuất Excel</button>
           <button class="miniBtn" id="btnSendTelegramTmpAll"><i data-lucide="send" aria-hidden="true"></i> Gửi Tele (tất cả)</button>
@@ -861,6 +866,35 @@ Ngày cấp CCCD: 19/04/2021'></textarea>
       <div class="modalActions">
         <button class="btn secondary" id="btnCancelEditTmp" type="button">Hủy</button>
         <button class="btn ok" id="btnSaveEditTmp" type="button">Lưu thay đổi</button>
+      </div>
+    </div>
+  </div>
+  <div class="modalOverlay" id="batchCT01Modal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="batchCT01Title" aria-describedby="batchCT01Help">
+      <h2 class="modalTitle" id="batchCT01Title">In CT01 hàng loạt</h2>
+      <p class="modalSub" id="batchCT01Help">Thông tin dưới đây được dùng chung cho tất cả người đã chọn.</p>
+      <label for="batchHouseholdHeadName">Họ, chữ đệm và tên chủ hộ <span class="required">*</span></label>
+      <input id="batchHouseholdHeadName" list="batchHouseholdHeadSuggestions" placeholder="Chọn gợi ý hoặc nhập tên khác" />
+      <datalist id="batchHouseholdHeadSuggestions">
+        <option value="NGUYỄN VĂN XUÂN CHUÂN"></option>
+        <option value="NGUYỄN THỊ NGUYỆT"></option>
+        <option value="NGUYỄN MINH TUẤN"></option>
+      </datalist>
+      <label for="batchHeadIdNumber">Số định danh cá nhân của chủ hộ (<span class="" id="batchHeadIdBadge" data-state="empty">0/12</span> số) <span class="required">*</span></label>
+      <div class="batchHeadIdLine">
+        <input id="batchHeadIdNumber" maxlength="12" inputmode="numeric" autocomplete="off" placeholder="Nhập 12 số" aria-describedby="batchHeadIdStatus" />
+        <!-- <span class="digitBadge" id="batchHeadIdBadge" data-state="empty">0/12</span> -->
+      </div>
+      <p class="modalSub" id="batchHeadIdStatus" role="status">Chưa có số định danh chủ hộ</p>
+      <label for="batchTempAddress">Địa chỉ nơi đề nghị đăng ký tạm trú <span class="required">*</span></label>
+      <input id="batchTempAddress" value="Tổ 4B, KP1, Phường Bình Cơ, TP.Hồ Chí Minh" />
+      <p class="modalSub" id="batchCT01Count"></p>
+      <p class="modalSub error" id="batchCT01Error" role="alert"></p>
+      <div class="modalActions">
+        <button class="btn secondary" id="btnCancelBatchCT01" type="button">Hủy</button>
+        <button class="btn" id="btnPreviewBatchCT01" type="button"><i data-lucide="eye" aria-hidden="true"></i> Xem trước</button>
+        <button class="btn ok" id="btnPrintBatchCT01" type="button"><i data-lucide="files" aria-hidden="true"></i> In chung 1 file</button>
+        <button class="btn ok" id="btnPrintSeparateBatchCT01" type="button"><i data-lucide="file-output" aria-hidden="true"></i> In từng file</button>
       </div>
     </div>
   </div>
@@ -1046,6 +1080,24 @@ function clearReaderPreview(){
       "Số nhà/Ấp/KP/Đường",
       "Phòng"
     ];
+    const TMP_SELECTION_KEY = "cccd_convert_tmp_selection_v1";
+    const selectedTmpRows = new Set((() => {
+      try {
+        const saved = JSON.parse(sessionStorage.getItem(TMP_SELECTION_KEY) || "[]");
+        return Array.isArray(saved) ? saved.filter(Number.isInteger) : [];
+      } catch { return []; }
+    })());
+
+    function updateTmpSelectionUI(total = loadTmpRows().length){
+      for (const index of [...selectedTmpRows]) if (index < 0 || index >= total) selectedTmpRows.delete(index);
+      try { sessionStorage.setItem(TMP_SELECTION_KEY, JSON.stringify([...selectedTmpRows].sort((a, b) => a - b))); } catch {}
+      $("tmpSelectionCount").textContent = `Đã chọn ${selectedTmpRows.size} người`;
+      const all = $("tmpSelectAllCheckbox");
+      if (all) {
+        all.checked = total > 0 && selectedTmpRows.size === total;
+        all.indeterminate = selectedTmpRows.size > 0 && selectedTmpRows.size < total;
+      }
+    }
 
     function loadTmpRows(){
       try{
@@ -1192,6 +1244,8 @@ function clearReaderPreview(){
         table.style.display = "none";
         body.innerHTML = "";
         head.innerHTML = "";
+        selectedTmpRows.clear();
+        updateTmpSelectionUI(0);
         return;
       }
 
@@ -1199,6 +1253,19 @@ function clearReaderPreview(){
       table.style.display = "table";
 
       head.innerHTML = "";
+      const thSelect = document.createElement("th");
+      thSelect.className = "tmpSelectCell";
+      const selectAll = document.createElement("input");
+      selectAll.type = "checkbox";
+      selectAll.id = "tmpSelectAllCheckbox";
+      selectAll.setAttribute("aria-label", "Chọn tất cả người trong bảng tạm");
+      selectAll.addEventListener("change", () => {
+        selectedTmpRows.clear();
+        if (selectAll.checked) rows.forEach((_, index) => selectedTmpRows.add(index));
+        renderTmpTable();
+      });
+      thSelect.append(selectAll);
+      head.appendChild(thSelect);
       const th0 = document.createElement("th");
       th0.textContent = "#";
       head.appendChild(th0);
@@ -1216,6 +1283,21 @@ function clearReaderPreview(){
       body.innerHTML = "";
       rows.forEach((r, idx) => {
         const tr = document.createElement("tr");
+
+        const tdSelect = document.createElement("td");
+        tdSelect.className = "tmpSelectCell";
+        tdSelect.setAttribute("data-label", "Chọn");
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.checked = selectedTmpRows.has(idx);
+        checkbox.dataset.selectTmpRow = String(idx);
+        checkbox.setAttribute("aria-label", `Chọn ${r?.["Họ tên"] || `dòng ${idx + 1}`}`);
+        checkbox.addEventListener("change", () => {
+          if (checkbox.checked) selectedTmpRows.add(idx); else selectedTmpRows.delete(idx);
+          updateTmpSelectionUI(rows.length);
+        });
+        tdSelect.append(checkbox);
+        tr.appendChild(tdSelect);
 
         const tdIndex = document.createElement("td");
         tdIndex.textContent = String(idx + 1);
@@ -1239,6 +1321,9 @@ function clearReaderPreview(){
         del.addEventListener("click", () => {
           const cur = loadTmpRows();
           cur.splice(idx, 1);
+          const shifted = [...selectedTmpRows].filter(i => i !== idx).map(i => i > idx ? i - 1 : i);
+          selectedTmpRows.clear();
+          shifted.forEach(i => selectedTmpRows.add(i));
           saveTmpRows(cur);
           toast("✅ Đã xóa dòng");
         });
@@ -1282,8 +1367,91 @@ function clearReaderPreview(){
 
         body.appendChild(tr);
       });
+      updateTmpSelectionUI(rows.length);
       renderLucideIcons();
     }
+
+    function selectAllTmpRows(selected){
+      const rows = loadTmpRows();
+      selectedTmpRows.clear();
+      if (selected) rows.forEach((_, index) => selectedTmpRows.add(index));
+      renderTmpTable();
+    }
+
+    function openBatchCT01Modal(){
+      const rows = loadTmpRows();
+      const selected = [...selectedTmpRows].filter(index => rows[index]);
+      if (!selected.length) return toast("❌ Chưa chọn người nào trong Bảng tạm để in CT01.");
+      $("batchCT01Count").textContent = `Sẽ tạo ${selected.length} CT01 riêng.`;
+      $("batchCT01Error").textContent = "";
+      updateBatchHeadIdStatus();
+      ModalController.open($("batchCT01Modal"), {
+        initialFocus: $("batchHouseholdHeadName"),
+        onConfirm: () => submitBatchCT01(false),
+        onClose: () => { $("batchCT01Error").textContent = ""; }
+      });
+    }
+
+    function updateBatchHeadIdStatus(){
+      const input = $("batchHeadIdNumber");
+      const digits = input.value.replace(/\D/g, "").slice(0, 12);
+      input.value = digits;
+      const valid = digits.length === 12;
+      $("batchHeadIdBadge").textContent = `${digits.length}/12${valid ? " ✓" : ""}`;
+      $("batchHeadIdBadge").dataset.state = digits.length === 0 ? "empty" : (valid ? "valid" : "short");
+      $("batchHeadIdStatus").textContent = valid
+        ? "Số định danh chủ hộ hợp lệ"
+        : (digits.length ? `Còn thiếu ${12 - digits.length} số` : "Chưa có số định danh chủ hộ");
+      ["btnPreviewBatchCT01", "btnPrintBatchCT01", "btnPrintSeparateBatchCT01"].forEach(id => {
+        $(id).disabled = !valid;
+      });
+      return valid;
+    }
+
+    function submitBatchCT01(printMode = "preview"){
+      if (ModalController.active !== $("batchCT01Modal")) return;
+      const householdHeadName = $("batchHouseholdHeadName").value.trim();
+      const headIdNumber = $("batchHeadIdNumber").value.replace(/\D/g, "").slice(0, 12);
+      $("batchHeadIdNumber").value = headIdNumber;
+      const tempAddress = $("batchTempAddress").value.trim();
+      if (!householdHeadName || !tempAddress) {
+        $("batchCT01Error").textContent = "Vui lòng nhập đầy đủ tên chủ hộ và địa chỉ đăng ký tạm trú.";
+        (!householdHeadName ? $("batchHouseholdHeadName") : $("batchTempAddress")).focus();
+        return;
+      }
+      if (headIdNumber.length !== 12) {
+        $("batchCT01Error").textContent = "Số định danh cá nhân của chủ hộ phải đủ 12 số.";
+        $("batchHeadIdNumber").focus();
+        return;
+      }
+      const rows = loadTmpRows();
+      const items = [...selectedTmpRows].sort((a, b) => a - b)
+        .map(index => rows[index]).filter(Boolean)
+        .map(row => buildCT01PrefillFromTmpRow(row, { householdHeadName, headIdNumber, tempAddress }));
+      if (!items.length) {
+        $("batchCT01Error").textContent = "Các dòng đã chọn không còn tồn tại. Hãy chọn lại.";
+        return;
+      }
+      sessionStorage.removeItem(CT01_PREFILL_KEY);
+      sessionStorage.setItem(CT01_BATCH_PREFILL_KEY, JSON.stringify({ items, printMode }));
+      window.location.href = "./ct01.html";
+    }
+
+    $("btnSelectTmpAll").addEventListener("click", () => selectAllTmpRows(true));
+    $("btnClearTmpSelection").addEventListener("click", () => selectAllTmpRows(false));
+    $("btnPrintSelectedCT01").addEventListener("click", openBatchCT01Modal);
+    $("btnCancelBatchCT01").addEventListener("click", () => ModalController.close());
+    $("btnPreviewBatchCT01").addEventListener("click", () => submitBatchCT01("preview"));
+    $("btnPrintBatchCT01").addEventListener("click", () => submitBatchCT01("combined"));
+    $("btnPrintSeparateBatchCT01").addEventListener("click", () => submitBatchCT01("separate"));
+    $("batchHeadIdNumber").addEventListener("input", event => {
+      event.target.value = event.target.value.replace(/\D/g, "").slice(0, 12);
+      $("batchCT01Error").textContent = "";
+      updateBatchHeadIdStatus();
+    });
+    $("batchCT01Modal").addEventListener("click", event => {
+      if (event.target === $("batchCT01Modal")) ModalController.close();
+    });
 
     let editingTmpRow = null;
 
@@ -2480,6 +2648,11 @@ function bestMatch(list, rawName, typeHint){
       $("mode").value = "manual-old";
       updateAddressModePanels();
 
+      window.addEventListener("pageshow", () => {
+        renderSavedCount();
+        renderTmpTable();
+      });
+
       const apiKey = ($("apiKey").value || "").trim();
       const provinceCode = ($("provinceCode").value || "").trim();
       const districtCode = ($("districtCode").value || "").trim();
@@ -2544,6 +2717,7 @@ Số nhà/Ấp/KP/Đường: ${$("addrStreet").textContent}
 // ✅ Điền CT01 & chuyển trang
 // =======================
 const CT01_PREFILL_KEY = "ct01_prefill_v1";
+const CT01_BATCH_PREFILL_KEY = "ct01_batch_prefill_v1";
 const CT01_DEFAULT_TEMP_ADDRESS = "Tổ 4B, KP1, Phường Bình Cơ, TP.Hồ Chí Minh";
 
 function todayDDMMYYYY(){
@@ -2554,62 +2728,58 @@ function todayDDMMYYYY(){
   return `${dd}/${mm}/${yyyy}`;
 }
 
-function buildCT01Prefill(){
-  const fullName = ($("name")?.textContent || "").trim();
-  const idNumber = ($("cccd")?.textContent || "").trim();
-  const dob = ($("dob")?.textContent || "").trim();
-  const gender = ($("gender")?.textContent || "").trim();
-
-  // CT01 luôn dùng địa chỉ tạm trú mặc định, không lấy địa chỉ từ CCCD.
-  const tempAddress = CT01_DEFAULT_TEMP_ADDRESS;
-
-  // Nếu không có đủ dữ liệu cơ bản thì báo
+function createCT01Prefill({ fullName, idNumber, dob = "", gender = "", householdHeadName = "", headIdNumber = "", tempAddress = CT01_DEFAULT_TEMP_ADDRESS }){
   if (!fullName || fullName === "—" || !idNumber || idNumber === "—"){
     throw new Error("Chưa có Họ tên/CCCD. Hãy quét/parse/OCR trước.");
   }
-  // Đẩy theo đúng schema state của ct01.html mình gửi trước đó
   return {
     agency: "Công an phường Bình Cơ, TP. Hồ Chí Minh",
-
     fullName,
     dob: (dob && dob !== "—") ? dob : "",
     gender: (gender && gender !== "—") ? gender : "",
-
     idNumber: idNumber.replace(/\D/g, "").slice(0, 12),
-
     phone: "",
     email: "",
-
-    householdHeadName: "",
-    relationToHead: "",
-    headIdNumber: "",
-
-    requestType: "tamtru",
-
+    householdHeadName,
     relationToHead: "Người Thuê Trọ",
-
-    tempAddress: tempAddress || "",
+    headIdNumber: headIdNumber.replace(/\D/g, "").slice(0, 12),
+    requestType: "tamtru",
+    tempAddress,
     fromDate: todayDDMMYYYY(),
     toDate: "",
     reason: "Thuê trọ",
-
-    // để ct01 tự build nếu bạn có logic buildSuggestedContent,
-    // nhưng mình vẫn set sẵn nội dung đơn giản:
-    requestContent: tempAddress
-      ? `Đề nghị đăng ký tạm trú tại: ${tempAddress}. Thời gian tạm trú: từ ngày ${todayDDMMYYYY()}. Lý do: Thuê trọ.`
-      : `Đề nghị đăng ký tạm trú. Thời gian tạm trú: từ ngày ${todayDDMMYYYY()}. Lý do: Thuê trọ.`,
-
+    // Để ct01.html tạo nội dung bằng đúng flow buildSuggestedContent() hiện có.
+    requestContent: "",
     members: [],
-
     declareDate: todayDDMMYYYY(),
     place: "TP. Hồ Chí Minh",
-
-    sigHead: "",
+    sigHead: householdHeadName,
     sigOwner: "",
     sigGuardian: "",
     sigDeclarer: fullName,
     extraNote: "Tạo từ trang quét QR"
   };
+}
+
+function buildCT01Prefill(){
+  return createCT01Prefill({
+    fullName: ($("name")?.textContent || "").trim(),
+    idNumber: ($("cccd")?.textContent || "").trim(),
+    dob: ($("dob")?.textContent || "").trim(),
+    gender: ($("gender")?.textContent || "").trim()
+  });
+}
+
+function buildCT01PrefillFromTmpRow(row, shared){
+  return createCT01Prefill({
+    fullName: normalizeCell(row?.["Họ tên"]),
+    idNumber: normalizeCell(row?.["Số CCCD"]),
+    dob: normalizeCell(row?.["Ngày sinh"]),
+    gender: normalizeCell(row?.["Giới tính"]),
+    householdHeadName: shared.householdHeadName,
+    headIdNumber: shared.headIdNumber,
+    tempAddress: shared.tempAddress
+  });
 }
 
 $("btnGoCT01").addEventListener("click", () => {

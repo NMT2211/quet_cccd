@@ -251,6 +251,131 @@ async function main() {
     assert((await page.evaluate(() => buildTelegramMessageFromRow(loadTmpRows()[0]))).includes('NGƯỜI ĐÃ SỬA'));
     passed.push('Edit temporary row: cancel, required fields, Enter once, preserve other rows and current scan, updated Telegram payload');
 
+    await page.evaluate(() => {
+      const rows = loadTmpRows();
+      rows[1] = { ...rows[1], 'Họ tên': 'NGƯỜI THỨ HAI', 'Số CCCD': '091213006839' };
+      rows[2] = { ...rows[2], 'Họ tên': 'NGƯỜI THỨ BA', 'Số CCCD': '091213006840' };
+      saveTmpRows(rows);
+    });
+    const batchRows = await page.evaluate(() => loadTmpRows());
+    await page.locator('#btnPrintSelectedCT01').click();
+    assert((await page.locator('#toast').textContent()).includes('Chưa chọn người nào'));
+    assert.deepEqual(await page.locator('#toast').evaluate(el => ({
+      right: getComputedStyle(el).right,
+      top: getComputedStyle(el).top,
+      backdrop: getComputedStyle(el, '::before').content
+    })), { right: '14px', top: '14px', backdrop: 'none' });
+    await page.locator('[data-select-tmp-row="0"]').check();
+    assert.equal(await page.locator('#tmpSelectionCount').textContent(), 'Đã chọn 1 người');
+    await page.locator('#btnPrintSelectedCT01').click();
+    await page.locator('#batchHouseholdHeadName').fill('NGUYỄN THỊ NGUYỆT');
+    await page.locator('#batchHeadIdNumber').fill('123');
+    assert.equal(await page.locator('#batchHeadIdBadge').textContent(), '3/12');
+    assert.equal(await page.locator('#btnPreviewBatchCT01').isDisabled(), true);
+    await page.keyboard.press('Enter');
+    assert(await page.locator('#batchCT01Modal').isVisible());
+    assert((await page.locator('#batchCT01Error').textContent()).includes('đủ 12 số'));
+    await page.locator('#batchHeadIdNumber').fill('012345678901');
+    assert.equal(await page.locator('#batchHeadIdBadge').textContent(), '12/12 ✓');
+    assert.equal(await page.locator('#btnPreviewBatchCT01').isEnabled(), true);
+    await page.keyboard.press('Enter');
+    await page.waitForURL('**/ct01.html');
+    assert.equal(await page.locator('#batchPreview .batchPage').count(), 1);
+    assert((await page.locator('#batchPreview .batchPage').first().textContent()).includes('NGƯỜI ĐÃ SỬA'));
+    await page.evaluate(() => { window.__printCalls = 0; window.print = () => { window.__printCalls += 1; }; });
+    await page.locator('#btnPrint').click();
+    assert.equal(await page.evaluate(() => window.__printCalls), 1);
+    await page.goBack();
+    await page.reload();
+    assert.equal(await page.locator('[data-select-tmp-row]:checked').count(), 1);
+    assert.equal(await page.locator('#tmpSelectionCount').textContent(), 'Đã chọn 1 người');
+
+    await page.locator('[data-select-tmp-row="0"]').check();
+    await page.locator('[data-select-tmp-row="1"]').check();
+    assert.equal(await page.locator('#tmpSelectionCount').textContent(), 'Đã chọn 2 người');
+    await page.locator('#btnPrintSelectedCT01').click();
+    await page.locator('#batchHouseholdHeadName').fill('NGUYỄN VĂN XUÂN CHUÂN');
+    await page.locator('#batchHeadIdNumber').fill('012345678901');
+    await page.locator('#batchTempAddress').fill('ĐỊA CHỈ DÙNG CHUNG');
+    await page.locator('#btnPreviewBatchCT01').click();
+    await page.waitForURL('**/ct01.html');
+    const batchPages = page.locator('#batchPreview .batchPage');
+    assert.equal(await batchPages.count(), 2);
+    assert.equal(await batchPages.nth(0).getAttribute('data-person-name'), batchRows[0]['Họ tên']);
+    assert.equal(await batchPages.nth(1).getAttribute('data-person-name'), batchRows[1]['Họ tên']);
+    assert((await batchPages.nth(0).textContent()).includes(batchRows[0]['Số CCCD']));
+    assert(!(await batchPages.nth(0).textContent()).includes(batchRows[1]['Số CCCD']));
+    assert((await batchPages.nth(1).textContent()).includes(batchRows[1]['Số CCCD']));
+    assert((await batchPages.nth(1).textContent()).includes('NGUYỄN VĂN XUÂN CHUÂN'));
+    assert((await batchPages.nth(1).textContent()).includes('ĐỊA CHỈ DÙNG CHUNG'));
+    assert((await batchPages.nth(1).textContent()).includes('012345678901'));
+    const batchRequestText = (await batchPages.nth(1).textContent()).replace(/\s+/g, ' ');
+    assert(batchRequestText.includes('Đề nghị đăng ký tạm trú tại: Nhà trọ NGUYỄN VĂN XUÂN CHUÂN, ĐỊA CHỈ DÙNG CHUNG.'));
+    assert.equal(await batchPages.nth(1).locator('.sig .fillName').first().textContent(), 'NGUYỄN VĂN XUÂN CHUÂN');
+    assert.equal(await page.locator('#a4Print .batchPage').count(), 2);
+    assert.equal(await page.locator('#a4Print .batchPage').first().evaluate(el => getComputedStyle(el).pageBreakAfter), 'always');
+    await page.evaluate(() => { window.__printCalls = 0; window.print = () => { window.__printCalls += 1; }; });
+    await page.locator('#btnPrint').click();
+    assert.equal(await page.evaluate(() => window.__printCalls), 1);
+    await page.screenshot({ path: path.join(root, 'test-artifacts/batch-ct01-preview.png'), fullPage: true });
+    await page.goBack();
+    await page.reload();
+
+    await page.locator('#btnSelectTmpAll').click();
+    assert.equal(await page.locator('[data-select-tmp-row]:checked').count(), 3);
+    assert.equal(await page.locator('#tmpSelectionCount').textContent(), 'Đã chọn 3 người');
+    await page.locator('#btnClearTmpSelection').click();
+    assert.equal(await page.locator('[data-select-tmp-row]:checked').count(), 0);
+    await page.locator('#btnSelectTmpAll').click();
+    await page.locator('#btnPrintSelectedCT01').click();
+    await page.keyboard.press('Escape');
+    assert(!(await page.locator('#batchCT01Modal').isVisible()));
+    await page.locator('#btnPrintSelectedCT01').click();
+    await page.locator('#batchHouseholdHeadName').fill('NGUYỄN MINH TUẤN');
+    await page.locator('#batchHeadIdNumber').fill('012345678901');
+    await page.addInitScript(() => {
+      window.__autoBatchPrintCalls = 0;
+      window.print = () => { window.__autoBatchPrintCalls += 1; };
+    });
+    await page.locator('#btnPrintBatchCT01').click();
+    await page.waitForURL('**/ct01.html');
+    await page.waitForFunction(() => window.__autoBatchPrintCalls === 1);
+    assert.equal(await page.locator('#a4Print .batchPage').count(), 3);
+    await page.goBack();
+    await page.reload();
+
+    await page.locator('#btnPrintSelectedCT01').click();
+    await page.locator('#batchHouseholdHeadName').fill('NGUYỄN MINH TUẤN');
+    await page.locator('#batchHeadIdNumber').fill('012345678901');
+    await page.addInitScript(() => {
+      window.__separateBatchPrints = [];
+      window.print = () => {
+        window.__separateBatchPrints.push({
+          title: document.title,
+          pages: document.querySelectorAll('#a4Print .batchPage').length,
+          person: document.querySelector('#a4Print .batchPage')?.textContent || ''
+        });
+      };
+    });
+    await page.locator('#btnPrintSeparateBatchCT01').click();
+    await page.waitForURL('**/ct01.html');
+    await page.waitForFunction(() => window.__separateBatchPrints.length === 1);
+    for (let index = 1; index < 3; index += 1) {
+      await page.evaluate(() => window.dispatchEvent(new Event('afterprint')));
+      await page.waitForFunction(expected => window.__separateBatchPrints.length === expected, index + 1);
+    }
+    const separatePrints = await page.evaluate(() => window.__separateBatchPrints);
+    assert(separatePrints.every(entry => entry.pages === 1));
+    assert(separatePrints.every((entry, index) => entry.person.includes(batchRows[index]['Số CCCD'])));
+    assert(separatePrints.every((entry, index) => !entry.person.includes(batchRows[(index + 1) % batchRows.length]['Số CCCD'])));
+    await page.evaluate(() => window.dispatchEvent(new Event('afterprint')));
+    assert.equal(await page.locator('#a4Print .batchPage').count(), 3);
+    await page.goBack();
+    await page.reload();
+    passed.push('Batch CT01: empty guard, one/multiple selection, select all, clear all, preview, print and isolated person data');
+    await fresh();
+    await page.evaluate(rows => saveTmpRows(rows), batchRows);
+
     await page.locator('#btnCopyTmpAll').click();
     const copiedTable = await page.evaluate(() => navigator.clipboard.readText());
     const copiedLines = copiedTable.split(/\r?\n/);
@@ -301,9 +426,10 @@ async function main() {
     await page.locator('#appPopupCancel').click();
     assert.equal(await page.locator('#fullName').inputValue(), person.name);
     await page.locator('#jsonFile').setInputFiles({ name: 'invalid.json', mimeType: 'application/json', buffer: Buffer.from('{invalid') });
-    await page.locator('#appPopup').waitFor({ state: 'visible' });
-    assert.equal(await page.locator('#appPopupTitle').textContent(), 'Không thể nạp dữ liệu');
-    await page.locator('#appPopupAccept').click();
+    await page.locator('#appToast').waitFor({ state: 'visible' });
+    assert.equal(await page.locator('#appToast').textContent(), 'File JSON không hợp lệ.');
+    assert.equal(await page.locator('#appPopup').isVisible(), false);
+    assert.equal(await page.locator('#appToast').evaluate(el => getComputedStyle(el).right), '14px');
     assert.deepEqual(await page.locator('#householdHeadSuggestions option').evaluateAll(options => options.map(option => option.value)), [
       'NGUYỄN VĂN XUÂN CHUÂN', 'NGUYỄN THỊ NGUYỆT', 'NGUYỄN MINH TUẤN'
     ]);

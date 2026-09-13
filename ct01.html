@@ -22,6 +22,12 @@
     .appPopup h2{ margin:0 0 8px; font-size:18px; }
     .appPopup p{ margin:0; color:var(--muted); line-height:1.5; }
     .appPopupActions{ display:flex; justify-content:flex-end; gap:10px; margin-top:18px; }
+    .appToast{
+      position:fixed; top:14px; right:14px; z-index:1200;
+      display:none; width:max-content; max-width:min(420px, calc(100vw - 28px));
+      padding:12px 14px; border-radius:14px; color:#fff; background:rgba(15,23,42,.94);
+      box-shadow:0 14px 30px rgba(0,0,0,.18); line-height:1.45;
+    }
     :root{
       /* ✅ LIGHT THEME */
       --bg:#ffffff;
@@ -300,7 +306,17 @@
   font-weight: 700;
   display: inline-flex;
   white-space: nowrap;
+  max-width: 100%;
+  justify-content: center;
 }
+    /* .sig .fillName.longName{ font-size:8.5pt; letter-spacing:-.2px; } */
+
+    .batchModeNotice{ display:none; }
+    .batchPreview{ display:none; width:100%; gap:18px; }
+    .batchPreview.active{ display:grid; }
+    .batchPreview .a4{ zoom:var(--batch-preview-scale, 1); }
+    .batchPage{ break-after:page; page-break-after:always; }
+    .batchPage:last-child{ break-after:auto; page-break-after:auto; }
 
     /* Print only */
     @media print{
@@ -308,6 +324,7 @@
       #nav-host{ display:none !important; }
       .wrap, .topbar, .grid{ display:none !important; }
       .printOnly{ display:block !important; padding:0 !important; margin:0 !important; }
+      .printOnly .batchPage{ margin:0 !important; }
       .a4{
         box-shadow:none !important;
         border-radius:0 !important;
@@ -438,8 +455,10 @@
       </div>
 
       <div class="actions">
+        <span class="badge batchModeNotice" id="batchModeNotice"></span>
         <button class="btn primary" id="btnPreview" type="button"><i data-lucide="eye" aria-hidden="true"></i> Cập nhật Preview</button>
         <button class="btn ok" id="btnPrint" type="button"><i data-lucide="printer" aria-hidden="true"></i> In / Lưu PDF</button>
+        <button class="btn ok" id="btnPrintSeparate" type="button" style="display:none"><i data-lucide="file-output" aria-hidden="true"></i> In từng file</button>
         <button class="btn warn" id="btnDownloadJson" type="button"><i data-lucide="download" aria-hidden="true"></i> Tải JSON</button>
         <button class="btn" id="btnLoadJson" type="button"><i data-lucide="upload" aria-hidden="true"></i> Nạp JSON</button>
         <button class="btn danger" id="btnReset" type="button"><i data-lucide="trash-2" aria-hidden="true"></i> Xóa dữ liệu</button>
@@ -448,7 +467,7 @@
 
     <div class="grid">
       <!-- INPUT -->
-      <div class="card">
+      <div class="card" id="inputCard">
         <h2>1) Nhập thông tin</h2>
         <div class="body">
           <div class="row1">
@@ -610,8 +629,8 @@
 
           <div class="row3">
             <div>
-              <label>Chủ hộ (tên để hiện ở phần chữ ký)</label>
-              <input id="sigHead" placeholder="(Ký, ghi rõ họ tên) – nếu có" />
+              <label>Chủ hộ (tự động lấy từ mục 7)</label>
+              <input id="sigHead" placeholder="Tự động lấy họ tên chủ hộ" readonly />
             </div>
             <div>
               <label>Chủ sở hữu chỗ ở hợp pháp (tên)</label>
@@ -639,10 +658,11 @@
 
       <!-- PREVIEW -->
       <div class="card">
-        <h2>2) Preview CT01 (A4)</h2>
+        <h2 id="previewTitle">2) Preview CT01 (A4)</h2>
         <div class="previewShell">
           <div class="a4Viewport" id="a4Viewport">
             <div class="a4" id="a4"></div>
+            <div class="batchPreview" id="batchPreview"></div>
           </div>
         </div>
       </div>
@@ -651,10 +671,11 @@
 
   <!-- PRINT VERSION -->
   <div class="printOnly">
-    <div class="a4" id="a4Print"></div>
+    <div id="a4Print"></div>
   </div>
 
   <input type="file" id="jsonFile" accept="application/json" style="display:none" />
+  <div class="appToast" id="appToast" role="status" aria-live="polite"></div>
 
   <dialog class="appPopup" id="appPopup" aria-labelledby="appPopupTitle" aria-describedby="appPopupMessage">
     <h2 id="appPopupTitle">Thông báo</h2>
@@ -696,7 +717,18 @@
     const $ = (id) => document.getElementById(id);
 
     let appPopupResolve = null;
+    function showAppToast(message){
+      const toast = $("appToast");
+      toast.textContent = message;
+      toast.style.display = "block";
+      clearTimeout(window.__appToastTimer);
+      window.__appToastTimer = setTimeout(() => { toast.style.display = "none"; }, 2600);
+    }
     function showAppPopup(message, { title = "Thông báo", confirm = false } = {}){
+      if (!confirm) {
+        showAppToast(message);
+        return Promise.resolve(true);
+      }
       const dialog = $("appPopup");
       if (dialog.open) dialog.close();
       $("appPopupTitle").textContent = title;
@@ -750,6 +782,15 @@ function buildBaseFilename(){
 }
 
 window.addEventListener("afterprint", () => {
+  if (batchSeparatePrintIndex >= 0) {
+    batchSeparatePrintIndex += 1;
+    if (batchSeparatePrintIndex < batchPrefills.length) {
+      setTimeout(printNextBatchFile, 150);
+      return;
+    }
+    batchSeparatePrintIndex = -1;
+    renderBatchPreview();
+  }
   document.title = ORIGINAL_TITLE;
 });
 
@@ -959,6 +1000,12 @@ window.addEventListener("afterprint", () => {
       const a4 = $("a4");
       if(!vp || !a4) return;
 
+      if (batchPrefills.length) {
+        const viewportWidth = Math.max(1, vp.clientWidth - 20);
+        document.documentElement.style.setProperty("--batch-preview-scale", String(Math.min(1, viewportWidth / 794)));
+        return;
+      }
+
       a4.style.transform = "none";
 
       const vpW = Math.max(1, vp.clientWidth - 20);
@@ -1071,6 +1118,7 @@ window.addEventListener("afterprint", () => {
       state.declareDate = $("declareDate").value;
       state.place = $("place").value;
 
+      $("sigHead").value = state.householdHeadName || "";
       state.sigHead = $("sigHead").value;
       state.sigOwner = $("sigOwner").value;
       state.sigGuardian = $("sigGuardian").value;
@@ -1261,33 +1309,54 @@ function renderMembersPrint(){
               ${declareDMY}
               <div class="cap">Ý KIẾN CỦA CHỦ HỘ (3)</div>
               <div class="note">(Ký, ghi rõ họ tên)</div>
-              <div class="fillName">${sigHead || ""}</div>
+              <div class="fillName${sigHead.length > 20 ? " longName" : ""}">${sigHead || ""}</div>
             </div>
             <div class="sig">
               ${declareDMY}
               <div class="cap">Ý KIẾN CỦA CHỦ SỞ HỮU<br/>CHỖ Ở HỢP PHÁP (4)</div>
               <div class="note">(Ký, ghi rõ họ tên)</div>
-              <div class="fillName">${sigOwner || ""}</div>
+              <div class="fillName${sigOwner.length > 20 ? " longName" : ""}">${sigOwner || ""}</div>
             </div>
             <div class="sig">
               ${declareDMY}
               <div class="cap">Ý KIẾN CỦA CHA, MẸ<br/>NGƯỜI GIÁM HỘ (5)</div>
               <div class="note">(Ký, ghi rõ họ tên)</div>
-              <div class="fillName">${sigGuardian || ""}</div>
+              <div class="fillName${sigGuardian.length > 20 ? " longName" : ""}">${sigGuardian || ""}</div>
             </div>
             <div class="sig">
               ${declareDMY}
               <div class="cap">NGƯỜI KÊ KHAI (6)</div>
               <div class="note">(Ký, ghi rõ họ tên)</div>
-              <div class="fillName">${sigDeclarer || ""}</div>
+              <div class="fillName${sigDeclarer.length > 20 ? " longName" : ""}">${sigDeclarer || ""}</div>
             </div>
           </div>
         </div>
       `;
     }
 
+    let batchPrefills = [];
+    let batchPrintMode = "preview";
+    let batchSeparatePrintIndex = -1;
+
     // ✅ nhận dữ liệu từ trang quét QR (index)
     (function hydrateFromPrefill(){
+      const batchKey = "ct01_batch_prefill_v1";
+      const batchRaw = sessionStorage.getItem(batchKey);
+      if (batchRaw) {
+        try {
+          const payload = JSON.parse(batchRaw);
+          batchPrefills = Array.isArray(payload?.items) ? payload.items : [];
+          batchPrintMode = payload?.printMode || (payload?.autoPrint ? "combined" : "preview");
+          sessionStorage.removeItem(batchKey);
+          if (batchPrefills.length) {
+            Object.assign(state, batchPrefills[0]);
+            applyStateToInputs(true);
+            return;
+          }
+        } catch(e) {
+          sessionStorage.removeItem(batchKey);
+        }
+      }
       const key = "ct01_prefill_v1";
       const raw = sessionStorage.getItem(key);
       if (!raw) return;
@@ -1299,11 +1368,62 @@ function renderMembersPrint(){
       }catch(e){}
     })();
 
+    function buildCT01HtmlFor(prefill){
+      const snapshot = { ...state, members: [...(state.members || [])] };
+      Object.assign(state, prefill, { members: [...(prefill.members || [])], sigDeclarer: prefill.fullName || "" });
+      if (!sanitize(state.requestContent).trim()) {
+        state.requestContent = buildSuggestedContent();
+      }
+      const html = buildCT01Html();
+      Object.assign(state, snapshot);
+      return html;
+    }
+
+    function renderBatchPreview(){
+      const pages = batchPrefills.map((prefill, index) => {
+        const name = sanitize(prefill.fullName || "");
+        return `<section class="a4 batchPage" data-batch-index="${index}" data-person-name="${name}">${buildCT01HtmlFor(prefill)}</section>`;
+      }).join("");
+      $("a4").style.display = "none";
+      $("batchPreview").classList.add("active");
+      $("batchPreview").innerHTML = pages;
+      $("a4Print").innerHTML = pages;
+      const viewportWidth = Math.max(1, $("a4Viewport").clientWidth - 20);
+      document.documentElement.style.setProperty("--batch-preview-scale", String(Math.min(1, viewportWidth / 794)));
+    }
+
+    function printBatchCombined(){
+      batchSeparatePrintIndex = -1;
+      document.title = `CT01-${batchPrefills.length}-nguoi`;
+      renderBatchPreview();
+      window.print();
+    }
+
+    function printNextBatchFile(){
+      const prefill = batchPrefills[batchSeparatePrintIndex];
+      if (!prefill) return;
+      const name = sanitize(prefill.fullName || "");
+      const cccd = digitsOnly(prefill.idNumber || "") || "CCCD";
+      document.title = `CT01-${name}-${cccd}`;
+      $("a4Print").innerHTML = `<section class="a4 batchPage">${buildCT01HtmlFor(prefill)}</section>`;
+      window.print();
+    }
+
+    function printBatchSeparately(){
+      if (!batchPrefills.length || batchSeparatePrintIndex >= 0) return;
+      batchSeparatePrintIndex = 0;
+      printNextBatchFile();
+    }
+
     function renderPreview(){
+      if (batchPrefills.length) {
+        renderBatchPreview();
+        return;
+      }
       syncFromInputs();
       const html = buildCT01Html();
       $("a4").innerHTML = html;
-      $("a4Print").innerHTML = html;
+      $("a4Print").innerHTML = `<section class="a4">${html}</section>`;
       requestAnimationFrame(fitA4Preview);
     }
 
@@ -1425,7 +1545,7 @@ function renderMembersPrint(){
       $("declareDate").value = state.declareDate || "";
       $("place").value = state.place || "";
 
-      $("sigHead").value = state.sigHead || "";
+      $("sigHead").value = state.householdHeadName || "";
       $("sigOwner").value = state.sigOwner || "";
       $("sigGuardian").value = state.sigGuardian || "";
 
@@ -1502,6 +1622,10 @@ function renderMembersPrint(){
     });
 
     $("btnPrint").addEventListener("click", () => {
+      if (batchPrefills.length) {
+        printBatchCombined();
+        return;
+      }
       ensureDefaults();
       if(!validateAll(true)) return;
 
@@ -1512,6 +1636,7 @@ function renderMembersPrint(){
       renderPreview();
       window.print();
     });
+    $("btnPrintSeparate").addEventListener("click", printBatchSeparately);
 
     $("btnDownloadJson").addEventListener("click", downloadJson);
 
@@ -1530,9 +1655,24 @@ function renderMembersPrint(){
 
     // ✅ init defaults + first render
     ensureDefaults();
+    if (batchPrefills.length) {
+      $("inputCard").style.display = "none";
+      $("batchModeNotice").style.display = "inline-flex";
+      $("batchModeNotice").textContent = `Đang xem trước ${batchPrefills.length} CT01`;
+      $("previewTitle").textContent = `2) Xem trước ${batchPrefills.length} CT01`;
+      $("btnPreview").style.display = "none";
+      $("btnDownloadJson").style.display = "none";
+      $("btnLoadJson").style.display = "none";
+      $("btnReset").style.display = "none";
+      $("btnPrint").replaceChildren(document.createElement("i"), document.createTextNode(" In chung 1 file"));
+      $("btnPrint").firstElementChild.setAttribute("data-lucide", "printer");
+      $("btnPrintSeparate").style.display = "inline-flex";
+    }
     renderPreview();
     validateAll(false);
     if (window.lucide?.createIcons) window.lucide.createIcons();
+    if (batchPrefills.length && batchPrintMode === "combined") setTimeout(printBatchCombined, 250);
+    if (batchPrefills.length && batchPrintMode === "separate") setTimeout(printBatchSeparately, 250);
   </script>
 </body>
 </html>

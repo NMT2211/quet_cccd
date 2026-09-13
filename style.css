@@ -25,15 +25,18 @@ body:has(#btnShortcuts) :is(button, a, input, textarea, select):focus-visible{
   outline-offset: 3px;
 }
 body .modalOverlay{ z-index: 1100; }
-body .toast{ z-index: 1200; max-width: calc(100vw - 28px); pointer-events: none; }
-body .toast::before{
-  content: "";
-  position: fixed;
-  inset: -100vh -100vw;
-  background: rgba(15,23,42,.35);
-  z-index: -1;
+body .toast{
+  z-index: 1200;
+  max-width: min(420px, calc(100vw - 28px));
+  width: max-content;
+  left: auto;
+  right: 14px;
+  top: 14px;
+  transform: none;
+  text-align: left;
   pointer-events: none;
 }
+body .toast::before{ content:none; }
 body .lucide{ width: 1em; height: 1em; vertical-align: -0.125em; flex: 0 0 auto; }
 body .toast .lucide{ margin-right: 6px; }
 body :is(.btn, .copyBtn, .miniBtn, .pill, .sectionTitle, .tabBtn) > .lucide{ margin-right: 6px; }
@@ -61,9 +64,11 @@ body .toast--warning .lucide{ color: #fde68a; }
   border-radius: 999px;
   background: #f1f5f9;
   color: #475569;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 600;
   white-space: nowrap;
+  min-width: 80px;
+    text-align: center;
   /* gap: 5px; */
 }
 .digitBadge[data-state="valid"]{ color: #166534; background: #f0fdf4; border-color: #bbf7d0; }
@@ -103,6 +108,14 @@ padding: 10px 12px;
   }
 .shortcutRowActions{ display: flex; gap: 6px; }
 .tmpRowActions{ display: flex; flex-wrap: wrap; gap: 6px; min-width: 0; }
+.tmpSelectionCount{ display:inline-flex; align-items:center; font-size:13px; font-weight:700; color:var(--muted); padding:0 4px; }
+.tmpSelectCell{ width:44px; min-width:44px; text-align:center; }
+.tmpSelectCell input{ width:18px; height:18px; min-height:0; cursor:pointer; }
+#batchCT01Modal .modal{ width:min(650px, 100%); }
+#batchCT01Modal label{ display:block; margin-top:12px; }
+.batchHeadIdLine{ display:flex; align-items:center; gap:10px; }
+.batchHeadIdLine input{ flex:1; min-width:0; }
+#batchHeadIdStatus{ margin:5px 0 0; }
 .tmpRowActions .iconBtn{
   width: 40px;
   min-width: 40px;
