@@ -57,7 +57,14 @@
 
     body{
       margin:0;
-      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      font-family:
+        Inter,
+        ui-sans-serif,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
       font-size: var(--base);
       background: var(--bg);
       color: var(--text);
@@ -65,6 +72,22 @@
       -webkit-font-smoothing: antialiased;
       text-rendering: optimizeLegibility;
       width: 100%;
+    }
+
+    body,
+    button,
+    input,
+    textarea,
+    select,
+    table{
+      font-family:
+        Inter,
+        ui-sans-serif,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
     }
 
     .wrap{
@@ -122,7 +145,7 @@
     .card{
       background: var(--surface);
       border:1px solid var(--line);
-      border-radius: var(--radius);
+      border-radius: 8px;
       box-shadow: var(--shadow);
       padding: 16px;
     }
@@ -137,7 +160,7 @@
       flex-wrap:wrap;
     }
     .sectionTitle{
-      font-weight:750;
+      font-weight:700;
       font-size:16px;
       line-height:1.35;
     }
@@ -237,7 +260,7 @@
 
 
     .status{
-      margin-top:10px;
+  
       color: var(--muted);
       font-size: 13px;
       line-height:1.55;
@@ -258,16 +281,18 @@
     /* Info table */
     .kv{
       display:grid;
-      grid-template-columns: 160px minmax(0, 1fr) auto;
+      grid-template-columns: 170px minmax(0, 1fr) auto;
       gap:12px;
-      padding:12px 0;
-      border-top:1px solid var(--line);
+          padding: 0 15px;
+      border-top: 1px solid #e5e7ebb0;
       align-items:center;
     }
     .kv:first-child{border-top:0}
-    .k{color:var(--muted);font-size:13px;align-self:center;font-weight:600}
+    .k{color:var(--muted);font-size:14px;align-self:center;font-weight:600}
     .v{font-weight:600; align-self:center; word-break: break-word}
-    .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}
+    .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 18px;
+  }
 
     .copyBtn{
       display:inline-flex;
@@ -281,7 +306,7 @@
       color: var(--text);
       font-weight:600;
       cursor:pointer;
-      min-height: var(--tap);
+      
       white-space:nowrap;
       transition: background .15s ease, border-color .15s ease, opacity .15s ease;
     }
@@ -439,7 +464,9 @@
       overflow:auto;
       max-height: 320px;
       -webkit-overflow-scrolling: touch;
-      border:1px solid #dbe6f3; border-radius:14px; background:#f3f8fe;
+      border:1px solid #dbe6f3; background:#f3f8fe;
+      border-bottom-right-radius: 11px;
+    border-bottom-left-radius: 11px;
     }
     table.tmpTable{
       width: 100%;
@@ -566,51 +593,70 @@
   <div id="nav-host"></div>
 
   <div class="wrap">
-    <div class="top">
-      <div>
-        <h1>Quét QR CCCD → Lấy thông tin + Chuyển đổi địa chỉ mới</h1>
-        <div class="small" style="margin-top:6px">
-          Quét QR / OCR ảnh CCCD → tự gọi API chuyển đổi địa chỉ → lưu bảng tạm → xuất Excel
+    <header class="top appHeading">
+      <div class="appHeadingMain">
+        <span class="appHeadingIcon" aria-hidden="true"><i data-lucide="scan-line"></i></span>
+        <div>
+          <h1>Quét QR CCCD → Lấy thông tin + Chuyển đổi địa chỉ mới</h1>
+          <div class="small appHeadingSub">Quét QR / OCR ảnh CCCD → tự gọi API chuyển đổi địa chỉ → lưu bảng tạm → xuất Excel • Tạo CT01</div>
         </div>
       </div>
-      <div class="pill" id="libStatus"><i data-lucide="archive" aria-hidden="true"></i> Đang kiểm tra thư viện quét QR...</div>
-      <button class="copyBtn" id="btnShortcuts" type="button"><i data-lucide="keyboard" aria-hidden="true"></i> Phím tắt</button>
-    </div>
+      <div class="appHeadingMeta">
+        <div class="pill" id="libStatus"><i data-lucide="loader-circle" aria-hidden="true"></i> Đang kiểm tra QR local...</div>
+        <span class="headingMetaItem"><i data-lucide="calendar-days" aria-hidden="true"></i><time id="headerDate">—</time></span>
+        <span class="headingMetaItem"><i data-lucide="clock-3" aria-hidden="true"></i><time id="headerTime">—</time></span>
+        <button class="copyBtn floatingShortcut" id="btnShortcuts" type="button" aria-label="Mở cài đặt phím tắt">
+          <i data-lucide="keyboard" aria-hidden="true"></i> Phím tắt
+        </button>
+      </div>
+    </header>
 
     <div class="grid">
       <!-- LEFT -->
-      <div class="card">
+      <div class="card scannerPanel">
         <div class="sectionHeader stickyActions">
           <div>
-            <div class="sectionTitle"><i data-lucide="camera" aria-hidden="true"></i> Quét QR bằng camera</div>
-            <div class="sectionSub">Quét trực tiếp, tải ảnh QR hoặc OCR ảnh CCCD.</div>
-          </div>
-          <div class="actionGroup">
-            <button class="btn" id="btnStart">Bắt đầu quét</button>
-            <button class="btn secondary" id="btnStop" disabled>Dừng</button>
+            <div class="sectionTitle"><i data-lucide="scan-line" aria-hidden="true"></i> Quét CCCD</div>
+            <div class="sectionSub">Quét trực tiếp từ camera hoặc chọn ảnh QR/CCCD.</div>
           </div>
         </div>
-
-        <div style="height:12px"></div>
-        <div id="reader"></div>
-
-        <div class="status" id="scanStatus">Trạng thái: <b>Chưa quét</b></div>
 
         <!-- ✅ Tabs: Upload QR / OCR CCCD -->
-        <div class="tabs" role="tablist" aria-label="Chọn chế độ ảnh">
-          <button class="tabBtn active" id="tabQrBtn" type="button" role="tab" aria-selected="true" aria-controls="tabQrPane">
-            <i data-lucide="qr-code" aria-hidden="true"></i> Ảnh QR
+        <div class="tabs scannerTabs" role="tablist" aria-label="Chọn chế độ quét">
+          <button class="tabBtn active" id="tabCameraBtn" type="button" role="tab" aria-selected="true">
+            Camera
+          </button>
+          <button class="tabBtn" id="tabQrBtn" type="button" role="tab" aria-selected="false" aria-controls="tabQrPane">
+            Ảnh QR
           </button>
           <button class="tabBtn" id="tabOcrBtn" type="button" role="tab" aria-selected="false" aria-controls="tabOcrPane">
-            <i data-lucide="wand-sparkles" aria-hidden="true"></i> OCR CCCD
+            OCR CCCD
           </button>
         </div>
 
+        <div class="readerFrame" tabindex="0" role="button" aria-label="Khung quét camera hoặc chọn ảnh">
+          <div id="reader"></div>
+          <div class="scannerStateOverlay" id="scannerStateOverlay" data-state="idle" aria-live="polite">
+            <span class="scannerCorner scannerCornerTL" aria-hidden="true"></span>
+            <span class="scannerCorner scannerCornerTR" aria-hidden="true"></span>
+            <span class="scannerCorner scannerCornerBL" aria-hidden="true"></span>
+            <span class="scannerCorner scannerCornerBR" aria-hidden="true"></span>
+            <span class="scannerStateIcon" id="scannerStateIcon"><i data-lucide="camera" aria-hidden="true"></i></span>
+            <strong id="scannerStateTitle">Chưa bật camera</strong>
+            <span id="scannerStateMessage">Bấm “Bắt đầu quét” hoặc kéo ảnh vào đây</span>
+          </div>
+        </div>
+
+        <div class="scannerActionRow">
+          <button class="btn" id="btnStart"><i data-lucide="play" aria-hidden="true"></i> Bắt đầu quét</button>
+          <button class="btn secondary" id="btnStop" disabled><i data-lucide="square" aria-hidden="true"></i> Dừng</button>
+        </div>
+
+        <div class="status scannerStatus" id="scanStatus">Trạng thái: <b>Chưa quét</b></div>
+
         <!-- TAB 1: Upload QR -->
-        <div class="tabPane active" id="tabQrPane" role="tabpanel" aria-labelledby="tabQrBtn">
-          <label>Tải ảnh QR (ảnh có QR ở mặt sau CCCD)</label>
-          <input id="qrFile" type="file" accept="image/*" />
-          <div class="small">Mẹo: chụp gần, nét, không rung, tránh chói.</div>
+        <div class="tabPane" id="tabQrPane" role="tabpanel" aria-labelledby="tabQrBtn">
+          <input class="scannerFileInput" id="qrFile" type="file" accept="image/*" aria-label="Chọn ảnh QR" />
         </div>
 
         <!-- TAB 2: OCR CCCD -->
@@ -621,18 +667,7 @@
 
           <div style="height:10px"></div>
 
-          <label>Tải ảnh CCCD để OCR (mặt trước)</label>
-          <input id="idFile" type="file" accept="image/*" />
-
-          <label style="margin-top:10px">Groq API Key</label>
-          <input id="groqKey" type="password" placeholder="Bearer gsk_..." value="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"/>
-
-
-          <label style="margin-top:10px">Model Vision</label>
-          <select id="groqModel">
-            <option value="meta-llama/llama-4-scout-17b-16e-instruct" selected>Llama 4 Scout (Vision)</option>
-            <option value="meta-llama/llama-4-maverick-17b-128e-instruct">Llama 4 Maverick (Vision)</option>
-          </select>
+          <input class="scannerFileInput" id="idFile" type="file" accept="image/*" aria-label="Chọn ảnh CCCD để OCR" />
 
           <div class="row" style="margin-top:10px">
             <button class="btn ok" id="btnOcrId" disabled><i data-lucide="wand-sparkles" aria-hidden="true"></i> OCR CCCD</button>
@@ -641,9 +676,10 @@
           <div class="status" id="ocrStatus">OCR: —</div>
         </div>
 
-        <hr />
-
-        <label>Hoặc dán chuỗi QR thủ công (hỗ trợ 2 dạng)</label>
+        <details class="scannerDisclosure" open>
+          <summary><span><i data-lucide="clipboard-paste" aria-hidden="true"></i> Nhập QR thủ công</span><i class="scannerDisclosureChevron" data-lucide="chevron-down" aria-hidden="true"></i></summary>
+          <div class="scannerDisclosureBody">
+        <label>Dán chuỗi QR thủ công (hỗ trợ 2 dạng)</label>
         <textarea id="rawInput" placeholder='VD 1: 034205011440|Nguyễn Minh Tuấn|22082005|Nam|Tổ 4B, Kp 1, Hội Nghĩa, Thị xã Tân Uyên, Bình Dương|19042021
 
 VD 2 (dạng có nhãn):
@@ -658,10 +694,23 @@ Ngày cấp CCCD: 19/04/2021'></textarea>
           <button class="btn secondary" id="btnParse">Parse + tự chuyển đổi</button>
           <button class="btn danger" id="btnClear">Xóa</button>
         </div>
+          </div>
+        </details>
 
-        <div class="status">
-          <i data-lucide="lightbulb" aria-hidden="true"></i> Điện thoại: dùng camera sau + bật flash + zoom 2x–3x để bắt QR nhỏ.
-        </div>
+        <details class="scannerDisclosure">
+          <summary><span><i data-lucide="settings-2" aria-hidden="true"></i> Thiết lập nâng cao</span><i class="scannerDisclosureChevron" data-lucide="chevron-down" aria-hidden="true"></i></summary>
+          <div class="scannerDisclosureBody">
+            <div class="small">API Key, OCR và thiết lập nhận diện ảnh.</div>
+            <label>Groq API Key</label>
+            <input id="groqKey" type="password" placeholder="Bearer gsk_..." value="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"/>
+            <label>Model Vision</label>
+            <select id="groqModel">
+              <option value="meta-llama/llama-4-scout-17b-16e-instruct" selected>Llama 4 Scout (Vision)</option>
+              <option value="meta-llama/llama-4-maverick-17b-128e-instruct">Llama 4 Maverick (Vision)</option>
+            </select>
+            <div class="status"><i data-lucide="lightbulb" aria-hidden="true"></i> Camera sau, flash và zoom 2x–3x giúp bắt QR nhỏ tốt hơn.</div>
+          </div>
+        </details>
       </div>
 
       <!-- RIGHT -->
@@ -686,19 +735,22 @@ Ngày cấp CCCD: 19/04/2021'></textarea>
         <div style="height:10px"></div>
 
         <div id="infoBox">
-          <div class="kv"><div class="k">Số CCCD</div><div class="cccdValue v"><div class="cccdLine"><span class="v mono" id="cccd" aria-describedby="cccdDigitMessage">—</span><span id="cccdDigitBadge" class="digitBadge" data-state="empty">0/12</span></div><div class="small" id="cccdDigitMessage" role="status">Chưa có số CCCD</div></div><button class="copyBtn" data-copy="#cccd">Copy</button></div>
-          <div class="kv"><div class="k">Họ tên</div><div class="v" id="name">—</div><button class="copyBtn" data-copy="#name">Copy</button></div>
-          <div class="kv"><div class="k">Ngày sinh</div><div class="v" id="dob">—</div><button class="copyBtn" data-copy="#dob">Copy</button></div>
-          <div class="kv"><div class="k">Giới tính</div><div class="v" id="gender">—</div><button class="copyBtn" data-copy="#gender">Copy</button></div>
-          <div class="kv"><div class="k">Địa chỉ (cũ)</div><div class="v" id="oldAddr">—</div><button class="copyBtn" data-copy="#oldAddr">Copy</button></div>
-          <div class="kv"><div class="k">Ngày cấp</div><div class="v" id="issue">—</div><button class="copyBtn" data-copy="#issue">Copy</button></div>
+          <div class="kv"><div class="k">Số CCCD</div><div class="cccdValue v"><div class="cccdLine"><span class="v mono" id="cccd" aria-describedby="cccdDigitMessage">—</span><span id="cccdDigitBadge" class="digitBadge" data-state="empty">0/12</span></div><div class="small" id="cccdDigitMessage" role="status">Chưa có số CCCD</div></div><button class="copyBtn" data-copy="#cccd"><i data-lucide="copy" aria-hidden="true"></i></button></div>
+          <div class="kv"><div class="k">Họ tên</div><div class="v" id="name">—</div><button class="copyBtn" data-copy="#name"><i data-lucide="copy" aria-hidden="true"></i></button></div>
+          <div class="kv"><div class="k">Ngày sinh</div><div class="v" id="dob">—</div><button class="copyBtn" data-copy="#dob"><i data-lucide="copy" aria-hidden="true"></i></button></div>
+          <div class="kv"><div class="k">Giới tính</div><div class="v" id="gender">—</div><button class="copyBtn" data-copy="#gender"><i data-lucide="copy" aria-hidden="true"></i></button></div>
+          <div class="kv"><div class="k">Địa chỉ (cũ)</div><div class="v" id="oldAddr">—</div><button class="copyBtn" data-copy="#oldAddr"><i data-lucide="copy" aria-hidden="true"></i></button></div>
+          <div class="kv"><div class="k">Ngày cấp</div><div class="v" id="issue">—</div><button class="copyBtn" data-copy="#issue"><i data-lucide="copy" aria-hidden="true"></i></button></div>
         </div>
 
         <hr />
 
         <div class="sectionHeader">
           <div>
-            <div class="sectionTitle"><i data-lucide="refresh-cw" aria-hidden="true"></i> Địa chỉ mới</div>
+            <div class="addressTitleLine">
+              <div class="sectionTitle"><i data-lucide="map-pin" aria-hidden="true"></i> Địa chỉ chuyển đổi</div>
+              <div class="status convertHeaderStatus" id="convertStatus" role="status" aria-live="polite" hidden>—</div>
+            </div>
             <div class="sectionSub">Tự chuyển đổi hoặc chọn thủ công khi cần. POST <code class="inline">/api/v1/convert/address</code></div>
           </div>
         </div>
@@ -773,19 +825,24 @@ Ngày cấp CCCD: 19/04/2021'></textarea>
           </div>
         </div>
 
-        <div class="status" id="convertStatus" style="margin-top:12px">—</div>
-
         <div style="height:8px"></div>
 
         <div id="newBox">
-          <div class="kv"><div class="k">Địa chỉ tổng</div><div class="v" id="addrFull">—</div><button class="copyBtn" data-copy="#addrFull">Copy</button></div>
-          <div class="kv"><div class="k">Tỉnh/Thành phố *</div><div class="v" id="addrProvince">—</div><button class="copyBtn" data-copy="#addrProvince">Copy</button></div>
-          <div class="kv"><div class="k">Xã/Phường/Đặc khu *</div><div class="v" id="addrWard">—</div><button class="copyBtn" data-copy="#addrWard">Copy</button></div>
-          <div class="kv"><div class="k">Số nhà/Ấp/KP/Đường</div><div class="v" id="addrStreet">—</div><button class="copyBtn" data-copy="#addrStreet">Copy</button></div>
+          <div class="kv"><div class="k">Địa chỉ tổng</div><div class="v" id="addrFull">—</div><button class="copyBtn" data-copy="#addrFull" aria-label="Sao chép địa chỉ tổng"><i data-lucide="copy" aria-hidden="true"></i></button></div>
+          <div class="kv"><div class="k">Tỉnh/Thành phố *</div><div class="v" id="addrProvince">—</div><button class="copyBtn" data-copy="#addrProvince" aria-label="Sao chép tỉnh hoặc thành phố"><i data-lucide="copy" aria-hidden="true"></i></button></div>
+          <div class="kv"><div class="k">Xã/Phường/Đặc khu *</div><div class="v" id="addrWard">—</div><button class="copyBtn" data-copy="#addrWard" aria-label="Sao chép xã, phường hoặc đặc khu"><i data-lucide="copy" aria-hidden="true"></i></button></div>
+          <div class="kv"><div class="k">Số nhà/Ấp/KP/Đường</div><div class="v" id="addrStreet">—</div><button class="copyBtn" data-copy="#addrStreet" aria-label="Sao chép số nhà, ấp, khu phố hoặc đường"><i data-lucide="copy" aria-hidden="true"></i></button></div>
         </div>
 
-        <label style="margin-top:12px">Log kỹ thuật</label>
-        <textarea id="log" readonly class="mono" placeholder="Log request/response sẽ hiện ở đây..."></textarea>
+        <details class="logDisclosure">
+          <summary>
+            <span><i data-lucide="terminal" aria-hidden="true"></i> Log kỹ thuật</span>
+            <i class="logDisclosureChevron" data-lucide="chevron-down" aria-hidden="true"></i>
+          </summary>
+          <div class="logDisclosureBody">
+            <textarea id="log" readonly class="mono" aria-label="Nội dung log kỹ thuật" placeholder="Log request/response sẽ hiện ở đây..."></textarea>
+          </div>
+        </details>
       </div>
     </div>
 
@@ -796,15 +853,18 @@ Ngày cấp CCCD: 19/04/2021'></textarea>
           <div class="tmpTitleIcon"><i data-lucide="table-2" aria-hidden="true"></i></div>
           <div class="tmpTitleText">
             <div class="sectionTitle">Bảng tạm</div>
-            <div class="small">Lưu nhiều người rồi mới xuất file</div>
+            <div class="small" id="tmpRecordCount">0 bản ghi</div>
           </div>
         </div>
-        <div class="right">
-          <span class="tmpSelectionCount" id="tmpSelectionCount"><i data-lucide="users" aria-hidden="true"></i> Đã chọn 0 người</span>
+        <div class="tmpSelectionTools">
+          <span class="tmpSelectionCount" id="tmpSelectionCount"><i data-lucide="square-check-big" aria-hidden="true"></i> Đã chọn 0/0</span>
+          <button class="miniBtn" id="btnClearTmpSelection" type="button">Bỏ chọn</button>
           <button class="miniBtn ok" id="btnPrintSelectedCT01" type="button"><i data-lucide="printer" aria-hidden="true"></i> In CT01 đã chọn</button>
+        </div>
+        <div class="right">
           <button class="miniBtn" id="btnCopyTmpAll" type="button"><i data-lucide="copy" aria-hidden="true"></i> Sao chép bảng</button>
           <button class="miniBtn" id="btnExportExcelInTable"><i data-lucide="file-spreadsheet" aria-hidden="true"></i> Xuất Excel</button>
-          <button class="miniBtn" id="btnSendTelegramTmpAll"><i data-lucide="send" aria-hidden="true"></i> Gửi Tele (tất cả)</button>
+          <button class="miniBtn" id="btnSendTelegramTmpAll"><i data-lucide="send" aria-hidden="true"></i> Gửi Telegram</button>
           <button class="miniBtn danger" id="btnClearTmpAll"><i data-lucide="trash-2" aria-hidden="true"></i> Xóa hết</button>
         </div>
       </div>
@@ -957,8 +1017,47 @@ function clearReaderPreview(){
 }
 
 
-    function setScanStatus(html) { $("scanStatus").innerHTML = `Trạng thái: ${html}`; }
-    function setConvertStatus(html) { $("convertStatus").innerHTML = html; }
+    function setScanStatus(html) {
+      $("scanStatus").innerHTML = `Trạng thái: ${html}`;
+
+      const overlay = $("scannerStateOverlay");
+      if (!overlay) return;
+      const textProbe = document.createElement("div");
+      textProbe.innerHTML = html;
+      const text = (textProbe.textContent || "").trim();
+      const isError = /lỗi|không load|không mở|không đọc|không thể/i.test(text);
+      const isRunning = /đang mở|đang quét|đang đọc|đang ocr/i.test(text);
+      const isSuccess = /đã quét|đã ocr|đã chọn ảnh/i.test(text);
+      const state = isError ? "error" : isRunning ? "running" : isSuccess ? "success" : "idle";
+      const content = {
+        idle: ["camera", text.includes("Sẵn sàng") ? "Sẵn sàng quét" : "Chưa bật camera", "Bấm “Bắt đầu quét” hoặc kéo ảnh vào đây"],
+        running: ["scan-line", "Đang quét...", "Đưa mã QR vào trong khung"],
+        success: ["circle-check", "Đã đọc CCCD", "Thông tin đang được xử lý"],
+        error: ["triangle-alert", "Không thể quét", text || "Hãy kiểm tra camera hoặc thử lại"]
+      }[state];
+
+      overlay.dataset.state = state;
+      $("scannerStateIcon").replaceChildren(iconElement(content[0]));
+      $("scannerStateTitle").textContent = content[1];
+      $("scannerStateMessage").textContent = content[2];
+      renderLucideIcons();
+    }
+    function setConvertStatus(html) {
+      const status = $("convertStatus");
+      status.innerHTML = html;
+      const text = (status.textContent || "").trim();
+      status.hidden = !text || text === "—";
+      status.dataset.state = status.querySelector(".error") ? "error"
+        : status.querySelector(".warn") ? "warning"
+          : status.querySelector(".oktxt") ? "success" : "loading";
+      if (!status.hidden) {
+        const icon = status.dataset.state === "success" ? "circle-check"
+          : status.dataset.state === "warning" ? "triangle-alert"
+            : status.dataset.state === "error" ? "circle-x" : "loader-circle";
+        status.prepend(iconElement(icon));
+        renderLucideIcons();
+      }
+    }
     function setOcrStatus(html) { $("ocrStatus").innerHTML = `OCR: ${html}`; }
 
     const INFO_ACTION_BUTTON_IDS = ["btnCopyAll", "btnSaveTmp", "btnGoCT01", "btnSendTelegram"];
@@ -1051,6 +1150,21 @@ function clearReaderPreview(){
       box.scrollTop = box.scrollHeight;
     }
 
+    function logJson(label, value, maxLength = 6000) {
+      let formatted;
+      try {
+        formatted = JSON.stringify(value, null, 2);
+      } catch {
+        formatted = String(value ?? "");
+      }
+      if (formatted === undefined) formatted = String(value ?? "");
+
+      if (formatted.length > maxLength) {
+        formatted = formatted.slice(0, maxLength) + "\n… [đã rút gọn]";
+      }
+      logLine(`${label}\n${formatted}`);
+    }
+
     async function copyText(text){
       const v = (text || "").toString().trim();
       if (!v || v === "—") return toast("Không có dữ liệu để copy");
@@ -1080,19 +1194,123 @@ function clearReaderPreview(){
     // ✅ Tabs: QR Upload / OCR
     // =======================
     function setTab(tab){
+      const isCamera = tab === "camera";
       const isQr = tab === "qr";
+      const isOcr = tab === "ocr";
+      $("tabCameraBtn").classList.toggle("active", isCamera);
       $("tabQrBtn").classList.toggle("active", isQr);
-      $("tabOcrBtn").classList.toggle("active", !isQr);
+      $("tabOcrBtn").classList.toggle("active", isOcr);
 
+      $("tabCameraBtn").setAttribute("aria-selected", isCamera ? "true" : "false");
       $("tabQrBtn").setAttribute("aria-selected", isQr ? "true" : "false");
-      $("tabOcrBtn").setAttribute("aria-selected", !isQr ? "true" : "false");
+      $("tabOcrBtn").setAttribute("aria-selected", isOcr ? "true" : "false");
 
       $("tabQrPane").classList.toggle("active", isQr);
-      $("tabOcrPane").classList.toggle("active", !isQr);
+      $("tabOcrPane").classList.toggle("active", isOcr);
+
+      if (isCamera && $("btnStop").disabled) {
+        setScanStatus("<b>Sẵn sàng</b> • Bấm “Bắt đầu quét”.");
+      } else if (!isCamera) {
+        const overlay = $("scannerStateOverlay");
+        overlay.dataset.state = "picker";
+        $("scannerStateIcon").replaceChildren(iconElement(isOcr ? "scan-text" : "image-up"));
+        $("scannerStateTitle").textContent = isOcr ? "Chọn ảnh CCCD" : "Chọn ảnh QR";
+        $("scannerStateMessage").textContent = "Bấm hoặc kéo thả ảnh trực tiếp vào khung";
+        renderLucideIcons();
+      }
     }
 
+    $("tabCameraBtn").addEventListener("click", () => setTab("camera"));
     $("tabQrBtn").addEventListener("click", () => setTab("qr"));
     $("tabOcrBtn").addEventListener("click", () => setTab("ocr"));
+
+    // Kéo-thả ảnh dùng lại đúng event change của input QR/OCR hiện có.
+    (() => {
+      const frame = document.querySelector(".readerFrame");
+      const overlay = $("scannerStateOverlay");
+      if (!frame || !overlay) return;
+      let dragDepth = 0;
+      let previousState = null;
+
+      const rememberState = () => {
+        if (previousState) return;
+        previousState = {
+          state: overlay.dataset.state,
+          title: $("scannerStateTitle").textContent,
+          message: $("scannerStateMessage").textContent
+        };
+      };
+      const showDropState = () => {
+        rememberState();
+        overlay.dataset.state = "drop";
+        $("scannerStateIcon").replaceChildren(iconElement("image-up"));
+        $("scannerStateTitle").textContent = "Thả ảnh để đọc";
+        $("scannerStateMessage").textContent = $("tabOcrBtn").classList.contains("active")
+          ? "Ảnh sẽ được xử lý bằng OCR CCCD"
+          : "Ảnh sẽ được đọc mã QR";
+        renderLucideIcons();
+      };
+      const restoreState = () => {
+        if (!previousState) return;
+        overlay.dataset.state = previousState.state;
+        $("scannerStateIcon").replaceChildren(iconElement(
+          previousState.state === "error" ? "triangle-alert"
+            : previousState.state === "success" ? "circle-check"
+            : previousState.state === "running" ? "scan-line" : "camera"
+        ));
+        $("scannerStateTitle").textContent = previousState.title;
+        $("scannerStateMessage").textContent = previousState.message;
+        previousState = null;
+        renderLucideIcons();
+      };
+
+      frame.addEventListener("dragenter", event => {
+        event.preventDefault();
+        dragDepth += 1;
+        showDropState();
+      });
+      frame.addEventListener("dragover", event => {
+        event.preventDefault();
+        if (event.dataTransfer) event.dataTransfer.dropEffect = "copy";
+      });
+      frame.addEventListener("dragleave", event => {
+        event.preventDefault();
+        dragDepth = Math.max(0, dragDepth - 1);
+        if (!dragDepth) restoreState();
+      });
+      frame.addEventListener("drop", event => {
+        event.preventDefault();
+        dragDepth = 0;
+        const file = event.dataTransfer?.files?.[0];
+        if (!file || !(file.type.startsWith("image/") || /\.(jpe?g|png|webp|heic|heif|bmp)$/i.test(file.name))) {
+          restoreState();
+          toast("⚠️ Vui lòng thả một tệp ảnh hợp lệ.");
+          return;
+        }
+
+        const useOcr = $("tabOcrBtn").classList.contains("active");
+        const input = $(useOcr ? "idFile" : "qrFile");
+        const transfer = new DataTransfer();
+        transfer.items.add(file);
+        input.files = transfer.files;
+        previousState = null;
+        setTab(useOcr ? "ocr" : "qr");
+        input.dispatchEvent(new Event("change", { bubbles: true }));
+      });
+
+      const openSelectedFilePicker = () => {
+        const useOcr = $("tabOcrBtn").classList.contains("active");
+        const useQr = $("tabQrBtn").classList.contains("active");
+        if (!useOcr && !useQr) return;
+        $(useOcr ? "idFile" : "qrFile").click();
+      };
+      frame.addEventListener("click", openSelectedFilePicker);
+      frame.addEventListener("keydown", event => {
+        if (event.key !== "Enter" && event.key !== " ") return;
+        event.preventDefault();
+        openSelectedFilePicker();
+      });
+    })();
 
     // =======================
     // ✅ Bộ nhớ tạm + Export Excel
@@ -1119,7 +1337,9 @@ function clearReaderPreview(){
     function updateTmpSelectionUI(total = loadTmpRows().length){
       for (const index of [...selectedTmpRows]) if (index < 0 || index >= total) selectedTmpRows.delete(index);
       try { sessionStorage.setItem(TMP_SELECTION_KEY, JSON.stringify([...selectedTmpRows].sort((a, b) => a - b))); } catch {}
-      setIconLabel($("tmpSelectionCount"), "users", `Đã chọn ${selectedTmpRows.size} người`);
+      setIconLabel($("tmpSelectionCount"), "square-check-big", `Đã chọn ${selectedTmpRows.size}/${total}`);
+      $("btnClearTmpSelection").disabled = selectedTmpRows.size === 0;
+      $("btnPrintSelectedCT01").disabled = selectedTmpRows.size === 0;
       const all = $("tmpSelectAllCheckbox");
       if (all) {
         all.checked = total > 0 && selectedTmpRows.size === total;
@@ -1144,6 +1364,7 @@ function clearReaderPreview(){
     function renderSavedCount(){
       const rows = loadTmpRows();
       $("savedCount").textContent = String(rows.length);
+      $("tmpRecordCount").textContent = `${rows.length} bản ghi`;
     }
 
     function normalizeCell(v){
@@ -1459,6 +1680,11 @@ function clearReaderPreview(){
     }
 
     $("btnPrintSelectedCT01").addEventListener("click", openBatchCT01Modal);
+    $("btnClearTmpSelection").addEventListener("click", () => {
+      selectedTmpRows.clear();
+      updateTmpSelectionUI();
+      document.querySelectorAll("[data-select-tmp-row]").forEach(checkbox => { checkbox.checked = false; });
+    });
     $("btnCancelBatchCT01").addEventListener("click", () => ModalController.close());
     $("btnPreviewBatchCT01").addEventListener("click", () => submitBatchCT01("preview"));
     $("btnPrintBatchCT01").addEventListener("click", () => submitBatchCT01("combined"));
@@ -2024,7 +2250,7 @@ function bestMatch(list, rawName, typeHint){
       logLine("GET " + url.toString());
       const res = await fetch(url.toString(), { headers: { "Accept": "application/json" }});
       const data = await res.json().catch(() => ({}));
-      logLine("↳ " + res.status + " " + JSON.stringify(data).slice(0, 1200));
+      logJson(`↳ HTTP ${res.status}`, data);
 
       if (!res.ok) throw new Error(`GET ${path} lỗi HTTP ${res.status}`);
       if (data && data.success === false) throw new Error(data.message || "API success=false");
@@ -2034,7 +2260,7 @@ function bestMatch(list, rawName, typeHint){
     async function apiPOST(path, body, apiKey) {
       const url = BASE + path;
       logLine("POST " + url);
-      logLine("Body: " + JSON.stringify(body));
+      logJson("Body", body);
 
       const res = await fetch(url, {
         method: "POST",
@@ -2046,7 +2272,7 @@ function bestMatch(list, rawName, typeHint){
         body: JSON.stringify(body)
       });
       const data = await res.json().catch(() => ({}));
-      logLine("↳ " + res.status + " " + JSON.stringify(data).slice(0, 1600));
+      logJson(`↳ HTTP ${res.status}`, data);
 
       if (!res.ok) throw new Error(`POST ${path} lỗi HTTP ${res.status}` + (data?.message ? `: ${data.message}` : ""));
       if (data && data.success === false) throw new Error(data.message || "API success=false");
@@ -2062,7 +2288,7 @@ function bestMatch(list, rawName, typeHint){
       logLine("GET(v2) " + url.toString());
       const res = await fetch(url.toString(), { headers: { "Accept": "application/json" }});
       const data = await res.json().catch(() => ({}));
-      logLine("↳ " + res.status + " " + JSON.stringify(data).slice(0, 1200));
+      logJson(`↳ HTTP ${res.status}`, data);
 
       if (!res.ok) throw new Error(`GET ${path} lỗi HTTP ${res.status}`);
       return data;
@@ -2411,7 +2637,7 @@ function bestMatch(list, rawName, typeHint){
           setNewAddressFields(fallback);
           setInfoActionButtonsEnabled(true);
           logLine("[Thông tin] Fallback: phát hiện địa chỉ có dạng mới street, ward, province.");
-          logLine("Fallback result: " + JSON.stringify(fallback));
+          logJson("Fallback result", fallback);
           setConvertStatus(
             `<span class="warn">Chuyển đổi lỗi:</span> ${originalMessage}<br>` +
             `<span class="oktxt">Đã tự nhận diện địa chỉ mới và set kết quả.</span>`
@@ -2448,6 +2674,7 @@ function bestMatch(list, rawName, typeHint){
     }
 
     async function startScanner() {
+      setTab("camera");
       if (typeof window.Html5Qrcode === "undefined") {
         setScanStatus(`<b class="error">Không load được Html5Qrcode</b> • Kiểm tra đường dẫn script local.`);
         return;
@@ -2998,7 +3225,7 @@ Nếu không chắc trường nào, để chuỗi rỗng.
       });
 
       const json = await res.json().catch(() => ({}));
-      logLine("↳ " + res.status + " " + JSON.stringify(json).slice(0, 2000));
+      logJson(`↳ HTTP ${res.status}`, json);
 
       if (!res.ok){
         const msg = json?.error?.message || json?.message || ("HTTP " + res.status);
@@ -3241,6 +3468,18 @@ $("btnSendTelegram").addEventListener("click", () => {
     // Boot
     // =======================
     (function boot() {
+      const updateHeaderClock = () => {
+        const now = new Date();
+        $("headerDate").textContent = new Intl.DateTimeFormat("en-GB", {
+          day: "2-digit", month: "2-digit", year: "numeric"
+        }).format(now);
+        $("headerTime").textContent = new Intl.DateTimeFormat("en-GB", {
+          hour: "2-digit", minute: "2-digit", hour12: false
+        }).format(now);
+      };
+      updateHeaderClock();
+      window.setInterval(updateHeaderClock, 30000);
+
       ShortcutManager.init(toast);
       updateCccdDigitStatus();
       renderSavedCount();
@@ -3252,7 +3491,7 @@ $("btnSendTelegram").addEventListener("click", () => {
 
       const badge = $("libStatus");
       if (typeof window.Html5Qrcode === "undefined") {
-        setIconLabel(badge, "archive", "Không load được Html5Qrcode (local). Kiểm tra ./assets/html5-qrcode.min.js");
+        setIconLabel(badge, "circle-alert", "QR local: Lỗi");
         badge.classList.add("error");
         $("btnStart").disabled = true;
         setScanStatus(`<b class="warn">Không thể quét camera</b> • Bạn vẫn có thể dán chuỗi QR thủ công, upload ảnh QR, hoặc OCR ảnh CCCD.`);
@@ -3260,7 +3499,7 @@ $("btnSendTelegram").addEventListener("click", () => {
         setOcrStatus("—");
         return;
       }
-      setIconLabel(badge, "archive", "Thư viện QR: OK (local)");
+      setIconLabel(badge, "circle-check", "QR local: OK");
       badge.classList.add("oktxt");
       $("btnStart").disabled = false;
       setScanStatus("<b class='oktxt'>Sẵn sàng</b> • Bấm “Bắt đầu quét”.");

@@ -55,7 +55,7 @@
     *{ box-sizing:border-box; }
     body{
       margin:0;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       background: var(--bg);
       color: var(--text);
     }
@@ -357,7 +357,7 @@
       border-radius:8px;
       color:#0f172a;
       font-size:12px;
-      font-weight:800;
+      font-weight:700;
     }
 
     .printLine{
@@ -583,7 +583,7 @@
             <div>
               <label>10. Nội dung đề nghị (2)</label>
               <textarea id="requestContent" placeholder="Nội dung sẽ tự gợi ý theo loại yêu cầu, bạn có thể sửa lại cho đúng thực tế..."></textarea>
-              <div class="hint"><i data-lucide="circle-check" aria-hidden="true"></i> Tự gợi ý sẽ cập nhật theo “Chủ hộ/Địa chỉ/Từ ngày…”. Nếu bạn tự gõ vào ô này thì hệ thống sẽ không tự ghi đè nữa.</div>
+              <!-- <div class="hint"><i data-lucide="circle-check" aria-hidden="true"></i> Tự gợi ý sẽ cập nhật theo “Chủ hộ/Địa chỉ/Từ ngày…”. Nếu bạn tự gõ vào ô này thì hệ thống sẽ không tự ghi đè nữa.</div> -->
             </div>
           </div>
 
@@ -1433,7 +1433,7 @@ function renderMembersPrint(){
 
       const tr = document.createElement("tr");
       tr.innerHTML = `
-        <td style="text-align:center; font-weight:800">${idx}</td>
+        <td style="text-align:center; font-weight:700">${idx}</td>
         <td><input class="m-name" placeholder="Họ tên" value="${sanitize(data.name||"")}" /></td>
         <td><input class="m-dob" placeholder="dd/mm/yyyy" value="${sanitize(data.dob||"")}" /></td>
         <td><input class="m-gender" placeholder="Nam/Nữ" value="${sanitize(data.gender||"")}" /></td>
